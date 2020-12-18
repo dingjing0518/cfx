@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysHelpsDaoEx">
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(title)">
+				AND title = #{title}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(content)">
+				AND content = #{content}
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="@Ognl@isNotEmpty(helpCategoryPk)">
+				AND helpCategoryPk = #{helpCategoryPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(showType)">
+				AND showType = #{showType}
+			</if>
+			<if test="showPlace != null and showPlace != ''">
+				AND showPlace like '%${showPlace}%'
+			</if>
+		</where>
+	</sql>
+	
+	
+	<select id="searchHelpMenu" resultType="cn.cf.dto.SysHelpsDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,
+		title
+		FROM sys_helps
+		<include refid="searchGridWhere" />
+		order by sort asc ,insertTime DESC
+	</select>
+	
+	
+</mapper>
+

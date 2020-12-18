@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysSupplierRecommedExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,storeName,storePk,isRecommed,url,sort,isDelete,isOnline,insertTime,position,linkUrl,block,brandPk,
+		brandName,platform,updateTime,region,abbreviated
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+            <if test="@Ognl@isNotEmpty(brandPk)">
+                AND brandPk = #{brandPk}			</if>
+            <if test="@Ognl@isNotEmpty(brandName)">
+                AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(isRecommed)">
+				AND isRecommed = #{isRecommed}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}		</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isOnline)">
+				AND isOnline = #{isOnline}			</if>
+			<if test="@Ognl@isNotEmpty(position)">
+				AND position LIKE '%${position}%'			</if>
+			<if test="@Ognl@isNotEmpty(positioned)">
+				AND position = #{positioned}		</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block LIKE '%${block}%'			</if>
+            <if test="@Ognl@isNotEmpty(region)">
+                AND region = #{region}			</if>
+            <if test="@Ognl@isNotEmpty(platform)">
+                AND platform  LIKE '%${platform}%'		</if>
+			<if test="@Ognl@isNotEmpty(platformed)">
+				AND platform  = #{platformed}	</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+
+		</where>
+	</sql>
+	
+	
+	<update id="updateSupplierRecommed" parameterType="cn.cf.dto.SysSupplierRecommedExtDto">
+
+        UPDATE sys_supplier_recommed
+        <set>
+        	<if test="storeName != null and storeName !=''">
+				storeName = #{storeName},
+        	</if>
+        	<if test="storePk != null and storePk !=''">
+				storePk = #{storePk} ,
+        	</if>
+        	<if test="isRecommed != null and isRecommed !=''">
+				isRecommed = #{isRecommed} ,
+        	</if>
+        	<if test="url != null and url !=''">
+        		 url = #{url} ,
+        	</if>
+        	<if test="sort != null and sort !=''">
+        		 sort = #{sort} ,
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		isDelete = #{isDelete} ,
+        	</if>
+        	<if test="isOnline != null and isOnline !=''">
+				isOnline = #{isOnline} ,
+        	</if>
+        	<if test="insertTime != null">
+				insertTime = #{insertTime} ,
+        	</if>
+        	<if test="updateTime != null ">
+				updateTime = #{updateTime} ,
+        	</if>
+
+        	<if test="position != null ">
+        		 position = #{position} ,
+        	</if>
+        	<if test="linkUrl != null ">
+        		 linkUrl = #{linkUrl} ,
+        	</if>
+			<if test="url != null ">
+				url = #{url} ,
+			</if>
+			<if test="brandPk != null ">
+				brandPk = #{brandPk} ,
+			</if>
+			<if test="brandName != null ">
+				brandName = #{brandName} ,
+			</if>
+			<if test="platform != null ">
+				platform = #{platform} ,
+			</if>
+			<if test="region != null ">
+				region = #{region} ,
+			</if>
+			<if test="block != null ">
+				block = #{block}
+			</if>
+			<if test="abbreviated != null ">
+				abbreviated = #{abbreviated}
+			</if>
+
+        </set> 
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM
+			sys_supplier_recommed
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.SysSupplierRecommedExtDto"
+		parameterType="java.util.Map">
+		SELECT
+			pk,
+		<choose>
+			<when test="supplierNameCol == 'OPER_OPERMG_RECOMMEND_COL_SUPPNAME'">
+				INSERT (storeName,3,5,'*****') AS storeName,
+			</when>
+			<otherwise>
+				storeName AS storeName,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="prePicCol == 'OPER_OPERMG_RECOMMEND_COL_PREPIC'">
+				'' AS url,
+			</when>
+			<otherwise>
+				url,
+			</otherwise>
+		</choose>
+		storePk,isRecommed,sort,isDelete,isOnline,insertTime,position,linkUrl,block,brandPk,
+		brandName,platform,updateTime,region,abbreviated
+		FROM
+			sys_supplier_recommed
+		<include refid="searchGridWhere" />
+		<if test="orderName != null and orderName != ''">
+		order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit != ''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchRecommendCounts" resultType="int">
+		select count(1) from sys_supplier_recommed 
+		where isDelete = 1
+		  and platform = #{platform}
+		  and position = #{position}
+		  and brandPk = #{brandPk}
+		  and storePk = #{storePk}
+		<if test="pk != null and pk != ''">
+			and pk != #{pk}
+		</if>
+	</select>
+</mapper>
+

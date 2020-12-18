@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCusgoodsDaoEx">
+
+ <select id="searchBillCusGoodsList"  resultType="cn.cf.dto.B2bBillCusgoodsDtoEx"
+		parameterType="java.util.Map">
+SELECT
+	cg.pk,
+	cg.customerPk,
+	cg.companyPk,
+	cg.goodsPk,
+	cg.goodsName,
+	cg.goodsShotName,
+	cg.bindStatus,
+	cg.account,
+	cg.bankName,
+	cg.bankNo,
+	cg.isVisable,
+	cg.platformAmount,
+	IFNULL(cg.useAmount, 0) AS useAmount
+FROM
+	b2b_bill_cusgoods cg
+LEFT JOIN b2b_bill_goods g ON cg.goodsPk = g.pk
+WHERE
+	g.isDelete = 1
+AND g.isVisable = 1
+<if test="companyPk!=null and companyPk!=''">
+and cg.companyPk=#{companyPk}
+</if>
+ <if test="bindStatus!=null">
+ and cg.bindStatus=#{bindStatus}
+ 
+ </if>
+ <if test="isVisable!=null">
+ and cg.isVisable=#{isVisable}
+ </if>
+ <if test="pk!=null and pk!=''">
+ 
+ and cg.pk=#{pk}
+ </if>
+  <if test="account!=null and account!=''">
+ 
+ and cg.account=#{account}
+ </if>
+  <if test="bankNo!=null and bankNo!=''">
+ 
+ and cg.bankNo=#{bankNo}
+ </if>
+   <if test="goodsShotName!=null and goodsShotName!=''">
+ 
+ and cg.goodsShotName=#{goodsShotName}
+ </if>
+ 
+ </select>
+	 
+<update id="updateBillCusgoods">
+ UPDATE b2b_bill_cusgoods 
+ <set>
+ <if test="bindStatus != null">
+	  bindStatus = #{bindStatus},   
+ </if>
+  <if test="useAmount != null">
+	  useAmount = #{useAmount}   
+ </if>
+ </set>
+ <if test="pk != null">
+	    WHERE 
+        	pk = #{pk}  
+ </if>
+</update>
+
+<update id="updateBillCusgoodsAmt">
+ UPDATE b2b_bill_cusgoods 
+ <set>
+	  useAmount = 0  
+ </set>
+ where 1 = 1
+</update>
+	 
+</mapper>
+

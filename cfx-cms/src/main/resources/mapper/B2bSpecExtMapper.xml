@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,sort,isDelete,isVisable,insertTime,parentPk
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+		</where>
+	</sql>
+	
+	<update id="updateSpec" parameterType="cn.cf.dto.B2bSpecExtDto">
+    
+        UPDATE b2b_spec
+        <set>
+        	<if test="name != null and name != '' ">
+        	name = #{name},
+        	</if>
+        	<if test="sort != null and sort != '' ">
+        	sort = #{sort} ,
+        	</if>
+        	<if test="isDelete != null and isDelete != '' ">
+        	isDelete = #{isDelete} ,
+        	</if>
+        	<if test="isVisable != null and isVisable != '' ">
+        	isVisable = #{isVisable} ,
+        	</if>
+        	<if test="insertTime != null and insertTime != '' ">
+        	insertTime = #{insertTime} ,
+        	</if>
+        	<if test="parentPk != null and parentPk != '' ">
+        	parentPk = #{parentPk}  
+        	</if>
+        </set>      
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM b2b_spec a LEFT JOIN b2b_spec b ON a.parentPk = b.pk
+		WHERE
+		a.isDelete = 1
+		<if test="pk != null and pk != '' ">
+				AND a.pk = #{pk}			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE '%${name}%'			</if>
+			<if test="sort != null and sort != ''">
+				AND a.sort = #{sort}			</if>
+			<if test="isDelete != null and isDelete != ''">
+				AND a.isDelete = #{isDelete}			</if>
+			<if test="isVisable != null and isVisable != ''">
+				AND a.isVisable = #{isVisable}			</if>
+			<if test="insertTimeBegin != null and insertTimeBegin != ''">
+				AND a.insertTime >= #{insertTimeBegin}			</if>
+			<if test="pk != null and insertTimeEnd != ''">
+				AND a.insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="parentPk != null and parentPk != ''">
+				AND a.parentPk = #{parentPk}			</if>
+			<if test="noparentPk != null and noparentPk != ''">
+				AND a.parentPk != -1		</if>
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bSpecExtDto"
+		parameterType="java.util.Map">
+		SELECT
+				a.pk pk,
+				b. NAME parentName,
+				a. NAME NAME,
+				a.sort sort,
+				a.isDelete isDelete,
+				a.isVisable isVisable,
+				(
+					CASE a.isVisable
+					WHEN 1 THEN
+						'是'
+					WHEN 2 THEN
+						'否'
+					END
+				) isVisableName,
+				a.insertTime insertTime,
+				a.parentPk parentPk
+			FROM
+				b2b_spec a
+			LEFT JOIN b2b_spec b ON a.parentPk = b.pk
+			WHERE
+				a.isDelete = 1
+		<if test="pk != null and pk != '' ">
+				AND a.pk = #{pk}			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE '%${name}%'			</if>
+			<if test="sort != null and sort != ''">
+				AND a.sort = #{sort}			</if>
+			<if test="isDelete != null and isDelete != ''">
+				AND a.isDelete = #{isDelete}			</if>
+			<if test="isVisable != null and isVisable != ''">
+				AND a.isVisable = #{isVisable}			</if>
+			<if test="insertTimeBegin != null and insertTimeBegin != ''">
+				AND a.insertTime >= #{insertTimeBegin}			</if>
+			<if test="pk != null and insertTimeEnd != ''">
+				AND a.insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="parentPk != null and parentPk != ''">
+				AND a.parentPk = #{parentPk}			</if>
+			<if test="noparentPk != null and noparentPk != ''">
+				AND a.parentPk != -1		</if>
+		
+		<if test="orderName != null">
+			order by ${orderName} ${orderType} 
+		</if>
+		<if test="limit != null">
+			 limit #{start}, #{limit}
+		</if>
+	</select>
+	
+	
+	
+	<select id="isExtSpec" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(1)
+		FROM b2b_spec a 
+		WHERE
+			a.isDelete = 1 
+			and a.parentPk = #{parentPk}
+			and a.name =#{name}
+			<if test="pk != null and pk != ''">
+				AND a.pk != #{pk}	</if>
+	</select>
+	
+</mapper>
+

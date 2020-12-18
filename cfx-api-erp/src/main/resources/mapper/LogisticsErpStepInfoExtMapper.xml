@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpStepInfoExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,logisticsPk,productPk,productName,startWeight,endWeight,packNumber,price,isDelete,isStore
+	    ]]>
+	</sql>
+
+	<insert id="insertLgErpStepInfo" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp_stepInfo (
+         pk, logisticsPk, productPk, productName, startWeight, endWeight, packNumber, price, isDelete,isStore,block
+        ) VALUES (
+         #{pk}, #{logisticsPk}, #{productPk}, #{productName}, #{startWeight}, #{endWeight}, #{packNumber}, #{price}, #{isDelete},#{isStore},#{block}        
+        )
+    ]]>
+	</insert>
+	
+	
+	<delete id="deleteByLogisticsPk" parameterType="cn.cf.dto.LogisticsErpStepInfoDto">
+    <![CDATA[
+        DELETE FROM logistics_erp_stepInfo WHERE
+        logisticsPk = #{logisticsPk} 
+    ]]>
+	</delete>
+
+	<update id="updateLgErpStepInfo" parameterType="cn.cf.dto.LogisticsErpStepInfoDto">
+        UPDATE logistics_erp_stepInfo
+        <set>
+        	<if test="logisticsPk != null and logisticsPk != ''">
+        	 logisticsPk = #{logisticsPk} ,
+        	</if>
+        	<if test="productPk != null and productPk != ''">
+        	  productPk = #{productPk} ,
+        	</if>
+        	<if test="productName != null and productName != ''">
+        	 productName = #{productName} ,
+        	</if>
+        	<if test="startWeight != null and startWeight != ''">
+        	 startWeight = #{startWeight} ,
+        	</if>
+        	<if test="endWeight != null and endWeight != ''">
+        	 endWeight = #{endWeight} , 
+        	</if>
+        	<if test="packNumber != null and packNumber != ''">
+        	 packNumber = #{packNumber} ,
+        	</if>
+        	<if test="price != null and price != ''">
+        	 price = #{price} ,
+        	</if>
+        	<if test="isDelete != null and isDelete != ''">
+        	 isDelete = #{isDelete},  
+        	</if>
+        	<if test="isStore != null and isStore != ''">
+        	 isStore = #{isStore},
+        	</if>
+        	<if test="block != null and block != ''">
+        	 block = #{block}  
+        	</if>
+        </set>
+        WHERE pk = #{pk}  	        
+	</update>
+	
+</mapper>
+

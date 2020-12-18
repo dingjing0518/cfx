@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bReserveOrderDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserName,purchaserPk,orderStatus,orderAmount,actualAmount,insertTime,meno,deliverDetails,addressJson,memberPk,memberName,storeName,storePk,source,logisticsModelPk,logisticsModelName,invoiceJson,purchaseType,completeTime,purchaserMobile,goodsJson,isBatches,appointmentTime
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderNumber">
+    <![CDATA[
+        INSERT INTO b2b_reserve_order (
+         orderNumber, purchaserName, purchaserPk, orderStatus, orderAmount, actualAmount, insertTime, meno, deliverDetails, addressJson, memberPk, memberName, storeName, storePk, source, logisticsModelPk, logisticsModelName, invoiceJson, purchaseType, completeTime, purchaserMobile, goodsJson,isBatches,appointmentTime
+        ) VALUES (
+         #{orderNumber}, #{purchaserName}, #{purchaserPk}, #{orderStatus}, #{orderAmount}, #{actualAmount}, #{insertTime}, #{meno}, #{deliverDetails}, #{addressJson}, #{memberPk}, #{memberName}, #{storeName}, #{storePk}, #{source}, #{logisticsModelPk}, #{logisticsModelName}, #{invoiceJson}, #{purchaseType}, #{completeTime}, #{purchaserMobile}, #{goodsJson}   ,#{isBatches},#{appointmentTime}     
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bReserveOrder">
+    <![CDATA[
+        UPDATE b2b_reserve_order SET
+	        purchaserName = #{purchaserName} , purchaserPk = #{purchaserPk} , orderStatus = #{orderStatus} , orderAmount = #{orderAmount} , actualAmount = #{actualAmount} , insertTime = #{insertTime} , meno = #{meno} , deliverDetails = #{deliverDetails} , addressJson = #{addressJson} , memberPk = #{memberPk} , memberName = #{memberName} , storeName = #{storeName} , storePk = #{storePk} , source = #{source} , logisticsModelPk = #{logisticsModelPk} , logisticsModelName = #{logisticsModelName} , invoiceJson = #{invoiceJson} , purchaseType = #{purchaseType} , completeTime = #{completeTime} , purchaserMobile = #{purchaserMobile} , goodsJson = #{goodsJson}  
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bReserveOrder">
+    <![CDATA[
+        DELETE FROM b2b_reserve_order WHERE
+        orderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND orderAmount = #{orderAmount}			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				AND actualAmount = #{actualAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				AND meno = #{meno}			</if>
+			<if test="@Ognl@isNotEmpty(deliverDetails)">
+				AND deliverDetails = #{deliverDetails}			</if>
+			<if test="@Ognl@isNotEmpty(addressJson)">
+				AND addressJson = #{addressJson}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				AND logisticsModelPk = #{logisticsModelPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelName)">
+				AND logisticsModelName = #{logisticsModelName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceJson)">
+				AND invoiceJson = #{invoiceJson}			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND purchaseType = #{purchaseType}			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeBegin)">
+				AND completeTime >= #{completeTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeEnd)">
+				AND completeTime &lt;= #{completeTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserMobile)">
+				AND purchaserMobile = #{purchaserMobile}			</if>
+			<if test="@Ognl@isNotEmpty(goodsJson)">
+				AND goodsJson = #{goodsJson}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_reserve_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where orderNumber = #{orderNumber}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where purchaserName = #{purchaserName}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByMeno" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where meno = #{meno}	</select>
+	<select id="getByDeliverDetails" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where deliverDetails = #{deliverDetails}	</select>
+	<select id="getByAddressJson" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where addressJson = #{addressJson}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where memberName = #{memberName}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where storeName = #{storeName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where storePk = #{storePk}	</select>
+	<select id="getByLogisticsModelPk" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where logisticsModelPk = #{logisticsModelPk}	</select>
+	<select id="getByLogisticsModelName" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where logisticsModelName = #{logisticsModelName}	</select>
+	<select id="getByInvoiceJson" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where invoiceJson = #{invoiceJson}	</select>
+	<select id="getByPurchaserMobile" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where purchaserMobile = #{purchaserMobile}	</select>
+	<select id="getByGoodsJson" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order where goodsJson = #{goodsJson}	</select>
+</mapper>
+

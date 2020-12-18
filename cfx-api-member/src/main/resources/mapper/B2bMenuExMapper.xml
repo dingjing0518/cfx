@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMenuDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,parentPk,name,type,displayName,sort,isDelete,block
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(displayName)">
+				AND displayName = #{displayName}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+	<select id="searchMenuList" resultType="cn.cf.dto.B2bMenuDto">
+		select
+			<include refid="columns" />
+		   from b2b_menu where isDelete = 1 
+		  <if test="parentPk != null and parentPk != ''">  
+            and parentPk = #{parentPk}  
+        </if> 
+         <if test="rolePk != null and ''!=rolePk">  
+            and pk in (select menuPk from b2b_role_menu where rolePk=#{rolePk} )
+        </if> 
+          <if test="type != null">  
+            and type > #{type}  
+        </if>
+        <if test="companyType != null">  
+            and companyType = #{companyType}  
+        </if>
+        <if test="tokenType ==null">
+        	and name !='syncLog'
+        </if>
+        <!-- 盛虹的显示如下按钮 -->
+        <if test="tokenType !=1">
+        	and name != 'storeInstallUpDown'
+        	and name != 'storeInstallStock'
+        	and name != 'storeInstallPrice'
+        	and name != 'storeInstallDisplay'
+        	and name != 'storeInstallAuction'
+        	and name != 'storeInstallBind'
+        	and name != 'lineManageSync'
+        	and name != 'customerManagementAddress'
+        	and name != 'BSMAudit'
+        </if>  
+        			<if test="blocks != null and blocks !=''">
+        			 and (
+        				<foreach collection="blocks" item="item" open=" ("
+					close=" )" separator=" or ">
+					 locate ('${item}', block) 
+				</foreach>  
+				       or block IS NULL or block="")
+			</if>
+		order by sort desc
+	</select>
+</mapper>
+

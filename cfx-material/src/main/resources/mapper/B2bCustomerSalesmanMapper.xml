@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCustomerSalesmanDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,customerPk,memberPk,mobile,productPk,productName,filiale,filialeName,employeeNumber,employeeName,purchaserPk,purchaserName,storePk 
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_customer_salesman (
+         pk, customerPk, memberPk, mobile, productPk, productName, filiale,
+         filialeName, employeeNumber, employeeName, purchaserPk, purchaserName, storePk 
+        ) VALUES (
+         REPLACE(UUID(),'-',''), #{customerPk}, #{memberPk}, #{mobile}, #{productPk}, #{productName}, 
+         #{filiale}, #{filialeName}, #{employeeNumber}, #{employeeName}, #{purchaserPk}, #{purchaserName}, 
+         #{storePk}     
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bCustomerSalesman">
+    <![CDATA[
+        UPDATE b2b_customer_salesman SET
+	        customerPk = #{customerPk} , memberPk = #{memberPk} , mobile = #{mobile} , productPk = #{productPk} , productName = #{productName} , filiale = #{filiale} , filialeName = #{filialeName} , employeeNumber = #{employeeNumber} , employeeName = #{employeeName} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} , storePk = #{storePk}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bCustomerSalesman">
+    <![CDATA[
+        DELETE FROM b2b_customer_salesman WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(customerPk)">
+				AND customerPk = #{customerPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}			</if>
+			<if test="productPk != null">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="filiale != null">
+				AND filiale = #{filiale}			</if>
+			<if test="@Ognl@isNotEmpty(filialeName)">
+				AND filialeName = #{filialeName}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+					 
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_customer_salesman
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman
+		<include refid="searchGridWhere" />
+		order by productPk
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where pk = #{pk}	</select>
+	<select id="getByCustomerPk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where customerPk = #{customerPk}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where memberPk = #{memberPk}	</select>
+	<select id="getByMobile" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where mobile = #{mobile}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where productPk = #{productPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where productName = #{productName}	</select>
+	<select id="getByFiliale" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where filiale = #{filiale}	</select>
+	<select id="getByFilialeName" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where filialeName = #{filialeName}	</select>
+	<select id="getByEmployeeNumber" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where employeeNumber = #{employeeNumber}	</select>
+	<select id="getByEmployeeName" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where employeeName = #{employeeName}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where purchaserName = #{purchaserName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman where storePk = #{storePk}	</select>
+
+
+	<select id="searchGoodsBySaleMan" resultType="cn.cf.dto.B2bCustomerSalesmanDto">
+		SELECT
+		<include refid="columns" />
+		FROM
+		b2b_customer_salesman
+		WHERE
+		memberPk=#{memberPk}
+		<if test="purchaserPk and purchaserPk!=''">
+			and purchaserPk = #{purchaserPk}
+		</if>
+		and storePk = #{storePk}
+	</select>
+		
+</mapper>
+

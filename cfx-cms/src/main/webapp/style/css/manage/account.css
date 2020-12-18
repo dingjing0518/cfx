@@ -1,0 +1,75 @@
+.btn-group-sm>.btn,.btn-sm{padding:2px 8px !important;}
+.container{width:100% !important;}
+.page-head .page-title>h1{font-size:14px;}
+.page-head .page-title {padding: 10px 0;}
+.tabbable-line>.tab-content{padding:0px;}
+.page-header{height:51px !important;}
+.modal.fade.in{top:10%;}
+.nav .open > a,.nav .open > a:focus,.nav .open > a:hover,.nav>li>a:focus,.nav>li>a:hover{
+   background:none;
+}
+.page-content{padding:10px 0;}
+.search_k{float:left;width:16%;margin-bottom:5px;}
+.search_name{float:left;margin-right:10px;line-height:30px;width:60px;}
+.search_input{float:left;}
+.dataTables_wrapper .dataTables_length,.dataTables_wrapper .dt-buttons,div.dataTables_wrapper div.dataTables_filter{display:none;}
+.btn{padding: 3px 6px;}
+.imgC{width: 30px;height: 30px;background-size: 100%;}
+#name-error{display:none !important;}
+.page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.active>a:hover>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.active>a>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.current>a:hover>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.current>a>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-submenu>a:after{
+    color:#32c5d2;
+}
+@media screen and (max-width: 1024px) and (min-width: 800px) {
+    .input-small {
+        width: 80px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 80px !important;
+    }
+}
+@media screen and (max-width: 1280px) and (min-width: 1024px) {
+    .input-small {
+        width: 80px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 80px !important;
+    }
+}
+@media screen and (max-width: 1440px) and (min-width: 1280px) {
+    .input-small {
+        width: 115px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 115px !important;
+    }
+}
+@media screen and (max-width: 1680px) and (min-width: 1440px) {
+    .input-small {
+        width: 145px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 145px !important;
+    }
+}
+@media screen and (max-width: 1920px) and (min-width: 1680px) {
+    .input-small {
+        width: 195px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 195px !important;
+    }
+}
+@media screen and (min-width: 1920px){
+    .input-small {
+        width: 215px !important;
+    }
+    .select2-container--bootstrap{
+        float:left;
+        width: 215px !important;
+    }
+}

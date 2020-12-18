@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bProductDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+	 pk, name, sort, isDelete, isVisable, insertTime, productType, detils
+	    ]]>
+	</sql>
+	
+	<select id="searchProductNameByProductPks" resultType="cn.cf.dto.B2bProductDto"
+	parameterType="java.util.Map">
+		SELECT
+		pk,name
+		FROM b2b_product where  isDelete=1 AND isVisable = 1
+			<if test="productPks !=null and productPks !=''">
+			AND pk in
+			<foreach item="item" index="index" collection="productPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</if>
+	</select>
+	
+</mapper>
+

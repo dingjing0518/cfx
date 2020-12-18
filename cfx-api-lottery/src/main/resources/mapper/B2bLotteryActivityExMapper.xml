@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryActivityDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name, startTime,endTime, isDelete,insertTime,updateTime,isVisable,activityType,maximumNumber,  bindRole
+	    ]]>
+	</sql>
+ <select id="searchOnlineEntity" resultType="cn.cf.dto.B2bLotteryActivityDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM
+		b2b_lottery_activity
+		WHERE
+		startTime &lt;= NOW()
+		AND NOW() &lt;= endTime
+		AND pk =#{activityPk}
+		AND isDelete = 1
+		AND isVisable = 1
+	</select>
+	
+	<select id="searchActivityList" resultType="cn.cf.dto.B2bLotteryActivityDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_activity
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+	<sql id="searchGridWhere">
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeBegin)">
+				AND startTime >= #{startTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeEnd)">
+				AND startTime &lt;= #{startTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeBegin)">
+				AND endTime >= #{endTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeEnd)">
+				AND endTime &lt;= #{endTimeEnd}			</if>
+			 
+		 
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(activityType)">
+				AND activityType = #{activityType}			</if>
+				<if test="@Ognl@isNotEmpty(NowFlag)">
+				AND startTime &lt;=NOW() and now() &lt;=endTime 		</if>
+					<if test="@Ognl@isNotEmpty(Yesterday)">
+				 <![CDATA[ AND date(endTime)=DATE_SUB(curdate(),INTERVAL 1 DAY)	 ]]>
+					</if>
+		</where>
+	</sql>
+	 	<select id="searchCreditStatus" resultType="Integer">
+     SELECT
+	CASE
+WHEN activity.startTime &lt;= credit.creditAuditTime
+AND credit.creditAuditTime &lt;= activity.endTime THEN
+	1
+ELSE
+	2
+END STATUS
+FROM
+	b2b_lottery_activity activity,
+	(
+		SELECT
+			creditAuditTime
+		FROM
+			b2b_credit
+		WHERE
+			pk = #{creditPk}
+	) AS credit
+WHERE
+	activity.pk =#{activityPk}
+    </select>
+</mapper>
+

@@ -1,0 +1,2523 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserPk,
+	supplierPk,orderStatus,orderAmount,actualAmount,insertTime,
+	meno,memberPk,memberName,storeName,
+	storePk,
+	paymentType,
+	paymentName,
+	source,
+	paymentTime,
+	logisticsModelName,
+	purchaseType,
+	isDelete,
+	isDeleteSp,
+	economicsGoodsType,
+	economicsGoodsName,
+	purchaserInfo,
+	supplierInfo,
+	employeeName,
+	employeeNumber,
+	addressInfo
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber like '%${orderNumber}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserInfo like '%${purchaserName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND purchaseType = #{purchaseType}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName like '%${supplierName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND orderAmount = #{orderAmount}
+			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				AND actualAmount = #{actualAmount}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertStartTime)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >=
+				#{insertStartTime}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertEndTime)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;=
+				#{insertEndTime}			</if>
+
+			<if test="@Ognl@isNotEmpty(insertTime)">
+				AND insertTime &lt;= #{insertTime}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts like '%${contacts}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel like '%${contactsTel}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				AND meno = #{meno}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}
+			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}
+			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}
+			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName like '%${storeName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				AND paymentType = #{paymentType}
+			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND paymentName like '%${paymentName}%'			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}
+			</if>
+			<if test="@Ognl@isNotEmpty(paymentStartTime)">
+				AND str_to_date(paymentTime,'%Y-%m-%d') >=
+				#{paymentStartTime}
+			</if>
+			<if test="@Ognl@isNotEmpty(paymentEndTime)">
+				AND str_to_date(paymentTime,'%Y-%m-%d') &lt;=
+				#{paymentEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(repaymentStartTime)">
+				AND str_to_date(repaymentTime,'%Y-%m-%d') >=
+				#{repaymentStartTime}
+			</if>
+			<if test="@Ognl@isNotEmpty(repaymentEndTime)">
+				AND str_to_date(repaymentTime,'%Y-%m-%d') &lt;=
+				#{repaymentEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(loanStatus)">
+				AND loanStatus = #{loanStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}
+			</if>
+			<if test="@Ognl@isNotEmpty(interfaceTimeBegin)">
+				AND str_to_date(interfaceTime,'%Y-%m-%d') >=
+				#{interfaceTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(interfaceTimeEnd)">
+				AND str_to_date(interfaceTime,'%Y-%m-%d') &lt;=
+				#{interfaceTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModel)">
+				AND logisticsModel = #{logisticsModel}
+			</if>
+			<if test="@Ognl@isNotEmpty(invoicePk)">
+				AND invoicePk = #{invoicePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}
+			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND economicsGoodsType = #{economicsGoodsType}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="searchReportFormWhere">
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		<if test="addUpTime != null and addUpTime !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') &lt;= #{addUpTime}
+		</if>
+	</sql>
+
+
+
+
+	
+	<select id="getOrderByPurchaserPk" parameterType="java.util.Map"
+				resultType="cn.cf.entity.OrderNumEntity" >
+		SELECT a.* ,b.* FROM (SELECT
+		IFNULL(SUM(CASE 
+						WHEN o.block = "cf" THEN CASE WHEN og.afterWeight = 0 THEN	og.weight ELSE og.afterWeight	END 
+						ELSE  CASE	WHEN og.afterWeight = 0 THEN	 og.weight / 1000	ELSE	og.afterWeight / 1000	END 
+						END	
+					),0) AS weight,
+			IFNULL(count(DISTINCT og.orderNumber ),0)AS number
+			
+		FROM
+			b2b_order_goods og
+		INNER JOIN b2b_order o ON o.orderNumber = og.orderNumber
+		WHERE
+			str_to_date(
+				o.receivablesTime,
+				'%Y-%m-%d'
+			) = str_to_date(#{date}, '%Y-%m-%d')
+		AND o.orderStatus > 2
+		AND o.economicsGoodsType = #{economicsGoodsType}
+		AND o.orderClassify !=2
+		and o.purchaserPk = #{purchaserPk}
+		AND og.orderStatus != -1 )a,
+	(SELECT		
+		IFNULL(SUM(o.actualAmount),0) AS amount
+		FROM
+		b2b_order o 
+		WHERE
+			str_to_date(
+				o.receivablesTime,
+				'%Y-%m-%d'
+			) = str_to_date(#{date}, '%Y-%m-%d')
+		AND o.orderStatus > 2
+		AND o.economicsGoodsType = #{economicsGoodsType}
+		AND o.orderClassify !=2
+		and o.purchaserPk = #{purchaserPk}) b
+	</select>
+
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+			resultType="int">
+		SELECT count(*) FROM b2b_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bOrderExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		orderNumber,
+		purchaserInfo,
+		supplierInfo,
+		addressInfo,
+		block,
+		ownAmount,
+		<choose>
+			<when test="storeNameCol == 'OPER_ORDERMG_COL_STORENAME' or storeNameCol == 'EM_CREDIT_ORDER_ORDERMG_COL_STORENAME' 
+			or storeNameCol ==  'YARN_ORDERMG_COL_STORENAME' 	or storeNameCol ==  'YARN_ORDERMG_COL_STORENAME' 
+			or storeNameCol == 'FC_ODER_MGR_COL_STORENAME' ">
+				INSERT(storeName, 3, 5, '*****') AS storeName,
+			</when>
+			<otherwise>
+				storeName,
+			</otherwise>
+		</choose>
+		purchaserPk,
+		supplierPk,
+		orderStatus,
+		CASE orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		orderAmount,
+		actualAmount,
+		insertTime,
+		meno,
+		memberPk,
+		<choose>
+			<when test="memberNameCol == 'OPER_ORDERMG_COL_MEMBERNAME' 
+			or memberNameCol == 'YARN_ORDERMG_COL_MEMBERNAME' or memberNameCol == 'FC_ODER_MGR_COL_MEMBERNAME'">
+				INSERT (memberName,4,4, '****') as memberName,
+			</when>
+
+			<otherwise>
+				memberName ,
+			</otherwise>
+		</choose>
+		storePk,
+		paymentType,
+		paymentName,
+		source,
+		CASE source
+		WHEN 1 THEN
+		"pc"
+		WHEN 2 THEN
+		"wap"
+		WHEN 3 THEN
+		"app"
+		WHEN 4 THEN
+		"后台"
+		END AS sourceName,
+		paymentTime,
+		logisticsModelPk,
+		logisticsModelName,
+		CASE purchaseType
+		WHEN 1 THEN
+		"自采"
+		WHEN 2 THEN
+		"代采"
+		WHEN 3 THEN
+		"后台代采"
+		END AS purchaseTypeName,
+
+		economicsGoodsName
+		FROM
+		b2b_order
+		<include refid="searchGridWhere" />
+		<if test="orderName != null and orderName !=''">
+			ORDER BY ${orderName} ${orderType }
+		</if>
+		<if test="limit != null and limit != '' and limit>0">
+			LIMIT #{start}, #{limit}
+		</if>
+	</select>
+
+	<select id="getTotalPriceAndFreight" resultType="map">
+		SELECT
+		
+		SUM(
+		(CASE afterWeight
+		        WHEN 0 THEN weight
+		        ELSE afterWeight
+		    END)*(presentPrice)) AS totalPrice,
+		SUM(presentTotalFreight) AS totalFreight
+		FROM
+		b2b_order_goods
+		WHERE
+		orderNumber = #{orderNumber}
+	</select>
+
+	<select id="getByOrderNumberExt" resultType="cn.cf.dto.B2bOrderExtDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where orderNumber = #{orderNumber}
+	</select>
+
+	<select id="getByOrderNumberListExt" resultType="cn.cf.dto.B2bOrderGoodsExtDto"
+			parameterType="java.lang.String">
+		SELECT
+		orderNumber
+		,(CASE afterWeight
+		        WHEN 0 THEN weight
+		        ELSE afterWeight
+		    END) AS weight,afterWeight,boxes,
+		afterBoxes,originalPrice,presentPrice,
+
+		(originalPrice*(CASE afterWeight
+		        WHEN 0 THEN weight
+		        ELSE afterWeight
+		    END)) AS originalTotalPrice,
+		((presentPrice)*(CASE afterWeight
+		        WHEN 0 THEN weight
+		        ELSE afterWeight
+		    END)) AS presentTotalPrice,originalFreight,presentFreight,
+		(originalFreight*(CASE afterWeight
+		        WHEN 0 THEN weight
+		        ELSE afterWeight
+		    END)) AS originalTotalFreight,presentTotalFreight,
+		weightShipped,boxesShipped,orderStatus,
+		childOrderNumber,
+		logisticsPk,logisticsStepInfoPk,
+		logisticsCarrierPk,logisticsCarrierName,goodsType,goodsInfo
+		FROM b2b_order_goods where orderNumber = #{orderNumber}
+	</select>
+
+	<sql id="searchOrderMGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="orderNumber != null and orderNumber !=''">
+				AND o.orderNumber like '%${orderNumber}%'
+			</if>
+			<if test="purchaserName != null and purchaserName !=''">
+				AND SUBSTRING_INDEX(REPLACE (o.purchaserInfo,	CONCAT(SUBSTRING_INDEX(o.purchaserInfo, '"purchaserName":', 1),'"purchaserName":"'),''), '"', 1 )  LIKE '%${purchaserName}%'
+			</if>
+			<if test="storeName != null and storeName !=''">
+				AND o.storeName like '%${storeName}%'
+			</if>
+			<if test="receivablesStartTime != null and receivablesStartTime !=''">
+				<![CDATA[ AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{receivablesStartTime} ]]>
+			</if>
+			<if test="receivablesEndTime != null and receivablesEndTime !=''">
+				<![CDATA[ AND str_to_date(o.receivablesTime,'%Y-%m-%d') <= #{receivablesEndTime} ]]>
+			</if>
+			<if test="insertStartTime != null and insertStartTime !=''">
+				<![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') >= #{insertStartTime} ]]>
+			</if>
+			<if test="insertEndTime != null and insertEndTime !=''">
+				<![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') <= #{insertEndTime} ]]>
+			</if>
+			<if test="insertTime != null and insertTime !=''">
+				<![CDATA[ AND o.insertTime <= #{insertTime} ]]>
+			</if>
+			<if test="paymentStartTime != null and paymentStartTime !=''">
+				<![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') >= #{paymentStartTime} ]]>
+			</if>
+			<if test="paymentEndTime != null and paymentEndTime !=''">
+				<![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') <= #{paymentEndTime} ]]>
+			</if>
+			<if test="paymentType != null and paymentType !=''">
+				AND o.paymentType = #{paymentType}
+			</if>
+			<if test="orderStatus != null">
+				AND o.orderStatus = #{orderStatus}
+			</if>
+			<if test="source !=null and source !=''">
+				AND o.source = #{source}
+			</if>
+			<if test="block !=null and block !=''">
+				AND o.block = #{block}
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchOrderMCount" parameterType="java.util.Map"
+			resultType="int">
+		SELECT COUNT(*) FROM
+		(SELECT DISTINCT
+		o.orderNumber AS orderNumber
+		FROM
+		b2b_order o
+		LEFT JOIN marketing_order_member om ON om.orderPk = o.orderNumber
+		AND om.type = 1
+		<include refid="searchOrderMGridWhere"/>
+		) a
+	</select>
+
+	<select id="searchOrderMList" parameterType="java.util.Map"
+			resultType="cn.cf.dto.B2bOrderExtDto">
+		SELECT DISTINCT
+		o.orderNumber AS orderNumber,
+		o.purchaserInfo,
+		o.supplierInfo,
+		o.addressInfo,
+		if(${colPurPerson},    m1.name , INSERT (  m1.name ,  1, 1, '*')) as purPerson,
+		if(${colSupPerson},m2.name, INSERT (m2.name ,  1, 1, '*')) as supPerson,
+		if(${colStoreName}, o.storeName, INSERT ( o.storeName, 3, 5, '*****')) as storeName,
+		o.actualAmount AS actualAmount,
+		o.source AS source,
+		o.purchaseType AS purchaseType,
+		o.paymentName AS paymentName,
+		o.paymentTime AS paymentTime,
+		o.insertTime AS insertTime,
+		o.meno AS meno,
+		o.receivablesTime,
+		CASE o.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		o.orderStatus,
+		o.block,
+		o.economicsGoodsType
+		FROM
+		b2b_order o
+		LEFT JOIN marketing_order_member om ON om.orderPk = o.orderNumber  AND om.type = 1
+		left join manage_account m1  on m1.pk = om.purAccount
+		left join manage_account m2  on m2.pk = om.stAccount
+		<include refid="searchOrderMGridWhere"/>
+		<if test="orderName != null and orderName!=''">
+			ORDER BY ${orderName} ${orderType}
+		</if>
+		<if test="limit != null ">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+
+
+
+	<select id="exportOrderGoodsMList" resultType="cn.cf.dto.B2bOrderExtDto">
+		SELECT
+		ifnull(a.orderNumber,'') AS orderNumber,
+		ifnull(ROUND(a.orderAmount,2),0) AS orderAmount,
+		ifnull( ROUND(a.actualAmount,2),0 ) AS actualAmount,
+		a.purchaserInfo,
+		a.supplierInfo,
+		a.addressInfo,
+		b.goodsInfo,
+		(CASE  json_extract(b.goodsInfo, '$.stampDuty') 
+        WHEN 1 THEN '否'
+        WHEN 2 THEN '是'
+          ELSE  '否'
+        END)   stampDutyName,
+		a.insertTime AS insertTime,
+		ifnull(a.meno,'') AS meno,
+		if(${colMemberName},ifnull(a.memberName,''), INSERT (ifnull(a.memberName,''),4,4, '****')) as memberName,
+		CASE a.purchaseType
+		WHEN 1 THEN
+		'自采'
+		WHEN 2 THEN
+		'代采'
+		WHEN 3 THEN
+		'平台采'
+		END AS purchaseTypeName,
+		if(${colStoreName},ifnull(a.storeName,''), INSERT (ifnull(a.storeName,''), 3, 5, '*****')) as storeName,
+		a.paymentName AS paymentName,
+		a.source AS source,
+		a.paymentTime AS paymentTime,
+		b.childOrderNumber AS childOrderNumber,
+		IF (b.afterWeight = 0,b.weight,b.afterWeight) afterWeight,
+		IF (b.afterBoxes = 0,b.boxes,b.afterBoxes) afterBoxes,
+		ifnull(ROUND(b.originalPrice,2),0) AS originalPrice,
+		ifnull(ROUND(b.presentPrice,2),0) AS presentPrice,
+
+		ifnull(ROUND((b.presentPrice)* (IF (
+		b.afterWeight = 0,
+		b.weight,
+		b.afterWeight
+		)),2),0) AS presentTotalPrice,
+		ifnull(ROUND(b.presentTotalFreight,2),0) AS presentTotalFreight,
+		CASE a.source
+		WHEN 1 THEN
+		"pc"
+		WHEN 2 THEN
+		"wap"
+		WHEN 3 THEN
+		"app"
+		WHEN 4 THEN
+		"后台"
+		END AS sourceName,
+		if(${colPurPerson},  ifnull(a.purPerson,'') , INSERT ( ifnull(a.purPerson,'') ,  1, 1, '*')) as purPerson,
+		if(${colSupPerson},ifnull(a.supPerson,''), INSERT (ifnull(a.supPerson,''),  1, 1, '*')) as supPerson,
+		CASE b.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		b.orderStatus,
+		a.receivablesTime
+		FROM
+		b2b_order_goods b
+		JOIN (
+		SELECT o.*,
+		m1.`name` as  purPerson,
+		m2.`name` as supPerson
+		FROM b2b_order o
+		LEFT JOIN marketing_order_member om on om.orderPk  = o.orderNumber
+		left join manage_account m1  on m1.pk = om.purAccount
+		left join manage_account m2  on m2.pk = om.stAccount
+		<include refid="searchOrderMGridWhere"/>
+		) a ON b.orderNumber = a.orderNumber
+		order by a.insertTime desc
+		<if test="limit != null and limit != '' and limit>0">
+			LIMIT #{start}, #{limit}
+		</if>
+	</select>
+
+	<select id="searchCreditOrderList" parameterType="java.util.Map"
+			resultType="cn.cf.dto.B2bLoanNumberExtDto">
+		SELECT
+		o.bankPk AS bankPk,
+		o.bankName AS bankName,
+		o.loanStatus AS loanStatus,
+		o.economicsGoodsName AS economicsGoodsName,
+		CASE o.loanStatus
+		WHEN 1 THEN
+		'待申请'
+		WHEN 2 THEN
+		'申请中'
+		WHEN 3 THEN
+		'申请成功'
+		WHEN 4 THEN
+		'申请失败'
+		WHEN 5 THEN
+		'已还款'
+		WHEN 6 THEN
+		'部分还款'
+		END AS loans,
+		o.orderNumber AS orderNumber,
+		if(${colPurName},o.purchaserName, INSERT (o.purchaserName, 3, 5, '*****')) as purchaserName,
+		o.purchaserPk AS purchaserPk,
+		if(${colSuppName},o.supplierName, INSERT (o.supplierName, 3, 5, '*****')) as supplierName,
+		o.repaymentTime AS repaymentTime,
+		o.loanStartTime AS loanStartTime,
+		o.loanEndTime AS loanEndTime,
+		o.contractNumber AS contractNumber,
+		o.principal AS principal,
+		od.orderAmount,
+		od.actualAmount,
+		o.loanNumber,
+		o.loanAmount,
+		IFNULL( o.totalRate,0)  as  totalRate,
+		IFNULL( o.bankRate,0)  as  bankRate,
+		IFNULL( o.sevenRate,0)  as  sevenRate,
+		IFNULL( o.repaidInterest,0) as  repaidInterest,
+		IFNULL( o.repaidSerCharge,0)  as  repaidSerCharge,
+		o.economicsGoodsType,
+		CASE o.isOverdue
+		WHEN 1 THEN
+		'正常'
+		WHEN 2 THEN
+		'逾期'
+		END AS isOverdueName,
+		 o.isOverdue,
+		 o.economicsGoodsType,
+		 od.block,
+		 es.source AS source
+		FROM
+		b2b_loan_number o
+		LEFT JOIN b2b_order od ON od.orderNumber = o.orderNumber
+		LEFT JOIN b2b_economics_customer es ON es.companyPk = o.purchaserPk
+		WHERE
+		1 = 1
+		<if test="purchaserName!=null and purchaserName!=''" >
+			AND o.purchaserName like '%${purchaserName}%'
+		</if>
+		<if test="orderNumber !=null and orderNumber !=''">
+			AND o.orderNumber like '%${orderNumber}%'
+		</if>
+		<if test="loanNumber !=null and loanNumber !=''">
+			AND o.loanNumber like '%${loanNumber}%'
+		</if>
+		<if test="contractNumber !=null and contractNumber !=''">
+			AND o.contractNumber like '%${contractNumber}%'
+		</if>
+		<if test="bankPk !=null and bankPk !=''">
+			AND o.bankPk = #{bankPk}
+		</if>
+		<if test="loanStartTimeBegin !=null and loanStartTimeBegin !=''">
+			AND str_to_date(o.loanStartTime,'%Y-%m-%d') >= #{loanStartTimeBegin}
+		</if>
+		<if test="insertTime !=null and insertTime !=''">
+			<![CDATA[ AND o.insertTime <= #{insertTime} ]]>
+		</if>
+		<if test="loanStartTimeEnd !=null and loanStartTimeEnd !=''">
+			<![CDATA[ AND str_to_date(o.loanStartTime,'%Y-%m-%d') <= #{loanStartTimeEnd} ]]>
+		</if>
+		<if test="loanEndTimeBegin !=null and loanEndTimeBegin !=''">
+			AND str_to_date(o.loanEndTime,'%Y-%m-%d') >= #{loanEndTimeBegin}
+		</if>
+		<if test="loanEndTimeEnd !=null and loanEndTimeEnd !=''">
+			<![CDATA[ AND str_to_date(o.loanEndTime,'%Y-%m-%d') <= #{loanEndTimeEnd} ]]>
+		</if>
+		<if test="loanStatus !=null and loanStatus !=''">
+			AND o.loanStatus = #{loanStatus}
+		</if>
+		<if test="isOverdue !=null and isOverdue !=''">
+			AND o.isOverdue = #{isOverdue}
+		</if>
+		<if test="economicsGoodsType !=null and economicsGoodsType !=''">
+			AND o.economicsGoodsType = #{economicsGoodsType}
+		</if>
+		<if test="economicsGoodsName !=null and economicsGoodsName !=''">
+			AND o.economicsGoodsName = #{economicsGoodsName}
+		</if>
+
+		<if test="orderName != null and orderName!=''">
+			<!--<if test="orderName = 'insertTime'">
+			ORDER BY od.${orderName} ${orderType}
+			</if>-->
+			<!--/*<if test="orderName != 'insertTime'">*/-->
+			ORDER BY o.${orderName} ${orderType}
+			<!--</if>-->
+		</if>
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+	<update id="updateOrder">
+		UPDATE b2b_order
+		SET bankPk =
+		#{bankPk},bankName=#{bankName},loanStatus=2
+		WHERE
+		orderNumber =
+		#{orderNumber}
+	</update>
+
+
+	<select id="searchCreditOrders" parameterType="java.util.Map"
+			resultType="int">
+		SELECT
+		count(1)
+		FROM
+		b2b_loan_number o
+		LEFT JOIN b2b_order od ON od.orderNumber = o.orderNumber
+		WHERE
+		1 = 1
+		<if test="purchaserName!=null and purchaserName!=''" >
+			AND o.purchaserName like '%${purchaserName}%'
+		</if>
+		<if test="orderNumber !=null and orderNumber !=''">
+			AND o.orderNumber like '%${orderNumber}%'
+		</if>
+		<if test="loanNumber !=null and loanNumber !=''">
+			AND o.loanNumber like '%${loanNumber}%'
+		</if>
+		<if test="contractNumber !=null and contractNumber !=''">
+			AND o.contractNumber like '%${contractNumber}%'
+		</if>
+		<if test="bankPk !=null and bankPk !=''">
+			AND o.bankPk = #{bankPk}
+		</if>
+		<if test="insertTime !=null and insertTime !=''">
+			<![CDATA[ AND o.insertTime <= #{insertTime} ]]>
+		</if>
+		<if test="loanStartTimeBegin !=null and loanStartTimeBegin !=''">
+			AND str_to_date(o.loanStartTime,'%Y-%m-%d') >= #{loanStartTimeBegin}
+		</if>
+		<if test="loanStartTimeEnd !=null and loanStartTimeEnd !=''">
+			<![CDATA[ AND str_to_date(o.loanStartTime,'%Y-%m-%d') <= #{loanStartTimeEnd} ]]>
+		</if>
+		<if test="loanEndTimeBegin !=null and loanEndTimeBegin !=''">
+			AND str_to_date(o.loanEndTime,'%Y-%m-%d') >= #{loanEndTimeBegin}
+		</if>
+		<if test="loanEndTimeEnd !=null and loanEndTimeEnd !=''">
+			<![CDATA[ AND str_to_date(o.loanEndTime,'%Y-%m-%d') <= #{loanEndTimeEnd} ]]>
+		</if>
+		<if test="loanStatus !=null and loanStatus !=''">
+			AND o.loanStatus = #{loanStatus}
+		</if>
+		<if test="economicsGoodsType !=null and economicsGoodsType !=''">
+			AND o.economicsGoodsType = #{economicsGoodsType}
+		</if>
+		<if test="economicsGoodsName !=null and economicsGoodsName !=''">
+			AND o.economicsGoodsName = #{economicsGoodsName}
+		</if>
+		<if test="isOverdue !=null and isOverdue !=''">
+			AND o.isOverdue = #{isOverdue}
+		</if>
+	</select>
+
+
+	<sql id="searchOrderGoodsWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="orderNumber != null and orderNumber !=''">
+				and o.orderNumber like '%${orderNumber}%'
+			</if>
+			<if test="orderStatus != null and orderStatus != ''">
+				and o.orderStatus = #{orderStatus}
+			</if>
+			<if test="purchaserName != null and purchaserName !=''">
+				and o.purchaserInfo like '%${purchaserName}%'
+			</if>
+
+			<if test="purchaseType  != null and purchaseType !=''">
+				and o.purchaseType = #{purchaseType}
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				and o.supplierName like '%${supplierName}%'
+			</if>
+			<if test="paymentType != null and paymentType !=''">
+				and o.paymentType = #{paymentType}
+			</if>
+			<if test="block != null and block !=''">
+				and o.block = #{block}
+			</if>
+			<if test="memberPk != null and memberPk !=''">
+				and o.memberPk = #{memberPk}
+			</if>
+			<if test="storeName != null and storeName !=''">
+				AND o.storeName like '%${storeName}%'
+			</if>
+			<if test="source != null and source !=''">
+				and o.source = #{source}
+			</if>
+			<if test="insertStartTime != null and insertStartTime !=''">
+				<![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') >= #{insertStartTime} ]]>
+			</if>
+			<if test="insertEndTime != null and insertEndTime !=''">
+				<![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') <= #{insertEndTime} ]]>
+			</if>
+			<if test="paymentStartTime != null and paymentStartTime !=''">
+				<![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') >= #{paymentStartTime} ]]>
+			</if>
+			<if test="paymentEndTime != null and paymentEndTime !=''">
+				<![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') <= #{paymentEndTime} ]]>
+			</if>
+			<if test="insertTime != null and insertTime !=''">
+				<![CDATA[ AND o.insertTime <= #{insertTime} ]]>
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="searchOrderGoodsListCounts" parameterType="java.util.Map"
+			resultType="int">
+		SELECT
+			count(*)
+		FROM
+		b2b_order o
+		LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+		<include refid="searchOrderGoodsWhere"/>
+	</select>
+
+	<select id="searchOrderGoodsList" resultType="cn.cf.dto.B2bOrderExtDto" parameterType="java.util.Map">
+		SELECT
+		ifnull(o.orderNumber,'') as orderNumber,
+		ifnull(og.childOrderNumber,'') as childOrderNumber,
+		o.purchaserInfo,
+		o.supplierInfo,
+		o.addressInfo,
+		og.goodsInfo,
+		(CASE  json_extract(og.goodsInfo, '$.stampDuty') 
+        WHEN 1 THEN '否'
+        WHEN 2 THEN '是'
+          ELSE  '否'
+        END)   stampDutyName,
+		<choose>
+			<when test="storeNameCol == 'OPER_ORDERMG_COL_STORENAME' or storeNameCol =='YARN_ORDERMG_COL_STORENAME'">
+				INSERT(ifnull(o.storeName,''), 3, 5, '*****') AS storeName,
+			</when>
+			<otherwise>
+				ifnull(o.storeName,'') as storeName,
+			</otherwise>
+		</choose>
+		CASE og.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3
+		THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1
+		THEN
+		'已取消'
+		END AS orderStatusName,
+		og.orderStatus,
+		ifnull(og.boxes,'') as boxes,
+		ifnull(og.weight,'') as weight,
+		ifnull(ROUND(og.originalPrice,2),'') as originalPrice,
+		ifnull(ROUND(og.presentPrice,2),'') as presentPrice,
+		ifnull(ROUND((og.presentPrice)*(IF (
+		og.afterWeight = 0,
+		og.weight,
+		og.afterWeight
+		)),2),'') as presentTotalPrice,
+		ifnull(ROUND(presentTotalFreight,2),'') as presentTotalFreight,
+		ifnull( ROUND(o.actualAmount,2),'' ) AS actualAmount,
+		o.insertTime,
+
+		IF (
+		og.afterWeight = 0,
+		og.weight,
+		og.afterWeight
+		) afterWeight,
+		IF (
+		og.afterBoxes = 0,
+		og.boxes,
+		og.afterBoxes
+		)afterBoxes,
+		CASE o.source
+		WHEN 1 THEN
+		'PC'
+		WHEN 2 THEN
+		'WAP'
+		WHEN 3 THEN
+		'APP'
+		WHEN 4 THEN
+		'后台'
+		END AS sourceName,
+		ifnull(o.paymentName,'') as paymentName,
+		ifnull(o.logisticsModelName,'') as logisticsModelName,
+		<choose>
+			<when test="memberNameCol == 'OPER_ORDERMG_COL_MEMBERNAME' or  memberNameCol == 'YARN_ORDERMG_COL_MEMBERNAME'">
+				INSERT(ifnull(o.memberName,''), 4, 4, '****') AS memberName,
+			</when>
+			<otherwise>
+				ifnull(o.memberName,'') as memberName,
+			</otherwise>
+		</choose>
+		ifnull(o.meno,'') as meno,
+		CASE o.purchaseType
+		WHEN 1 THEN
+		'自采'
+		WHEN 2 THEN
+		'代采'
+		WHEN 3 THEN
+		'平台采'
+		END AS purchaseTypeName,
+		CASE o.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3
+		THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1
+		THEN
+		'已取消'
+		END AS orderStatusName
+		FROM
+		b2b_order o
+		LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+		<include refid="searchOrderGoodsWhere"/>
+		order by o.insertTime desc
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+	<select id="exportOrderList" resultType="cn.cf.dto.B2bOrderExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		o.orderNumber,
+		o.purchaserPk,
+		o.supplierPk,
+		o.orderStatus,
+		o.purchaserInfo,
+		o.supplierInfo,
+		o.addressInfo,
+		og.goodsInfo,
+		<choose>
+			<when test="storeNameCol == 'OPER_ORDERMG_COL_STORENAME' or  storeNameCol ==  'YARN_ORDERMG_COL_STORENAME' ">
+				INSERT(o.storeName, 3, 5, '*****') AS storeName,
+			</when>
+			<otherwise>
+				o.storeName,
+			</otherwise>
+		</choose>
+		CASE o.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		o.orderAmount,
+		o.actualAmount,
+		o.insertTime,
+		o.meno,
+		o.memberPk,
+		<choose>
+			<when test="memberNameCol == 'OPER_ORDERMG_COL_MEMBERNAME' or  memberNameCol== 'YARN_ORDERMG_COL_MEMBERNAME'">
+				INSERT (o.memberName, 4, 4, '****') as memberName,
+			</when>
+			<otherwise>
+				o.memberName,
+			</otherwise>
+		</choose>
+		o.storePk,
+		o.paymentType,
+		o.paymentName,
+		o.source,
+		CASE o.source
+		WHEN 1 THEN
+		"pc"
+		WHEN 2 THEN
+		"wap"
+		WHEN 3 THEN
+		"app"
+		WHEN 4 THEN
+		"后台"
+		END AS sourceName,
+		o.paymentTime,
+		o.logisticsModelPk,
+		o.logisticsModelName,
+		CASE o.purchaseType
+		WHEN 1 THEN
+		"自采"
+		WHEN 2 THEN
+		"代采"
+		WHEN 3 THEN
+		"后台代采"
+		END AS purchaseTypeName,
+		SUM(
+		IF (
+		og.afterBoxes = 0,
+		0,
+		og.afterBoxes
+		)
+		) afterBoxes,
+		SUM(
+		IF (
+		og.afterWeight = 0,
+		og.weight,
+		og.afterWeight
+
+		)
+		) allWeight,
+		SUM(ROUND((og.presentPrice)*(IF (
+		og.afterWeight = 0,
+		og.weight,
+		og.afterWeight
+		)),2)) allPresentTotalPrice ,
+		SUM(ROUND(presentTotalFreight,2)) allpresentTotalFreight,
+		o.economicsGoodsName
+		FROM
+		b2b_order o
+		LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+		WHERE
+		1 = 1
+		<if test="@Ognl@isNotEmpty(orderNumber)">
+			AND o.orderNumber like '%${orderNumber}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaserName)">
+			AND o.purchaserInfo like '%${purchaserName}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaserPk)">
+			AND o.purchaserPk = #{purchaserPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(supplierName)">
+			AND o.supplierName like '%${supplierName}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(supplierPk)">
+			AND o.supplierPk = #{supplierPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(block)">
+			AND o.block = #{block}
+		</if>
+		<if test="@Ognl@isNotEmpty(orderStatus)">
+			AND o.orderStatus = #{orderStatus}
+		</if>
+		<if test="@Ognl@isNotEmpty(orderAmount)">
+			AND o.orderAmount = #{orderAmount}
+		</if>
+		<if test="@Ognl@isNotEmpty(actualAmount)">
+			AND o.actualAmount = #{actualAmount}
+		</if>
+		<if test="@Ognl@isNotEmpty(insertStartTime)">
+			AND str_to_date(o.insertTime,'%Y-%m-%d') >= #{insertStartTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(insertEndTime)">
+			AND str_to_date(o.insertTime,'%Y-%m-%d') &lt;= #{insertEndTime}			</if>
+
+		<if test="@Ognl@isNotEmpty(insertTime)">
+			AND o.insertTime &lt;= #{insertTime}			</if>
+		<if test="@Ognl@isNotEmpty(address)">
+			AND o.address = #{address}
+		</if>
+		<if test="@Ognl@isNotEmpty(contacts)">
+			AND o.contacts like '%${contacts}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(contactsTel)">
+			AND o.contactsTel like '%${contactsTel}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(meno)">
+			AND o.meno = #{meno}
+		</if>
+		<if test="@Ognl@isNotEmpty(provinceName)">
+			AND o.provinceName = #{provinceName}
+		</if>
+		<if test="@Ognl@isNotEmpty(province)">
+			AND o.province = #{province}
+		</if>
+		<if test="@Ognl@isNotEmpty(cityName)">
+			AND o.cityName = #{cityName}
+		</if>
+		<if test="@Ognl@isNotEmpty(city)">
+			AND o.city = #{city}
+		</if>
+		<if test="@Ognl@isNotEmpty(areaName)">
+			AND o.areaName = #{areaName}
+		</if>
+		<if test="@Ognl@isNotEmpty(area)">
+			AND o.area = #{area}
+		</if>
+		<if test="@Ognl@isNotEmpty(town)">
+			AND o.town = #{town}
+		</if>
+		<if test="@Ognl@isNotEmpty(townName)">
+			AND o.townName = #{townName}
+		</if>
+		<if test="@Ognl@isNotEmpty(memberPk)">
+			AND o.memberPk = #{memberPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(memberName)">
+			AND o.memberName = #{memberName}
+		</if>
+		<if test="@Ognl@isNotEmpty(storeName)">
+			AND o.storeName like '%${storeName}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(storePk)">
+			AND o.storePk = #{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(paymentType)">
+			AND o.paymentType = #{paymentType}
+		</if>
+		<if test="@Ognl@isNotEmpty(paymentName)">
+			AND o.paymentName like '%${paymentName}%'			</if>
+		<if test="@Ognl@isNotEmpty(source)">
+			AND o.source = #{source}
+		</if>
+		<if test="@Ognl@isNotEmpty(paymentStartTime)">
+			AND str_to_date(o.paymentTime,'%Y-%m-%d') >= #{paymentStartTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(paymentEndTime)">
+			AND str_to_date(o.paymentTime,'%Y-%m-%d') &lt;= #{paymentEndTime}			</if>
+		<if test="@Ognl@isNotEmpty(repaymentStartTime)">
+			AND str_to_date(o.repaymentTime,'%Y-%m-%d') >= #{repaymentStartTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(repaymentEndTime)">
+			AND str_to_date(o.repaymentTime,'%Y-%m-%d') &lt;= #{repaymentEndTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(loanStatus)">
+			AND o.loanStatus = #{loanStatus}
+		</if>
+		<if test="@Ognl@isNotEmpty(bankPk)">
+			AND o.bankPk = #{bankPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(bankName)">
+			AND o.bankName = #{bankName}
+		</if>
+		<if test="@Ognl@isNotEmpty(interfaceTimeBegin)">
+			AND str_to_date(o.interfaceTime,'%Y-%m-%d') >= #{interfaceTimeBegin}
+		</if>
+		<if test="@Ognl@isNotEmpty(interfaceTimeEnd)">
+			AND str_to_date(o.interfaceTime,'%Y-%m-%d') &lt;= #{interfaceTimeEnd}
+		</if>
+		<if test="@Ognl@isNotEmpty(logisticsModel)">
+			AND o.logisticsModel = #{logisticsModel}
+		</if>
+		GROUP BY
+		o.orderNumber
+		<if test="limit != null and limit != '' and limit>0">
+			LIMIT #{start}, #{limit}
+		</if>
+	</select>
+	<!-- 关闭订单 -->
+	<update id="closeOrder" parameterType="java.lang.String">
+		UPDATE b2b_order SET
+		b2b_order.orderStatus=-1
+		WHERE
+		orderNumber = #{orderNumber}
+	</update>
+
+	<select id="countAndAmountCreditOrder" parameterType="java.util.Map"
+			resultType="cn.cf.entity.EconCreditOrderAmountEntry">
+	  SELECT
+		count(n.orderNumber) AS counts,
+		ROUND(SUM(n.loanAmount),2) AS amounts,
+		n.economicsGoodsType AS goodsType,
+		o.storeName AS storeName,
+		o.storePk AS storePk
+		FROM
+		b2b_loan_number n
+		LEFT JOIN b2b_order o ON n.orderNumber = o.orderNumber
+		WHERE
+		1 = 1
+		AND o.storePk is not null
+		AND n.economicsGoodsType = 1
+		AND o.orderClassify != 2
+		<if test="bankPk != null and bankPk != ''">
+			AND n.bankPk= #{bankPk}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY
+		o.storePk
+
+  UNION ALL
+
+		SELECT
+		count(n.orderNumber) AS counts,
+		ROUND(SUM(n.loanAmount),2) AS amounts,
+		n.economicsGoodsType AS goodsType,
+		o.storeName AS storeName,
+		o.storePk AS storePk
+		FROM
+		b2b_loan_number n
+		LEFT JOIN b2b_order o ON n.orderNumber = o.orderNumber
+		WHERE
+		1 = 1
+		AND o.storePk is not null
+		AND o.orderClassify != 2
+		AND n.economicsGoodsType = 2
+		<if test="bankPk != null and bankPk != ''">
+			AND n.bankPk= #{bankPk}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY
+		o.storePk
+	</select>
+
+
+	<select id="countAndAmountCreditContract" parameterType="java.util.Map"
+			resultType="cn.cf.entity.EconCreditOrderAmountEntry">
+		SELECT
+		count(n.orderNumber) AS counts,
+		ROUND(SUM(n.loanAmount),2) AS amounts,
+		n.economicsGoodsType AS goodsType,
+		o.storeName AS storeName,
+		o.storePk AS storePk
+		FROM
+		b2b_loan_number n
+		LEFT JOIN b2b_contract o ON n.orderNumber = o.contractNo
+		WHERE
+		1 = 1
+		AND o.storePk is not null
+		AND n.economicsGoodsType = 1
+		<if test="bankPk != null and bankPk != ''">
+			AND n.bankPk= #{bankPk}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY
+		o.storePk
+  UNION ALL
+		SELECT
+		count(n.orderNumber) AS counts,
+		ROUND(SUM(n.loanAmount),2) AS amounts,
+		n.economicsGoodsType AS goodsType,
+		o.storeName AS storeName,
+		o.storePk AS storePk
+		FROM
+		b2b_loan_number n
+		LEFT JOIN b2b_contract o ON n.orderNumber = o.contractNo
+		WHERE
+		1 = 1
+		AND o.storePk is not null
+		AND n.economicsGoodsType = 2
+		<if test="bankPk != null and bankPk != ''">
+			AND n.bankPk= #{bankPk}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY
+		o.storePk
+	</select>
+
+
+	<select id="searchEconomicsOrders"  resultType="cn.cf.entity.EconomicsProductOrder"
+			parameterType="java.util.Map">
+		SELECT
+			o.orderNumber,
+			o.purchaserPk,
+			o.loanAmount,
+			o.economicsGoodsType,
+			o.bankPk,
+			c.source,
+			o.economicsGoodsType AS productType
+		FROM
+			b2b_loan_number o
+		LEFT JOIN b2b_credit c ON c.companyPk = o.purchaserPk
+		WHERE  
+		  str_to_date(o.loanStartTime,'%Y-%m-%d') = str_to_date(#{loanStartTime},'%Y-%m-%d') 
+		  and  o.loanStatus not in ('2','4') 
+		order by o.bankPk
+	</select>
+
+	<select id = "getEconProductByOrderNumber"  resultType="cn.cf.dto.B2bOrderExtDto" parameterType="java.lang.String">
+		SELECT
+			o.orderNumber,
+			eg.goodsType AS economicsGoodsType
+		FROM
+			b2b_order o
+		LEFT JOIN b2b_economics_goods eg ON eg.goodsType = o.economicsGoodsType
+		where o.orderNumber = #{orderNumber}
+	</select>
+
+	<select id="searchSupplierSaleRF" parameterType="java.util.Map" resultType="cn.cf.entity.OperationSupplierSaleRF">
+		SELECT
+		count(o.orderNumber) AS counts,
+		o.storeName AS storeName,
+		o.storePk AS storePk,
+		GROUP_CONCAT(o.orderNumber) AS orderNumbers,
+		ac.`name` AS accountName,
+		SUM(o.actualAmount) AS amount,
+		o.receivablesTime receivablesTime,
+		o.block block
+		FROM
+		(select * from b2b_order where 1=1 and orderStatus > 2
+		<if test="startTime != null and startTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		<if test="nowTime != null and nowTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{nowTime}
+		</if>
+		) o
+		<!--当marketing_company表中的companyType为2时存入的是店铺的pk-->
+		LEFT JOIN (select * from marketing_company  where companyType = 2 ) mc ON mc.companyPk = o.storePk
+		LEFT JOIN manage_account ac ON ac.pk = mc.accountPk
+		GROUP BY
+		o.storePk
+		<if test="orderName != null and orderName!=''">
+			ORDER BY ${orderName} ${orderType}
+		</if>
+		<if test="limit != null  and limit!=''  and limit>0">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+	<select id="countSupplierSaleRF" parameterType="java.util.Map" resultType="int">
+		SELECT
+		count(*)
+		FROM
+		(
+		SELECT
+		o.storePk
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		b2b_order
+		WHERE
+		1 = 1
+		AND orderStatus > 2
+		<if test="startTime != null and startTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		<if test="nowTime != null and nowTime !=''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{nowTime}
+		</if>
+		) o
+		LEFT JOIN b2b_company c ON o.supplierPk = c.pk
+		LEFT JOIN (
+		SELECT
+		*
+		FROM
+		marketing_company
+		WHERE
+		companyType = 2
+		) mc ON mc.companyPk = c.pk
+		OR c.parentPk = mc.companyPk
+		LEFT JOIN manage_account ac ON ac.pk = mc.accountPk
+		GROUP BY
+		o.storePk
+		) couns
+	</select>
+
+	<select id="searchPurchaserSaleRF" parameterType="java.util.Map" resultType="cn.cf.entity.OperationPurchaserSaleRF">
+		SELECT
+		count(o.orderNumber) AS counts,
+		SUM(o.actualAmount) AS actualAmount,
+		o.purchaserPk AS purchaserName,
+		GROUP_CONCAT( o.orderNumber) AS orderNumbers,
+		GROUP_CONCAT(DISTINCT ac.`name`) AS accountName
+		FROM
+		b2b_order o
+		LEFT JOIN (select * from marketing_company where companyType = 1) mc ON o.purchaserPk = mc.companyPk
+		LEFT JOIN manage_account ac ON ac.pk = mc.accountPk
+		WHERE
+		o.orderStatus > 2
+		<if test="startTime != null and startTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY
+		o.purchaserPk;
+	</select>
+	<!-- 平台销售数据 -->
+	<select id="searchSupplierSaleDataRF" parameterType="java.util.Map" resultType="cn.cf.entity.SupplierSaleData">
+		<!-- 本月数据 -->
+		SELECT
+		count(counts) counts,
+		SUM(weight) weight,
+		SUM(amount) amount
+		FROM
+		(
+		SELECT
+		count(DISTINCT o.orderNumber) AS counts,
+		TRUNCATE(SUM(
+		IF( o.block = 'sx',
+		(CASE og.afterWeight
+		WHEN 0 THEN (og.weight/1000)
+		ELSE (og.afterWeight/1000)
+		END),
+		(CASE og.afterWeight
+		WHEN 0 THEN og.weight
+		ELSE og.afterWeight
+		END)
+		)),4) AS weight,
+		ROUND(o.actualAmount,2) AS amount
+		FROM
+		(select * from b2b_order where 1=1
+		<if test="supplierPk != null and supplierPk !=''">
+			and storePk = #{supplierPk}
+		</if>
+		<if test="supplierPkSH != null and supplierPkSH != ''">
+			and storePk != #{supplierPkSH}
+		</if>
+		<if test="supplierPkXFM != null and supplierPkXFM != ''">
+			and storePk != #{supplierPkXFM}
+		</if>
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) og ON o.orderNumber = og.orderNumber
+		WHERE
+		o.orderStatus > 2
+		<if test="startTime != null and startTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY o.orderNumber
+		) selfData
+UNION ALL
+		<!-- 上月数据 -->
+		SELECT
+		count(counts) counts,
+		SUM(weight) weight,
+		SUM(amount) amount
+		FROM
+		(
+		SELECT
+		count(DISTINCT o.orderNumber) AS counts,
+		TRUNCATE(SUM(
+		IF( o.block = 'sx',
+		(CASE og.afterWeight
+		WHEN 0 THEN (og.weight/1000)
+		ELSE (og.afterWeight/1000)
+		END),
+		(CASE og.afterWeight
+		WHEN 0 THEN og.weight
+		ELSE og.afterWeight
+		END)
+		)),4) AS weight,
+		ROUND(o.actualAmount,2) AS amount
+		FROM
+		(select * from b2b_order where 1=1
+		<if test="supplierPk != null and supplierPk !=''">
+			and storePk = #{supplierPk}
+		</if>
+		<if test="supplierPkSH != null and supplierPkSH != ''">
+			and storePk != #{supplierPkSH}
+		</if>
+		<if test="supplierPkXFM != null and supplierPkXFM != ''">
+			and storePk != #{supplierPkXFM}
+		</if>
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) og ON o.orderNumber = og.orderNumber
+		WHERE
+		o.orderStatus > 2
+		<if test="lastStartTime != null and lastStartTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{lastStartTime}
+		</if>
+		<if test="lastEndTime != null and lastEndTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{lastEndTime}
+		</if>
+		GROUP BY o.orderNumber
+		)lastData
+UNION ALL
+		<!-- 本月全部供应商数据 -->
+		SELECT
+		count(counts) counts,
+		SUM(weight) weight,
+		SUM(amount) amount
+		FROM
+		(
+		SELECT
+		count(DISTINCT o.orderNumber) AS counts,
+		TRUNCATE(SUM(
+		IF( o.block = 'sx',
+		(CASE og.afterWeight
+		WHEN 0 THEN (og.weight/1000)
+		ELSE (og.afterWeight/1000)
+		END),
+		(CASE og.afterWeight
+		WHEN 0 THEN og.weight
+		ELSE og.afterWeight
+		END)
+		)),4) AS weight,
+		ROUND(o.actualAmount,2) AS amount
+		FROM
+		b2b_order o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) og ON o.orderNumber = og.orderNumber
+		WHERE
+		o.orderStatus > 2
+		<if test="startTime != null and startTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime !=''">
+			AND str_to_date(o.receivablesTime,'%Y-%m-%d') &lt;= #{endTime}
+		</if>
+		GROUP BY o.orderNumber
+		) allData
+	</select>
+
+	<select id="searchStoreCounts" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+		COUNT(DISTINCT num) counts
+		FROM (
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		UNION ALL
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		) store
+	UNION ALL
+		SELECT
+		count(DISTINCT num) counts
+		FROM (
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 1
+		UNION ALL
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 1
+		) eStore
+  UNION ALL
+		SELECT
+		count(DISTINCT num) counts
+		FROM
+		(
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		<if test="khPurchaser != null and khPurchaser !='' ">
+			AND   purchaserPk = #{khPurchaser}
+		</if>
+		UNION ALL
+		SELECT
+		DISTINCT storePk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND storePk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		<if test="khPurchaser != null and khPurchaser !='' ">
+			AND   purchaserPk = #{khPurchaser}
+		</if>
+		) pStore
+	</select>
+	<select id="searchPurchaserCounts" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+		count(DISTINCT num) counts
+		FROM
+		(
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		UNION ALL
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		)pCounts
+  UNION ALL
+		SELECT
+		count(DISTINCT num) counts
+		FROM
+		(
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 1
+		UNION ALL
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 1
+		) eOneCounts
+  UNION ALL
+		SELECT
+		count(DISTINCT num) counts
+		FROM
+		(
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 2
+		UNION ALL
+		SELECT
+		DISTINCT purchaserPk num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		AND purchaserPk is not NULL
+		<if test="time != null and time !='' ">
+			AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') = #{time}
+		</if>
+		AND economicsGoodsType = 2
+		) eTwoCounts
+	</select>
+<select id="searchOrderCounts" parameterType="java.util.Map" resultType="java.lang.Integer">
+	SELECT
+		SUM(num) counts
+		FROM
+		(
+		SELECT
+		COUNT(orderNumber) num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		UNION ALL
+		SELECT
+		COUNT(contractNo) num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+	) orderCounts
+  UNION ALL
+	SELECT
+		SUM(num) counts
+	FROM
+		(SELECT
+		COUNT(orderNumber) num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+		UNION ALL
+		SELECT
+		COUNT(contractNo) num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+	  ) eOrderCounts
+UNION ALL
+	SELECT
+		SUM(num) counts
+	FROM
+		(
+		SELECT
+		COUNT(orderNumber) num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+		UNION ALL
+		SELECT
+		COUNT(contractNo) num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+	) eOrderCounts
+UNION ALL
+	SELECT
+		SUM(num) counts
+	FROM
+		(
+		SELECT
+		COUNT(orderNumber) num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND purchaseType = 1
+		UNION ALL
+		SELECT
+		COUNT(contractNo) num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND purchaserType = 1
+	) typeCountsOne
+UNION ALL
+	SELECT
+	 SUM(num) counts
+	FROM
+		(
+		SELECT
+		COUNT(orderNumber) num
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND source = 2
+		UNION ALL
+		SELECT
+		COUNT(contractNo) num
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND source = 2
+	) typeCountsTwo
+</select>
+	<select id="searchAmountCounts" parameterType="java.util.Map" resultType="java.lang.Double">
+		SELECT
+		SUM(amount) amounts
+		FROM
+		(
+		SELECT
+		SUM(actualAmount) amount
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		UNION ALL
+		SELECT
+		SUM(totalAmount) amount
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		)allAmounts
+UNION ALL
+		SELECT
+		SUM(amount) amounts
+		FROM
+		(
+		SELECT
+		SUM(actualAmount) amount
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+		UNION ALL
+		SELECT
+		SUM(totalAmount) amount
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+		) allAmounts
+UNION ALL
+		SELECT
+		SUM(amount) amounts
+		FROM
+		(
+		SELECT
+		SUM(actualAmount) amount
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+		UNION ALL
+		SELECT
+		SUM(totalAmount) amount
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+		) allAmounts
+	</select>
+	<select id="searchWeightCounts" parameterType="java.util.Map" resultType="java.lang.Double">
+		SELECT
+		TRUNCATE(SUM(mount),4) mounts
+		FROM
+		(
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(CASE g.afterWeight
+		WHEN 0 THEN (g.weight/1000)
+		ELSE (g.afterWeight/1000)
+		END),
+		(CASE g.afterWeight
+		WHEN 0 THEN g.weight
+		ELSE g.afterWeight
+		END))
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		orderNumber
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) g ON o.orderNumber = g.orderNumber
+		GROUP BY
+		o.orderNumber
+		) weightOrder
+
+		UNION ALL
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(g.weight/1000),g.weight)
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		contractNo
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		) o
+		LEFT JOIN (select * from b2b_contract_goods where contractStatus != -1) g ON o.contractNo = g.contractNo
+		GROUP BY
+		o.contractNo
+		) weightContract
+		) weightCounts
+
+UNION ALL
+
+		SELECT
+		TRUNCATE(SUM(mount),4) mounts
+		FROM
+		(
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(CASE g.afterWeight
+		WHEN 0 THEN (g.weight/1000)
+		ELSE (g.afterWeight/1000)
+		END),
+		(CASE g.afterWeight
+		WHEN 0 THEN g.weight
+		ELSE g.afterWeight
+		END))
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		orderNumber
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) g ON o.orderNumber = g.orderNumber
+		GROUP BY
+		o.orderNumber
+		) weightOrder
+
+		UNION ALL
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(g.weight/1000),g.weight)
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		contractNo
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 1
+		) o
+		LEFT JOIN (select * from b2b_contract_goods where contractStatus != -1) g ON o.contractNo = g.contractNo
+		GROUP BY
+		o.contractNo
+		) weightContract
+
+		) pWeightCounts
+
+UNION ALL
+		SELECT
+		TRUNCATE(SUM(mount),4) mounts
+		FROM
+		(
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(CASE g.afterWeight
+		WHEN 0 THEN (g.weight/1000)
+		ELSE (g.afterWeight/1000)
+		END),
+		(CASE g.afterWeight
+		WHEN 0 THEN g.weight
+		ELSE g.afterWeight
+		END))
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		orderNumber
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus != -1) g ON o.orderNumber = g.orderNumber
+		GROUP BY
+		o.orderNumber
+		) weightOrder
+
+		UNION ALL
+		SELECT
+		SUM(afterWeight) mount
+		FROM
+		(
+		SELECT
+		SUM(
+		IF(block = 'sx',(g.weight/1000),g.weight)
+		) AS afterWeight
+		FROM
+		(
+		SELECT
+		contractNo
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<include refid="searchReportFormWhere" />
+		AND economicsGoodsType = 2
+		) o
+		LEFT JOIN (select * from b2b_contract_goods where contractStatus !=-1) g ON o.contractNo = g.contractNo
+		GROUP BY
+		o.contractNo
+		) weightContract
+
+		) pWeightCounts
+	</select>
+	<select id="searchStoreTransDataCounts" parameterType="java.util.Map" resultType="cn.cf.entity.TransactionDataStoreEntity">
+		SELECT
+		storePk,
+		storeName,
+		SUM(amount) amount,
+		SUM(count) count,
+		GROUP_CONCAT(orderNumbers) orderNumbers
+		FROM
+		(
+		SELECT
+		storePk,
+		storeName,
+		SUM(actualAmount) amount,
+		count(orderNumber) count,
+		GROUP_CONCAT(orderNumber) orderNumbers
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<if test="dayTime != null and dayTime != ''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{dayTime}
+		</if>
+		<if test="goodsType != null and goodsType != ''">
+			AND economicsGoodsType  = #{goodsType}
+		</if>
+		GROUP BY
+		storePk
+		UNION ALL
+		SELECT
+		storePk,
+		storeName,
+		SUM(totalAmount) amount,
+		count(contractNo) count,
+		GROUP_CONCAT(contractNo) orderNumbers
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<if test="dayTime != null and dayTime != ''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{dayTime}
+		</if>
+		<if test="goodsType != null and goodsType != ''">
+			AND economicsGoodsType  = #{goodsType}
+		</if>
+		GROUP BY
+		storePk
+		) S
+		GROUP BY storePk
+	</select>
+
+	<select id="searchStoreContractTransDataCounts" parameterType="java.util.Map" resultType="cn.cf.entity.TransactionDataStoreEntity">
+		SELECT
+		storePk,
+		storeName,
+		SUM(amount) amount,
+		SUM(count) count,
+		GROUP_CONCAT(orderNumbers) orderNumbers
+		FROM
+		(
+		SELECT
+		storePk,
+		storeName,
+		SUM(actualAmount) amount,
+		count(orderNumber) count,
+		GROUP_CONCAT(orderNumber) orderNumbers
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND orderClassify != 2
+		<if test="dayTime != null and dayTime != ''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{dayTime}
+		</if>
+		<if test="goodsType != null and goodsType != ''">
+			AND economicsGoodsType  = #{goodsType}
+		</if>
+		GROUP BY
+		storePk
+		UNION ALL
+		SELECT
+		storePk,
+		storeName,
+		SUM(totalAmount) amount,
+		count(contractNo) count,
+		GROUP_CONCAT(contractNo) orderNumbers
+		FROM
+		b2b_contract
+		WHERE
+		contractStatus > 2
+		<if test="dayTime != null and dayTime != ''">
+			AND str_to_date(receivablesTime,'%Y-%m-%d') = #{dayTime}
+		</if>
+		<if test="goodsType != null and goodsType != ''">
+			AND economicsGoodsType  = #{goodsType}
+		</if>
+		GROUP BY
+		storePk
+		) S
+		GROUP BY storePk
+	</select>
+
+	<select id="getStoreTransWeightCounts" parameterType="java.util.Map" resultType="java.lang.Double">
+		select TRUNCATE(
+		SUM(
+		IF(block = 'sx',(CASE afterWeight
+		WHEN 0 THEN (weight/1000)
+		ELSE (afterWeight/1000)
+		END),
+		(CASE afterWeight
+		WHEN 0 THEN weight
+		ELSE afterWeight
+		END))),4) AS weight
+		from b2b_order_goods where orderStatus !=-1 and orderNumber IN
+		<foreach collection="orderNumberList" index="index" item="item"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getStoreContractTransWeightCounts" parameterType="java.util.Map" resultType="java.lang.Double">
+		select TRUNCATE(
+		SUM(IF(block = 'sx',(weight/1000),weight)),4) AS weight
+		from b2b_contract_goods where contractStatus != -1 and contractNo IN
+		<foreach collection="orderNumberList" index="index" item="item"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	<select id="searchIndustryProductSpecCounts"  parameterType="java.lang.String" resultType="cn.cf.entity.IndustryProductSpecTopRF">
+
+		SELECT
+		count(orderNumber) counts,
+		SUM(ROUND(weighted*(adminFee+loadFee+packageFee+presentPrice)+presentTotalFreight,2)) allAmount,
+		TRUNCATE(SUM(weighted),4) afterWeight,
+		SUBSTRING_INDEX(REPLACE (goodsInfo, CONCAT(SUBSTRING_INDEX(goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 )  AS specName,
+		SUBSTRING_INDEX(REPLACE (goodsInfo, CONCAT(SUBSTRING_INDEX(goodsInfo, '"productName":', 1),'"productName":"'),''), '"', 1 )  AS productName
+		FROM
+		(
+		SELECT
+		o.orderNumber,
+		o.actualAmount,
+		g.goodsInfo,
+		IF(json_extract (goodsInfo, '$.adminFee')= null|| json_extract (goodsInfo, '$.adminFee') ='',0,json_extract (goodsInfo, '$.adminFee')) adminFee,
+		IF(json_extract (goodsInfo, '$.loadFee')= null|| json_extract (goodsInfo, '$.loadFee') ='',0,json_extract (goodsInfo, '$.loadFee')) loadFee,
+		IF(json_extract (goodsInfo, '$.packageFee')= null|| json_extract (goodsInfo, '$.packageFee') ='',0,json_extract (goodsInfo, '$.packageFee')) packageFee,
+		SUBSTRING_INDEX(REPLACE (goodsInfo, CONCAT(SUBSTRING_INDEX(goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 )  AS specName,
+		SUBSTRING_INDEX(REPLACE (goodsInfo, CONCAT(SUBSTRING_INDEX(goodsInfo, '"productName":', 1),'"productName":"'),''), '"', 1 )  AS productName,
+		g.presentPrice,
+		(CASE WHEN g.afterWeight = 0 THEN	g.weight ELSE g.afterWeight	END) weighted,
+		g.presentTotalFreight
+		FROM
+		(
+		SELECT
+		orderNumber,
+		storeName,
+		block,
+		actualAmount
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND block = 'cf'
+		AND str_to_date(receivablesTime, '%Y-%m-%d') >= #{startTime}
+		AND str_to_date(receivablesTime, '%Y-%m-%d') &lt;= #{endTime}
+		) o
+		LEFT JOIN (
+		SELECT
+			*
+		FROM
+		b2b_order_goods
+		WHERE
+		orderStatus !=- 1
+		) g ON g.orderNumber = o.orderNumber
+
+		) s
+
+		GROUP BY productName,specName
+		ORDER BY afterWeight DESC
+		LIMIT 0,10
+</select>
+
+	<select id="searchIndustryStoreCounts"  parameterType="java.lang.String" resultType="cn.cf.entity.IndustryStoreTopRF">
+
+		SELECT
+		SUM(actualAmount) allAmount,
+		TRUNCATE(SUM(afterWeight),4) afterWeight,
+		storeName,
+		count(orderNumber) counts
+		FROM
+		(
+		SELECT
+		o.orderNumber,
+		o.storeName,
+		SUM((CASE
+		WHEN o.block = "cf" THEN CASE WHEN g.afterWeight = 0 THEN	g.weight ELSE g.afterWeight	END
+		ELSE  CASE	WHEN g.afterWeight = 0 THEN	 g.weight / 1000	ELSE	g.afterWeight / 1000	END
+		END
+		)) afterWeight,
+		actualAmount
+		FROM
+		(
+		SELECT
+		orderNumber,
+		storeName,
+		block,
+		actualAmount
+		FROM
+		b2b_order
+		WHERE
+		orderStatus > 2
+		AND str_to_date(receivablesTime, '%Y-%m-%d') >= #{startTime}
+				AND str_to_date(receivablesTime, '%Y-%m-%d') &lt;= #{endTime}
+		) o
+		LEFT JOIN (select * from b2b_order_goods where orderStatus !=-1) g ON g.orderNumber = o.orderNumber
+		GROUP BY o.orderNumber
+		) s
+		GROUP BY s.storeName
+		ORDER BY afterWeight DESC
+		LIMIT 0,10
+
+</select>
+
+<select id="searchIndustryPurchaserCounts"  parameterType="java.lang.String" resultType="cn.cf.entity.IndustryPurchaserTopRF">
+
+	SELECT
+	SUM(actualAmount) allAmount,
+	TRUNCATE(SUM(afterWeight),4) afterWeight,
+	purchaserPk,
+	count(orderNumber) counts
+	FROM
+	(
+	SELECT
+	o.orderNumber,
+	o.purchaserPk,
+	SUM((CASE
+	WHEN o.block = "cf" THEN CASE WHEN g.afterWeight = 0 THEN	g.weight ELSE g.afterWeight	END
+	ELSE  CASE	WHEN g.afterWeight = 0 THEN	 g.weight / 1000	ELSE	g.afterWeight / 1000	END
+	END
+	)) afterWeight,
+	actualAmount
+	FROM
+	(
+	SELECT
+	orderNumber,
+	purchaserPk,
+	block,
+	actualAmount
+	FROM
+	b2b_order
+	WHERE
+	orderStatus > 2
+	AND str_to_date(receivablesTime, '%Y-%m-%d') >= #{startTime}
+				AND str_to_date(receivablesTime, '%Y-%m-%d') &lt;= #{endTime}
+	) o
+	LEFT JOIN (select * from b2b_order_goods where orderStatus !=-1) g ON g.orderNumber = o.orderNumber
+	GROUP BY o.orderNumber
+	) s
+	GROUP BY s.purchaserPk
+	ORDER BY afterWeight DESC
+	LIMIT 0,10
+
+</select>
+
+<select id="searchReceivablesTimeList"  resultType="java.lang.String">
+	SELECT DISTINCT
+		receivablesTime
+	FROM
+	(
+		SELECT
+		*
+		FROM
+		(
+		SELECT DISTINCT
+		DATE_FORMAT(receivablesTime, '%Y-%m-%d') receivablesTime
+		FROM
+		b2b_order
+		WHERE
+		receivablesTime IS NOT NULL
+		AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') &lt; DATE_FORMAT(
+		date_sub(curdate(), INTERVAL 1 DAY),
+		'%Y-%m-%d'
+		)
+		ORDER BY
+		receivablesTime DESC
+	) orders
+	UNION ALL
+	SELECT
+		*
+	FROM
+	(
+		SELECT DISTINCT
+		DATE_FORMAT(receivablesTime, '%Y-%m-%d') receivablesTime
+		FROM
+		b2b_contract
+		WHERE
+		receivablesTime IS NOT NULL
+		AND DATE_FORMAT(receivablesTime, '%Y-%m-%d') &lt; DATE_FORMAT(
+		date_sub(curdate(), INTERVAL 1 DAY),
+		'%Y-%m-%d'
+		)
+		ORDER BY
+		receivablesTime DESC
+	  ) contract
+	) curTime
+	ORDER BY
+	receivablesTime DESC
+	</select>
+
+	<select id="searchOneDayBussStoreData" parameterType="java.lang.String" resultType="cn.cf.entity.BussStoreDataReport">
+		SELECT a.storePk, c.`name` as storeName ,IFNULL(b.number,0)as number ,
+		ROUND(IFNULL(b.amount,0),2)as amount ,IFNULL(b.weight,0)as weight,
+		IFNULL(a.accumNumber,0)as accumNumber  , 
+		ROUND(IFNULL(a.accumAmount,0),2)as accumAmount ,IFNULL( a.accumWeight,0)as accumWeight,  
+		str_to_date( '${date}','%Y-%m-%d') as date
+		 FROM (
+			SELECT
+				o.storePk,
+				COUNT(o.orderNumber) AS accumNumber,
+				SUM(o.actualAmount) AS accumAmount,
+				SUM(og.accumWeight) as accumWeight
+			FROM
+				b2b_order o
+			INNER JOIN 
+			( SELECT  g.orderNumber ,
+					SUM(CASE 
+							WHEN o.block = "cf" 
+							THEN CASE WHEN g.afterWeight = 0 THEN	g.weight ELSE g.afterWeight	END 
+							ELSE CASE	WHEN g.afterWeight = 0 THEN		g.weight / 1000	ELSE	g.afterWeight / 1000	END 
+							END	
+						) AS accumWeight  
+				FROM b2b_order_goods g 
+				INNER JOIN b2b_order o  ON o.orderNumber = g.orderNumber 
+				WHERE str_to_date(o.receivablesTime,'%Y-%m-%d')  &lt;= str_to_date(#{date},'%Y-%m-%d') and o.orderStatus>2   AND g.orderStatus!=-1
+			 GROUP BY g.orderNumber) og 
+			ON og.orderNumber = o.orderNumber
+			GROUP BY o.storePk 
+	 )a
+	LEFT JOIN(
+		SELECT
+				o.storePk,
+				COUNT(o.orderNumber) AS number,
+				SUM(o.actualAmount) AS amount,
+			SUM(og.weight)  as weight
+			FROM
+				b2b_order o
+			INNER JOIN 
+			( SELECT  g.orderNumber ,
+				SUM(CASE 
+					WHEN o.block = "cf" THEN CASE WHEN g.afterWeight = 0 THEN	g.weight ELSE g.afterWeight	END 
+					ELSE  CASE	WHEN g.afterWeight = 0 THEN	 g.weight / 1000	ELSE	g.afterWeight / 1000	END 
+					END	
+				) AS weight
+				FROM b2b_order_goods g 
+				INNER JOIN b2b_order o  ON o.orderNumber = g.orderNumber 
+				WHERE str_to_date(o.receivablesTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')	and o.orderStatus>2  AND g.orderStatus!=-1
+			GROUP BY g.orderNumber) og 
+			ON og.orderNumber = o.orderNumber
+			GROUP BY o.storePk )b ON b.storePk = a.storePk
+		LEFT JOIN b2b_store  c ON  c.pk = a.storePk
+	</select>
+
+	<select id="searchOriginalDate"  resultType="java.lang.String">
+	<![CDATA[	SELECT str_to_date(receivablesTime ,'%Y-%m-%d') as receivablesTime 
+		FROM b2b_order  
+		WHERE receivablesTime is not null and  receivablesTime<>''
+		ORDER BY receivablesTime  LIMIT 0,1 ]]>
+	</select>
+
+	
+	
+	<select id = "getPurByOrder" parameterType="java.lang.String" resultType="cn.cf.dto.B2bCompanyDto" >
+			 SELECT a.`name` ,a.purchaserPk AS pk  FROM(SELECT
+			o.purchaserPk ,
+			c.`name`
+		FROM
+			b2b_order o
+		LEFT JOIN b2b_company c ON o.purchaserPk = c.pk
+		WHERE
+			str_to_date(
+				o.receivablesTime,
+				'%Y-%m-%d'
+			) = str_to_date(#{date}, '%Y-%m-%d')
+		AND o.orderStatus > 2
+		AND o.economicsGoodsType >0
+		AND o.orderClassify !=2
+		GROUP BY
+			o.purchaserPk 
+		UNION
+		SELECT  c.purchaserPk ,cy.name FROM b2b_contract c
+		LEFT JOIN b2b_company cy ON c.purchaserPk = cy.pk
+		WHERE
+			str_to_date(
+				c.receivablesTime,
+				'%Y-%m-%d'
+			) = str_to_date(#{date}, '%Y-%m-%d')
+		AND c.contractStatus > 2
+		AND c.economicsGoodsType >0
+		GROUP BY
+			c.purchaserPk ) a
+		GROUP BY a.purchaserPk
+	</select>
+</mapper>
+

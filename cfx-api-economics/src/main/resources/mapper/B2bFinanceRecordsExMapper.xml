@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bFinanceRecordsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,supplierPk,supplierName,status,transactionAccount,receivablesAccount,transactionAmount,transactionType,insertTime,transactionAccountName,receivablesAccountName,description,poundage,currentIp,orderNumber,serialNumber,iouNumber,loanEndTime,reason,employeePk,employeeName,employeeNumber
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND f.pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND f.companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND f.supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND f.supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND f.status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(transactionAccount)">
+				AND f.transactionAccount = #{transactionAccount}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccount)">
+				AND f.receivablesAccount = #{receivablesAccount}			</if>
+			<if test="@Ognl@isNotEmpty(transactionAmount)">
+				AND f.transactionAmount = #{transactionAmount}			</if>
+			<if test="@Ognl@isNotEmpty(transactionType)">
+				AND f.transactionType = #{transactionType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				and TO_DAYS( f.insertTime ) >=TO_DAYS(#{insertTimeBegin})
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				and TO_DAYS( f.insertTime ) &lt;=TO_DAYS(#{insertTimeEnd})
+			</if>	
+			<if test="@Ognl@isNotEmpty(transactionAccountName)">
+				AND f.transactionAccountName = #{transactionAccountName}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccountName)">
+				AND f.receivablesAccountName = #{receivablesAccountName}			</if>
+			<if test="@Ognl@isNotEmpty(description)">
+				AND f.description = #{description}			</if>
+			<if test="@Ognl@isNotEmpty(poundage)">
+				AND f.poundage = #{poundage}			</if>
+			<if test="@Ognl@isNotEmpty(currentIp)">
+				AND f.currentIp = #{currentIp}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND f.orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND f.serialNumber = #{serialNumber}			</if>
+			<if test="@Ognl@isNotEmpty(iouNumber)">
+				AND f.iouNumber = #{iouNumber}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeBegin)">
+				AND f.loanEndTime >= #{loanEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeEnd)">
+				AND f.loanEndTime &lt;= #{loanEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(reason)">
+				AND f.reason = #{reason}			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND f.employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND f.employeeName = #{employeeName}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND f.employeeNumber = #{employeeNumber}			</if>
+			<if test="companyType == 1">
+				and f.transactionType  !=  5
+			</if>
+			<if test="companyType == 2">
+				and f.transactionType  = 5
+			</if>
+			<if test="companyPk != null and companyPk !=''">
+				and (c.pk = #{companyPk} or c.parentPk = #{companyPk})
+			</if>
+		</where>
+	</sql>
+	<select id="searchFinanceRecordsList" resultType="cn.cf.dto.B2bFinanceRecordsDtoEx">
+		<![CDATA[ SELECT
+				f.transactionType,
+					CASE f.transactionType
+				WHEN 1 THEN
+					'支付'
+				WHEN 2 THEN
+					'充值'
+				WHEN 3 THEN
+					'提现'
+				WHEN 4 THEN
+					'还款'
+				WHEN 5 THEN
+					'收款'
+				WHEN 6 THEN
+					'贴现'
+				END AS transactionName,
+				 f.insertTime,
+				f.description,
+				 REPLACE (f.description, '<br>', ';') AS descriptionEx,
+				 f.transactionAmount,
+					f.status,
+				 CASE f.status
+				WHEN 1 THEN
+					'交易成功'
+				WHEN 2 THEN
+					'交易失败'
+				WHEN 3 THEN
+					'交易中'
+				END AS statusName,
+				 ifnull(f.employeeName, '') AS employeeName,
+				 ifnull(f.employeeNumber, '') AS employeeNumber,
+				 orderNumber
+				FROM
+					b2b_finance_records f left join b2b_company c on f.companyPk = c.pk
+		]]>
+		<include refid="searchGridWhere" />
+		order by f.insertTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="searchFinanceRecordsCounts" resultType ="int">
+		select count(1) FROM
+			b2b_finance_records f left join b2b_company c on f.companyPk = c.pk
+			<include refid="searchGridWhere" />
+	</select>
+	<update id="updateStatus">
+		update b2b_finance_records
+		set status = #{status}
+		where orderNumber = #{orderNumber}
+	</update>
+	<select id="searchUnsuccessRecords" resultType="cn.cf.dto.B2bFinanceRecordsDtoEx">
+		select 
+			orderNumber 
+		FROM b2b_finance_records
+		where status =3 and transactionType = 1
+		group by orderNumber			
+	</select>
+</mapper>
+

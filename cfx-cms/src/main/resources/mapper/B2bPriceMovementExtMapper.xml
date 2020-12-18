@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bPriceMovementExtDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,goodsPk,price,date,sort,updateTime,isHome,isDelete,block,insertTime
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+
+			<if test="productName != null and productName !=''">
+			 and g.goodsInfo LIKE '%${productName}%'
+			</if>
+			<if test="varietiesName != null and varietiesName !=''">
+				and g.goodsInfo LIKE '%${varietiesName}%'
+			</if>
+			<if test="specName != null and specName !=''">
+				and g.goodsInfo LIKE '%${specName}%'
+			</if>
+			<if test="seriesName != null and seriesName !=''">
+				and g.goodsInfo LIKE '%${seriesName}%'
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and g.goodsInfo LIKE '%${specifications}%'
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and g.goodsInfo LIKE '%${batchNumber}%'
+			</if>
+			<if test="technologyTypeName != null and technologyTypeName !=''">
+				and g.goodsInfo LIKE '%${technologyTypeName}%'
+			</if> 
+		<if test="brandName != null and brandName !=''">
+		 and g.brandName = #{brandName}
+		</if>
+		<if test="isDelete != null and isDelete !=''">
+		 and mo.isDelete = #{isDelete}
+		</if>
+		<if test="isHome != null and isHome !=''">
+		 and mo.isHome = #{isHome}
+		</if>
+		<if test="block != null and block !=''">
+		 and mo.block = #{block}
+		</if>
+		<if test="@Ognl@isNotEmpty(technologyPk)">
+				AND SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"technologyPk":', 1),'"technologyPk":"'),''), '"', 1 ) = #{technologyPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(rawMaterialPk)">
+				AND SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"rawMaterialPk":', 1),'"rawMaterialPk":"'),''), '"', 1 ) = #{rawMaterialPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(rawMaterialParentPk)">
+				AND SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"rawMaterialParentPk":', 1),'"rawMaterialParentPk":"'),''), '"', 1 ) = #{rawMaterialParentPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(goodsInfo)">
+			<choose>
+	            <when test="block == 'cf'">
+	               AND (
+	                     SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"productName":', 1),'"productName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"varietiesName":', 1),'"varietiesName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"specifications":', 1),'"specifications":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"batchNumber":', 1),'"batchNumber":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"gradeName":', 1),'"gradeName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    g.brandName like '%${goodsInfo}%'
+	               )
+	            </when>
+	            <otherwise>
+	                   AND (
+	                     SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"technologyName":', 1),'"technologyName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"rawMaterialParentName":', 1),'"rawMaterialParentName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"rawMaterialName":', 1),'"rawMaterialName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (g.goodsInfo,	CONCAT(SUBSTRING_INDEX(g.goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	              or    g.brandName like '%${goodsInfo}%'
+	               )
+	            </otherwise>
+	        </choose>
+		</if>
+		<if test="platformUpdateTimeStart != null and platformUpdateTimeStart !=''">
+				AND str_to_date(g.updateTime,'%Y-%m-%d') >= #{platformUpdateTimeStart}			</if>
+		<if test="platformUpdateTimeEnd != null and platformUpdateTimeEnd !=''">
+				AND str_to_date(g.updateTime,'%Y-%m-%d') &lt;= #{platformUpdateTimeEnd}			</if>
+		<if test="updateTimeStart != null and updateTimeStart !=''">
+				AND str_to_date(mo.updateTime,'%Y-%m-%d') >= #{updateTimeStart}			</if>
+		<if test="updateTimeEnd != null and updateTimeEnd !=''">
+				AND str_to_date(mo.updateTime,'%Y-%m-%d') &lt;= #{updateTimeEnd}			</if>
+		<if test="dateStart != null and dateStart !=''">
+				AND str_to_date(mo.date,'%Y-%m-%d') >= #{dateStart}			</if>
+		<if test="dateEnd != null and dateEnd !=''">
+				AND str_to_date(mo.date,'%Y-%m-%d') &lt;= #{dateEnd}			</if>
+		<if test="insertTime != null and insertTime !=''">
+				AND mo.insertTime &lt;= #{insertTime}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCountExt" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+				count(1)
+			FROM
+				b2b_price_movement mo
+			LEFT JOIN b2b_goods g ON mo.goodsPk = g.pk
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bPriceMovementExtDto"
+		parameterType="java.util.Map">
+		SELECT
+			mo.pk,mo.price,str_to_date(mo.date,'%Y-%m-%d') AS date,mo.updateTime,mo.sort,mo.isHome,
+			g.brandName,g.tonPrice,g.updateTime as platformUpdateTime,g.pk as goodsPk,g.goodsInfo as goodsInfo
+			FROM
+				b2b_price_movement mo
+			LEFT JOIN b2b_goods g ON mo.goodsPk = g.pk
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<update id="updatePriceMovement" parameterType="cn.cf.dto.B2bPriceMovementExtDto">
+		UPDATE b2b_price_movement
+		<set>
+			<if test="isHome != null and isHome != ''">
+				isHome = #{isHome},
+			</if>
+			<if test="price != null">
+				price = #{price},
+			</if>
+			<if test="yesterdayPrice != null">
+				yesterdayPrice = #{yesterdayPrice},
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="sort != null">
+				sort = #{sort},
+			</if>
+			<if test="dateStr != null and dateStr != ''">
+				date = #{dateStr},
+			</if>
+			<if test="date != null and date != ''">
+				date = #{date},
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				updateTime = #{updateTime},
+			</if>
+			<if test="block != null and block != ''">
+				block = #{block}
+			</if>
+		</set>
+		where pk = #{pk}
+	</update>	
+	
+</mapper>
+

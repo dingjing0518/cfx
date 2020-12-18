@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityPresentExDao">
+
+
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+
+			<if test="@Ognl@isNotEmpty(pks)">
+				and pk
+
+				in
+				<foreach collection="pks" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(rewardPk)">
+				AND rewardPk = #{rewardPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				
+				AND companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+			
+				AND contactsTel LIKE '%${contactsTel}%'			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND periodType = #{periodType}			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND fibreShellNumber = #{fibreShellNumber}			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND empiricalValue = #{empiricalValue}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+				
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(periodTime)">
+				AND periodTime = #{periodTime}			</if>
+			<if test="@Ognl@isNotEmpty(conditionTypeName)">
+				AND conditionTypeName = #{conditionTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCountExt" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_dimensionality_present
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="searchGridCountExtWard" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_dimensionality_present pr
+		 LEFT JOIN b2b_dimensionality_extreward ex ON pr.rewardPk = ex.pk
+		 where 1=1
+		<if test="@Ognl@isNotEmpty(pk)">
+				AND pr.pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(rewardPk)">
+				AND pr.rewardPk = #{rewardPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND pr.companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				
+				AND pr.companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+			
+				AND pr.contactsTel LIKE '%${contactsTel}%'			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND pr.dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND pr.dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND pr.dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND pr.dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND pr.periodType = #{periodType}			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND pr.fibreShellNumber = #{fibreShellNumber}			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND pr.empiricalValue = #{empiricalValue}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND pr.isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND pr.type = #{type}			</if>
+				
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND pr.isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND pr.insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND pr.insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(pr.updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(pr.updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(periodTime)">
+				AND pr.periodTime = #{periodTime}			</if>
+			<if test="@Ognl@isNotEmpty(conditionTypeName)">
+				AND pr.conditionTypeName = #{conditionTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND pr.orderNumber = #{orderNumber}			</if>
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bDimensionalityPresentExDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,rewardPk,companyPk,dimenCategory,dimenName,
+		dimenType,dimenTypeName,periodType,fibreShellNumber,empiricalValue,isDelete,
+		isVisable,insertTime,updateTime,fibreShellRatio,empiricalRatio,fbGradeRatio,
+		emGradeRatio,memberPk,memberName,total,type,orderNumber,fbShellNumberWeighting,empiricalValueWeighting,
+		<choose>
+			<when test="companyNameCol == 'OPER_MEMBER_DIMEMS_COL_COMPANYNAME'">
+				INSERT (companyName,3,5,'*****') AS companyName,
+			</when>
+			<otherwise>
+				companyName,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="contactTelCol == 'OPER_MEMBER_DIMEMS_COL_MOBILE'">
+				INSERT (contactsTel,4,4,'****') AS contactsTel,
+			</when>
+			<otherwise>
+				contactsTel,
+			</otherwise>
+		</choose>
+		(
+		CASE periodType
+		WHEN 1 THEN
+		'一次赠送'
+		WHEN 2 THEN
+		'每天'
+		WHEN 3 THEN
+		'每周'
+		END
+		) AS periodTypeName,
+		(
+		CASE isVisable
+		WHEN 1 THEN
+		'启用'
+		WHEN 2 THEN
+		'禁用'
+		END
+		) AS
+		isVisableName
+		
+		FROM b2b_dimensionality_present 
+		<include refid="searchGridWhere" />
+
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+<select id="searchGridExtWard" resultType="cn.cf.dto.B2bDimensionalityPresentExDto"
+		parameterType="java.util.Map">
+		SELECT
+	pr.pk,pr.rewardPk,pr.companyPk,pr.dimenCategory,pr.dimenName,
+	pr.dimenType,pr.dimenTypeName,pr.periodType,pr.fibreShellNumber,pr.empiricalValue,pr.isDelete,
+	pr.isVisable,pr.insertTime,pr.updateTime,pr.fibreShellRatio,pr.empiricalRatio,pr.fbGradeRatio,
+	pr.emGradeRatio,pr.memberPk,pr.memberName,pr.total,pr.type,pr.orderNumber,pr.fbShellNumberWeighting,pr.empiricalValueWeighting,
+	<choose>
+		<when test="companyNameCol == 'OPER_MEMBER_DIMEMSEXT_COL_COMPANYNAME'">
+			INSERT (pr.companyName,3,5,'*****') AS companyName,
+		</when>
+		<otherwise>
+			pr.companyName,
+		</otherwise>
+	</choose>
+
+	<choose>
+		<when test="contactTelCol == 'OPER_MEMBER_DIMEMSEXT_COL_MOBILE'">
+			INSERT (pr.contactsTel,4,4,'****') AS contactsTel,
+		</when>
+		<otherwise>
+			pr.contactsTel,
+		</otherwise>
+	</choose>
+	(case ex.conditionType
+			when  1 THEN '累计成交采购商家数'
+			when  2 THEN '累计成交供应商家数'
+			WHEN  3 THEN '累计发布求购数量'
+			WHEN  4  THEN '累计求购报价数量'
+			when  5  THEN '累计添加人员数'
+			END) AS conditionTypeName,
+					(
+				CASE pr.periodType
+				WHEN 1 THEN
+					'一次赠送'
+				WHEN 2 THEN
+					'每天'
+				WHEN 3 THEN
+					'每周'
+				END
+			) AS periodTypeName,
+		 (
+				CASE pr.isVisable
+				WHEN 1 THEN
+					'启用'
+				WHEN 2 THEN
+					'禁用'
+				END
+			) AS 
+		isVisableName,
+			ex.timesDetail
+			FROM
+				b2b_dimensionality_present pr
+			LEFT JOIN b2b_dimensionality_extreward ex ON pr.rewardPk = ex.pk
+			where 1=1
+					<if test="@Ognl@isNotEmpty(pk)">
+				AND pr.pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(rewardPk)">
+				AND pr.rewardPk = #{rewardPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND pr.companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				
+				AND pr.companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+			
+				AND pr.contactsTel LIKE '%${contactsTel}%'			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND pr.dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND pr.dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND pr.dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND pr.dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND pr.periodType = #{periodType}			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND pr.fibreShellNumber = #{fibreShellNumber}			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND pr.empiricalValue = #{empiricalValue}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND pr.isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND pr.type = #{type}			</if>
+				
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND pr.isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND pr.insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND pr.insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(pr.updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(pr.updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(periodTime)">
+				AND pr.periodTime = #{periodTime}			</if>
+			<if test="@Ognl@isNotEmpty(conditionTypeName)">
+				AND pr.conditionTypeName = #{conditionTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND pr.orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(pks)">
+		and 	pr.pk in
+				<foreach collection="pks" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		</if>	
+				
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+
+
+
+
+	<select id="exportDimensionalityPresentList" resultType="cn.cf.dto.B2bDimensionalityPresentExDto"
+		parameterType="java.util.Map">
+		
+			SELECT
+					companyName,
+					contactsTel,
+					a.dimenName,
+					a.dimenTypeName,
+					case a.periodType
+			WHEN 1 THEN
+				 '一次赠送'
+			WHEN 2 THEN
+				 '每天'
+			WHEN 3 THEN
+				 '每月'
+			END AS periodTypeName,
+				  a.fibreShellNumber,
+				  a.empiricalValue,
+				  a.fibreShellRatio,
+				  a.empiricalRatio,
+				  a.emGradeRatio,
+				  a.fbGradeRatio,
+				  a.updateTime,
+				  a.isVisable,
+				  case a.isVisable
+			WHEN 1 THEN
+				  '启用'
+			WHEN 2 THEN
+				  '禁用'
+			END AS isVisableName,
+
+			fbShellNumberWeighting,
+			empiricalValueWeighting
+
+from b2b_dimensionality_present a
+
+WHERE
+	1 = 1
+		
+		<if test="@Ognl@isNotEmpty(type)">
+				AND a.type = #{type}
+			</if>
+		
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND a.isVisable = #{isVisable}
+			</if>
+		
+			<if test="@Ognl@isNotEmpty(insertStartTime)">
+				AND str_to_date(a.updateTime,'%Y-%m-%d') >= #{updateStartTime}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertEndTime)">
+				AND str_to_date(a.updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				
+				AND companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+			
+				AND contactsTel LIKE '%${contactsTel}%'			</if>
+				
+					<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND a.dimenCategory = #{dimenCategory}
+			</if>
+			
+				
+					<if test="@Ognl@isNotEmpty(dimenType)">
+				AND a.dimenType = #{dimenType}
+			</if>
+			
+				<if test="@Ognl@isNotEmpty(periodType)">
+				AND a.periodType = #{periodType}
+			</if>
+		
+	</select>
+	
+	
+	<delete id="deleteByDimen" parameterType="java.util.Map">
+  DELETE FROM b2b_dimensionality_present WHERE
+        dimenCategory = #{dimenCategory}  and dimenType=#{dimenType}
+
+</delete>
+</mapper>
+

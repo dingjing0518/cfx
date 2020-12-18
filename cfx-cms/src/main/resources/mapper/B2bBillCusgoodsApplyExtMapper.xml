@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCusgoodsApplyExtDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,customerPk,companyPk,goodsPk,goodsName,goodsShotName,status,account,bankName,bankNo,isVisable
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(customerPk)">
+				AND customerPk = #{customerPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsShotName)">
+				AND goodsShotName = #{goodsShotName}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(account)">
+				AND account = #{account}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(bankNo)">
+				AND bankNo = #{bankNo}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+		</where>
+	</sql>
+
+<update id="updateBatch" parameterType="java.util.List">
+		update b2b_bill_cusgoods_apply
+		<trim prefix="set" suffixOverrides=",">
+			
+			<trim prefix=" suggestAmount =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.suggestAmount != null">
+					when pk=#{i.pk}
+					then #{i.suggestAmount}
+				</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or"   item="i" index="index">
+			pk=#{i.pk}
+		</foreach>
+	</update>
+	
+</mapper>
+

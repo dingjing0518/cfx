@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bFuturesTypeDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isVisable,isHome,sort,updateTime,isDelete,insertTime,block,currencyUnit,unit
+	    ]]>
+	</sql>
+
+	<insert id="insertEx" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_futures_type (
+         pk, name, isVisable, isHome, sort, updateTime, isDelete,insertTime,block,currencyUnit,unit
+        ) VALUES (
+         #{pk}, #{name}, 1, #{isHome}, #{sort}, sysdate(), 1   ,sysdate(),#{block},#{currencyUnit},#{unit}
+        )
+    ]]>
+	</insert>
+
+	<update id="updateEx" parameterType="cn.cf.model.B2bFuturesType">
+        UPDATE b2b_futures_type SET
+        <if test = "name!=null and name!=''">
+        	name = #{name},
+        </if>
+        <if test = "isVisable!=null and isVisable!=''">
+         	 isVisable = #{isVisable} ,
+        </if>
+        <if test = "isHome !=null and isHome!='' ">
+          	isHome = #{isHome} ,
+        </if>
+         <if test = "sort !=null">
+           sort = #{sort} ,
+        </if>
+         <if test = "isDelete !=null and isDelete!='' ">
+           isDelete = #{isDelete} ,
+        </if>
+        <if test = "currencyUnit !=null ">
+           currencyUnit = #{currencyUnit} ,
+        </if>
+        <if test = "unit !=null  ">
+           unit = #{unit} ,
+        </if>
+	        updateTime = #{updateTime} 
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name like  '%${name}%'				</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(isHome)">
+				AND isHome = #{isHome}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND  str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND  str_to_date(updateTime,'%Y-%m-%d')  &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+				<if test="@Ognl@isNotEmpty(block)">
+                AND block = #{block}          </if>
+		</where>
+	</sql>
+	
+	<select id="searchGridExtCount" parameterType="cn.cf.dto.B2bFuturesTypeDtoEx"
+		resultType="int">
+		SELECT count(*) FROM b2b_futures_type
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bFuturesTypeDto"
+		parameterType="cn.cf.dto.B2bFuturesTypeDtoEx">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_futures_type
+		<include refid="searchGridWhere" />
+		<if test="orderName != null and orderName !=''">
+			ORDER BY ${orderName} ${orderType }
+		</if>
+		<if test="limit != null and limit != '' and limit>0">
+			LIMIT #{start}, #{limit}
+		</if>
+	</select>
+	
+	<select id="isExist" resultType="cn.cf.dto.B2bFuturesTypeDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_futures_type where name = #{name} 
+		<if test = "pk!=null and pk!=''">
+		and pk!=#{pk}
+		</if>
+		and isDelete = 1
+	</select>
+</mapper>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bStoreDaoEx">
+
+	<select id="getCompStoreByStorePk" resultType="cn.cf.dto.B2bStoreDtoEx">
+			SELECT
+				s.pk AS pk,
+				s. NAME,
+				c.pk AS companyPk,
+				IF (
+					s.contacts IS NULL
+					OR s.contacts = '',
+					c.contacts,
+					s.contacts
+				) AS contacts,
+				IF (
+					s.contactsTel IS NULL
+					OR s.contactsTel = '',
+					c.contactsTel,
+					s.contactsTel
+				) AS contactsTel,
+				 c.provinceName,
+				 c.cityName,
+				 c.areaName,
+				 s.startTime,
+				 s.endTime,
+				 s.introduce,
+				 c.headPortrait,
+				 shopNotices,
+				 s.qq,
+				 logoSettings,
+				 s.isOpen,
+				 s.upperWeight,
+				 s.showPricebfOpen
+			FROM b2b_store s
+			LEFT JOIN b2b_company c ON s.companyPk = c.pk
+			WHERE s.pk = #{pk}
+		</select>
+
+
+<select id = "getByGoodsPk" resultType="cn.cf.dto.B2bStoreDto" >
+	SELECT s.*  from b2b_goods  g  INNER  JOIN b2b_store s on g.storePk = s.pk
+	WHERE g.pk = #{goodsPk}
+</select>
+
+</mapper>
+

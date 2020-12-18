@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysNewsDaoEx">
+
+
+	
+
+
+	
+	<select id="getNewsByNext" resultType="map">
+		select pk,title
+			FROM
+			sys_news 
+		WHERE 1=1 
+		<if test="@Ognl@isNotEmpty(isDelete)">
+			AND isDelete = #{isDelete}
+		</if>
+		<if test="@Ognl@isNotEmpty(isVisable)">
+			AND isVisable = #{isVisable}
+		</if>
+		 <if test="@Ognl@isNotEmpty(status)">
+			AND STATUS = #{status}
+         </if>
+			AND  pk in (select newsPk from  sys_news_category where categoryPk = #{categoryPk})
+			<if test="type == 1">
+			 <![CDATA[ AND insertTime < #{insertTime}]]>
+			 order by insertTime desc
+			</if>
+			<if test="type == 2">
+			 <![CDATA[ AND insertTime > #{insertTime}]]>
+			 order by insertTime asc
+			</if>
+			limit 0,1
+	</select>
+	
+
+</mapper>
+

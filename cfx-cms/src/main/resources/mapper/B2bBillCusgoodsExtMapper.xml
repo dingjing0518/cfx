@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCusgoodsExtDao">
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+	    <![CDATA[
+		pk,customerPk,companyPk,goodsPk,goodsName,goodsShotName,bindStatus,account,bankName,bankNo,isVisable,platformAmount,useAmount
+	    ]]>
+	</sql>
+
+    <update id="updateObj" parameterType="cn.cf.dto.B2bBillCusgoodsExtDto">
+        UPDATE b2b_bill_cusgoods
+        <set>
+            <if test="customerPk != null and customerPk != ''">
+                customerPk = #{customerPk} ,
+            </if>
+            <if test="companyPk != null and companyPk != ''">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="goodsPk != null and goodsPk != ''">
+                goodsPk = #{goodsPk} ,
+            </if>
+            <if test="customerPk != null and customerPk != ''">
+                customerPk = #{customerPk} ,
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                goodsName = #{goodsName} ,
+            </if>
+            <if test="goodsShotName != null and goodsShotName != ''">
+                goodsShotName = #{goodsShotName} ,
+            </if>
+            <if test="bindStatus != null and bindStatus != ''">
+                bindStatus = #{bindStatus} ,
+            </if>
+            <if test="account != null and account != ''">
+                account = #{account} ,
+            </if>
+            <if test="bankName != null and bankName != ''">
+                bankName = #{bankName} ,
+            </if>
+            <if test="bankNo != null and bankNo != ''">
+                bankNo = #{bankNo} ,
+            </if>
+            <if test="isVisable != null and isVisable != ''">
+                isVisable = #{isVisable},
+            </if>
+            <if test="platformAmount != null">
+                platformAmount = #{platformAmount},
+            </if>
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}			</if>
+            <if test="@Ognl@isNotEmpty(customerPk)">
+                AND customerPk = #{customerPk}			</if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}			</if>
+            <if test="@Ognl@isNotEmpty(goodsPk)">
+                AND goodsPk = #{goodsPk}			</if>
+            <if test="@Ognl@isNotEmpty(goodsName)">
+                AND goodsName = #{goodsName}			</if>
+            <if test="@Ognl@isNotEmpty(goodsShotName)">
+                AND goodsShotName = #{goodsShotName}			</if>
+            <if test="@Ognl@isNotEmpty(bindStatus)">
+                AND bindStatus = #{bindStatus}			</if>
+            <if test="@Ognl@isNotEmpty(account)">
+                AND account = #{account}			</if>
+            <if test="@Ognl@isNotEmpty(bankName)">
+                AND bankName = #{bankName}			</if>
+            <if test="@Ognl@isNotEmpty(bankNo)">
+                AND bankNo = #{bankNo}			</if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}			</if>
+        </where>
+    </sql>
+
+    <select id="searchGridExtCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM b2b_bill_cusgoods
+        <include refid="searchGridWhere" />
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGridExt" resultType="cn.cf.dto.B2bBillCusgoodsExtDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_bill_cusgoods
+        <include refid="searchGridWhere" />
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    
+    <select id="getCusGoodsByMap" resultType="cn.cf.dto.B2bBillCusgoodsDto"
+		parameterType="java.util.Map">
+		select * from b2b_bill_cusgoods
+		where 1 = 1
+		<if test="pk != null and pk !=''">
+			and pk  = #{pk}
+		</if>
+		<if test="customerPk != null and customerPk !=''">
+			and customerPk  = #{customerPk}
+		</if>
+		<if test="goodsPk != null and goodsPk !=''">
+			and goodsPk  = #{goodsPk}
+		</if>
+	</select>
+
+	<delete id="deleteByCompanyPk" parameterType="String">
+    <![CDATA[
+        DELETE FROM b2b_bill_cusgoods WHERE
+        companyPk = #{companyPk} 
+    ]]>
+	</delete>
+</mapper>
+

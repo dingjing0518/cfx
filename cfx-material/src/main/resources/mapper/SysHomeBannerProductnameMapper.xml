@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysHomeBannerProductnameDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,productPk,productName,sort,isVisable,isDelete,insertTime,updateTime,detail,url
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_home_bannerproductname (
+         pk, productPk, productName, sort, isVisable, isDelete, insertTime, updateTime,detail,url
+        ) VALUES (
+         #{pk}, #{productPk}, #{productName}, #{sort}, #{isVisable}, #{isDelete}, #{insertTime}, #{updateTime}, #{detail}, #{url}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysHomeBannerProductname">
+    
+    <![CDATA[
+        UPDATE sys_home_bannerproductname SET
+	        productPk = #{productPk} , productName = #{productName} , sort = #{sort} , isVisable = #{isVisable} , isDelete = #{isDelete} , insertTime = #{insertTime} , updateTime = #{updateTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+	
+	<update id="updateObj" parameterType="cn.cf.dto.SysHomeBannerProductnameDto">
+		UPDATE sys_home_bannerproductname
+		<set>
+			<if test="productPk !=null and productPk !=''">
+				productPk=#{productPk},
+			</if>
+			<if test="productName !=null and productName !=''">
+				productName=#{productName},
+			</if>
+			<if test="sort !=null and sort !=''">
+				sort=#{sort},
+			</if>
+			<if test="isVisable !=null and isVisable !=''">
+				isVisable=#{isVisable},
+			</if>
+			<if test="isDelete !=null and isDelete !=''">
+				isDelete=#{isDelete},
+			</if>
+			<if test="insertTime !=null and insertTime !=''">
+				insertTime=#{insertTime},
+			</if>
+			<if test="updateTime!=null and updateTime!=''">
+				updateTime=#{updateTime},
+			</if>
+			<if test="detail !=null">
+				detail=#{detail},
+			</if>
+			<if test="url !=null">
+				url=#{url},
+			</if>
+			</set>
+			where pk = #{pk}
+	</update>
+	
+
+	<delete id="delete" parameterType="cn.cf.model.SysHomeBannerProductname">
+    <![CDATA[
+        DELETE FROM sys_home_bannerproductname WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(detail)">
+				AND detail = #{detail}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeStart)">
+				AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+				
+				AND isDelete = 1
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_home_bannerproductname
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_home_bannerproductname
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_home_bannerproductname
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_home_bannerproductname where pk = #{pk}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_home_bannerproductname where productPk = #{productPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_home_bannerproductname where productName = #{productName}	</select>
+</mapper>
+

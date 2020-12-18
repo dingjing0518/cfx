@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bTrancsationDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,storePk,companyPk,orderAmounts,payAmounts,orderCounts,childOrderCounts,payCounts,childPayCounts,trancsationDate,isDelete
+	    ]]>
+	</sql>
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="storePk != null">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmounts)">
+				AND orderAmounts = #{orderAmounts}			</if>
+			<if test="@Ognl@isNotEmpty(payAmounts)">
+				AND payAmounts = #{payAmounts}			</if>
+			<if test="@Ognl@isNotEmpty(orderCounts)">
+				AND orderCounts = #{orderCounts}			</if>
+			<if test="@Ognl@isNotEmpty(childOrderCounts)">
+				AND childOrderCounts = #{childOrderCounts}			</if>
+			<if test="@Ognl@isNotEmpty(payCounts)">
+				AND payCounts = #{payCounts}			</if>
+			<if test="@Ognl@isNotEmpty(childPayCounts)">
+				AND childPayCounts = #{childPayCounts}			</if>
+			<if test="@Ognl@isNotEmpty(trancsationDateBegin)">
+				AND trancsationDate >= #{trancsationDateBegin}			</if>
+			<if test="@Ognl@isNotEmpty(trancsationDateEnd)">
+				AND trancsationDate &lt;= #{trancsationDateEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+	<select id="trancsations" resultType="cn.cf.model.B2bTrancsation">
+			SELECT
+	IFNULL(a.orderCounts, 0) AS orderCounts,
+	a.companyPk,
+	a.storePk,
+	IFNULL(a.orderAmounts, 0) AS orderAmounts,
+	IFNULL(b.payCounts, 0) AS payCounts,
+	IFNULL(b.payAmounts, 0) AS payAmounts,
+	IFNULL(a.childOrderCounts, 0) AS childOrderCounts,
+	IFNULL(b.childPayCounts, 0) AS childPayCounts
+FROM
+	(
+		SELECT
+			count(*) AS orderCounts,
+			supplierPk AS companyPk,
+			storePk,
+			SUM(o.actualAmount) AS orderAmounts,
+			SUM(og.childOrderCounts) AS childOrderCounts
+		FROM
+			b2b_order o
+		LEFT JOIN (
+			SELECT
+				o.orderNumber,
+				COUNT(*) AS childOrderCounts
+			FROM
+				b2b_order o
+			LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+			WHERE
+				o.orderStatus > 0
+			AND date(o.insertTime) = curdate() - INTERVAL 1 DAY
+			GROUP BY
+				o.orderNumber
+		) og ON o.orderNumber = og.orderNumber
+		WHERE
+			1 = 1
+		AND o.orderStatus > 0
+		AND date(o.insertTime) = curdate() - INTERVAL 1 DAY
+		GROUP BY
+			o.supplierPk
+	) a
+LEFT JOIN (
+	SELECT
+		count(*) AS payCounts,
+		supplierPk AS companyPk,
+		storePk,
+		SUM(o.actualAmount) AS payAmounts,
+		SUM(og.childOrderCounts) AS childPayCounts
+	FROM
+		b2b_order o
+	LEFT JOIN (
+		SELECT
+			o.orderNumber,
+			COUNT(*) AS childOrderCounts
+		FROM
+			b2b_order o
+		LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+		WHERE
+			o.orderStatus > 2
+		AND date(o.insertTime) = curdate() - INTERVAL 1 DAY
+		GROUP BY
+			o.orderNumber
+	) og ON o.orderNumber = og.orderNumber
+	WHERE
+		o.orderStatus > 2
+	AND date(o.insertTime) = curdate() - INTERVAL 1 DAY
+	GROUP BY
+		o.supplierPk
+) b ON a.storePk = b.storePk
+AND a.companyPk = b.companyPk
+	
+	</select>
+	
+	
+	   <select id="searchCount"  parameterType="java.util.Map" resultType="int">
+        SELECT COUNT(DISTINCT trancsationDate) FROM b2b_trancsation 
+        where 1 = 1
+		<if test="storePk != null">
+            AND storePk = #{storePk}
+        </if>
+        <if test="companyPk != null">
+            AND companyPk = #{companyPk}
+        </if>
+         <if test="trancsationDateBegin != null">
+        	AND trancsationDate >=  #{trancsationDateBegin}
+        </if>
+         <if test="trancsationDateEnd != null">
+        	<![CDATA[ AND trancsationDate <=  #{trancsationDateEnd}  ]]>
+        </if>
+    </select>
+    
+    <!--
+    	分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页
+    	因为分页查询将传 offset,pageSize,lastRows 三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现
+    -->
+    <select id="searchTrancsationList" resultType="cn.cf.dto.B2bTrancsationDto" parameterType="java.util.Map">
+    	SELECT sum(orderAmounts) as orderAmounts,sum(payAmounts) as payAmounts,sum(orderCounts) as orderCounts,sum(payCounts) as payCounts,trancsationDate,
+    	sum(childOrderCounts) as childOrderCounts,sum(childPayCounts) as childPayCounts
+	    FROM b2b_trancsation 
+	    where 1 = 1
+		<if test="storePk != null">
+            AND storePk = #{storePk}
+        </if>
+        <if test="companyPk != null">
+            AND companyPk = #{companyPk}
+        </if>
+         <if test="trancsationDateBegin != null">
+        	AND trancsationDate >=  #{trancsationDateBegin}
+        </if>
+         <if test="trancsationDateEnd != null">
+        	<![CDATA[ AND trancsationDate <=  #{trancsationDateEnd}  ]]>
+        </if> 
+        GROUP BY trancsationDate
+        order by trancsationDate desc
+        <if test="start != null">
+        	limit ${start},${limit}
+        </if> 
+    </select>
+</mapper>
+

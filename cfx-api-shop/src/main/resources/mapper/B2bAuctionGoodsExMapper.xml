@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAuctionGoodsDaoEx">
+	<select id="checkGoodsAuctionStatus" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT a.*,
+		CASE
+		WHEN a.pk is null
+		then 1
+		WHEN (a.activityTime = date_format(now(), '%y-%m-%d') AND a.startTime >= date_format(now(),'%H:%i')) OR (a.activityTime > date_format(now(), '%y-%m-%d')) 
+		THEN  2
+		WHEN a.activityTime = date_format(now(), '%y-%m-%d') AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt;=a.endTime 
+		THEN  3
+		WHEN (a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i') > a.endTime)  OR date_format(now(), '%y-%m-%d') > a.activityTime
+		THEN  4
+		END as acStatus
+		FROM b2b_auction_goods a
+		WHERE a.`goodsPk`=#{goodsPk}
+		AND a.isDelete=1
+	</select>
+	<update id="deleteByPk" parameterType="java.lang.String">
+		UPDATE b2b_auction_goods set  b2b_auction_goods.isDelete=2  where b2b_auction_goods.pk=#{pk}
+	</update>
+<select id="searchAuctingGoods"  resultType="cn.cf.dto.B2bAuctionGoodsDto">
+	<![CDATA[
+		SELECT
+			ag.goodsPk
+		FROM
+			b2b_auction_goods ag
+		LEFT JOIN b2b_auction a ON ag.auctionPk = a.pk
+		WHERE
+			a.isDelete = 1
+		AND a.isVisable = 1
+		AND ag.isDelete = 1
+		AND TIME_TO_SEC(ag.startTime) <= TIME_TO_SEC(now())
+		AND TIME_TO_SEC(ag.endTime) >= TIME_TO_SEC(now())
+		AND ag.activityTime = DATE(now())
+	]]>
+		<if test="pks != null">
+			AND ag.goodsPk IN
+				<foreach item="item" index="index" collection="pks" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>			
+		</if>
+	</select>
+	
+	<update id="deleteByGoodsPk" parameterType="java.lang.String">
+		UPDATE b2b_auction_goods set  b2b_auction_goods.isDelete=2  where b2b_auction_goods.goodsPk=#{goodsPk}
+	</update>
+	
+</mapper>

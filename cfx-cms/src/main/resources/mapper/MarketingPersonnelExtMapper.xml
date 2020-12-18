@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.MarketingPersonnelExtDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,type,insertTime,accountPk,accountName,isDelete,isVisable,regionPk
+	    ]]>
+	</sql>
+
+	
+	<select id="getPersonByType"  resultType="cn.cf.dto.MarketingPersonnelDto">
+		SELECT
+		<include refid="columns" />
+		FROM
+		marketing_personnel
+		WHERE  isDelete=1 and isVisable=1
+		and type=#{type}
+	</select>
+
+
+	<!--当禁用大区配置是清空相关内容-->
+	<update id="updateRegion" parameterType="java.lang.String">
+		update marketing_personnel set regionPk = NULL where regionPk = #{regionPk};
+	</update>
+	
+	<select id="searchPersonnels" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		count(1)
+		FROM
+		  marketing_personnel 
+		where isDelete=1
+		<if test="type>0">
+		 and type=#{type}
+		</if>
+			<if test="accountPk!=null and accountPk!=''">
+		   and accountPk=#{accountPk}
+		</if>
+		  <if test="regionPk!=null and regionPk!=''">
+        and regionPk= #{regionPk}
+        </if>
+			<if test="isVisable>0">
+		and isVisable=#{isVisable}
+		</if>
+	</select>
+	<select id="searchPersonnelList" parameterType="java.util.Map"
+		resultType="cn.cf.dto.MarketingPersonnelExtDto">
+		SELECT
+		   p.pk,p.type,p.insertTime,p.accountPk,
+		   if(${colAccountName},  p.accountName , INSERT ( p.accountName,  1, 1, '*')) as accountName,
+		   p.isDelete,p.isVisable ,mr.name as regionName,p.regionPk,p.updateTime
+		FROM
+		marketing_personnel p 
+		left join  b2b_manage_region mr   on  mr.pk = p.regionPk
+		where isDelete=1
+		<if test="type>0">
+		 and p.type=#{type}
+		</if>
+	      <if test="accountPk!=null and accountPk!=''">
+		   and p.accountPk=#{accountPk}
+		</if>
+	       <if test="isVisable>0">
+		and p.isVisable=#{isVisable}
+		</if>
+		   <if test="regionPk!=null and regionPk!=''">
+        and p.regionPk= #{regionPk}
+        </if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	
+	
+	<select id="getRegions" resultType="cn.cf.dto.MarketingPersonnelExtDto">
+		SELECT p.* ,r.area 
+	   FROM marketing_personnel  p 
+	   INNER  JOIN b2b_manage_region r ON (r.pk = p.regionPk  AND r.isVisable = 1)
+	   WHERE  p.isDelete=1 AND p.isVisable = 1  AND p.type = 3 AND r.area !='' AND r.area is not NULL
+	</select>
+	
+	<select id="getByMap"   parameterType="java.util.Map" resultType="cn.cf.dto.MarketingPersonnelDto">
+	SELECT 
+	   <include refid="columns" />
+       FROM marketing_personnel   where  1=1  
+	 <if test="accountPk!=null and accountPk!=''">
+           and  accountPk =#{accountPk}
+        </if>
+        <if test="isDelete!=null and isDelete!=''">
+           and  isDelete =#{isDelete}
+        </if>
+        <if test="isVisable!=null and isVisable!=''">
+           and  isVisable =#{isVisable}
+        </if>
+	</select>
+	
+	<update id="updateExt" parameterType="cn.cf.model.MarketingPersonnel">
+        UPDATE marketing_personnel
+        <set>
+            <if test="type != null and type !=''">
+                type = #{type} ,
+            </if>
+            <if test="insertTime != null">
+                insertTime = #{insertTime} ,
+            </if>
+            <if test="accountPk != null and accountPk !=''">
+                accountPk = #{accountPk} ,
+            </if>
+            <if test="accountName != null and accountName !=''">
+                accountName = #{accountName} ,
+            </if>
+            <if test="isDelete != null and isDelete !=''">
+                isDelete = #{isDelete} ,
+            </if>
+            <if test="isVisable != null and isVisable !=''">
+                isVisable = #{isVisable} ,
+            </if>
+            <if test="regionPk != null">
+                regionPk = #{regionPk} ,
+            </if>
+            updateTime = now()
+        </set>
+        WHERE 
+            pk = #{pk}              
+    </update>
+    
+    
+        
+    <select id="getDistributePerson"  resultType="cn.cf.dto.MarketingPersonnelDto">
+        SELECT
+		  	p.pk,p.type,p.insertTime,
+		   p.accountPk,p.accountName,
+		   p.isDelete,p.isVisable,p.regionPk
+		FROM
+        marketing_personnel p
+        inner  join     b2b_manage_region  r on  r.pk = p.regionPk
+        WHERE  p.isDelete=1 and p.isVisable=1
+        and p.type in(1,3)  and r.area is not null
+    </select>
+    
+    
+     <select id="getAccountByOrder"  resultType="cn.cf.dto.MarketingPersonnelDto" parameterType="java.lang.String" >
+     SELECT  a.* FROM (	(SELECT
+					a.accountPk ,a.accountName
+				FROM
+					b2b_order o
+				INNER JOIN marketing_company c ON o.storePk = c.companyPk AND c.companyType=2
+				INNER JOIN (	SELECT
+						p.accountName,	p.accountPk
+					FROM marketing_personnel p
+					INNER JOIN marketing_company mc ON mc.accountPk = p.accountPk
+					AND mc.companyType = 2
+					WHERE
+						p.isDelete = 1
+					AND p.isVisable = 1
+					AND p.type = 1
+					GROUP BY
+						p.accountPk
+				) a ON a.accountPk = c.accountPk
+			WHERE 
+			   str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date( #{date},'%Y-%m-%d') and o.orderStatus >2 and o.block = "cf"
+		GROUP BY o.storePk )
+		UNION ALL
+		(	SELECT	a.accountPk,a.accountName
+					FROM	b2b_order o
+					INNER JOIN marketing_company c ON o.purchaserPk = c.companyPk AND c.companyType=1
+					INNER JOIN (
+						SELECT
+							p.accountName,
+							p.accountPk,
+							COUNT(mc.companyPk) AS companyNums,
+							GROUP_CONCAT(mc.companyPk) AS companyPks
+						FROM
+							marketing_personnel p
+						INNER JOIN marketing_company mc ON mc.accountPk = p.accountPk
+						AND mc.companyType = 1
+						WHERE
+							p.isDelete = 1
+						AND p.isVisable = 1
+						AND p.type = 1
+						GROUP BY
+							p.accountPk
+					) a ON a.accountPk = c.accountPk
+				WHERE 
+					  str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date( #{date},'%Y-%m-%d')	
+							and o.orderStatus >2  and o.block = "cf"
+					GROUP BY o.purchaserPk ) )a  
+					GROUP BY accountPk
+    </select>
+    
+    
+    	<select id="getPurCustomNum"  parameterType="java.util.Map" resultType="java.lang.Integer">
+ 			SELECT
+					ifnull(COUNT(DISTINCT o.purchaserPk),0)				 as num
+				FROM
+					b2b_order o
+				INNER JOIN marketing_company c ON o.purchaserPk = c.companyPk AND c.companyType=1
+				INNER JOIN  marketing_personnel  p ON  p.accountPk = c.accountPk AND	p.isDelete = 1	AND p.isVisable = 1 AND p.accountPk= #{accountPk}
+			WHERE 
+			   str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date( #{date},'%Y-%m-%d')  
+				and o.orderStatus >2  and o.block = "cf"
+				
+    	</select>
+    
+    
+        <select id="getSupCustomNum" parameterType="java.util.Map" resultType="java.lang.Integer">
+   				SELECT
+					ifnull(COUNT(DISTINCT o.storePk),0)		 as num
+				FROM
+					b2b_order o
+				INNER JOIN marketing_company c ON o.storePk = c.companyPk AND c.companyType=2
+				INNER JOIN  marketing_personnel  p ON  p.accountPk = c.accountPk AND	p.isDelete = 1	AND p.isVisable = 1 AND p.accountPk= #{accountPk}
+			WHERE 
+			   str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date( #{date},'%Y-%m-%d') 
+				and o.orderStatus >2  and o.block = "cf"
+    </select>
+    
+     <select id="getSupOrderByAccount"  resultType="cn.cf.dto.B2bOrderGoodsDto" parameterType="java.util.Map" >
+ 			SELECT	CASE WHEN og.afterWeight = 0 THEN og.weight ELSE og.afterWeight END as weight , og.goodsInfo ,og.orderNumber
+			FROM	b2b_order_goods og
+			INNER JOIN b2b_order o ON o.orderNumber = og.orderNumber
+			INNER JOIN marketing_company mc ON o.storePk = mc.companyPk AND mc.companyType = 2 AND mc.accountPk = #{accountPk}
+			WHERE
+					str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date(  #{date},'%Y-%m-%d')	and o.orderStatus >2 AND o.block = "cf"
+			and og.orderStatus!=-1
+    </select>
+    
+    <select id="getPurOrderByAccount"  resultType="cn.cf.dto.B2bOrderGoodsDto" parameterType="java.util.Map" >
+   					SELECT	CASE WHEN og.afterWeight = 0 THEN og.weight ELSE og.afterWeight END as weight , og.goodsInfo ,og.orderNumber
+			FROM	b2b_order_goods og
+			INNER JOIN b2b_order o ON o.orderNumber = og.orderNumber
+			INNER JOIN marketing_company mc ON o.purchaserPk = mc.companyPk AND mc.companyType = 1 AND mc.accountPk = #{accountPk}
+			WHERE
+					str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date(  #{date},'%Y-%m-%d')	and o.orderStatus >2 AND o.block = "cf"
+			and og.orderStatus!=-1
+    </select>
+    
+    <select  id = "getAccountByMap"  resultType="cn.cf.dto.ManageAccountDto" parameterType="java.util.Map">
+    	SELECT a.* FROM marketing_company c 
+		left  JOIN manage_account a ON a.pk = c.accountPk
+		WHERE c.companyPk = #{companyPk}  
+		and c.companyType = #{companyType} 
+    </select>
+    
+    <select  id = "getRegionalAccountByMap"  resultType="cn.cf.dto.ManageAccountExtDto" >
+        <![CDATA[
+		SELECT a.* ,mr.area FROM marketing_personnel p 
+			INNER   JOIN manage_account a ON ( a.pk = p.accountPk )
+			INNER join   b2b_manage_region mr   on  ( mr.pk = p.regionPk AND mr.isVisable = 1 AND mr.area is NOt NULL AND mr.area  <> "")
+		WHERE p.type =3 AND p.isDelete = 1 AND p.isVisable = 1 
+		    ]]>
+    </select>
+    
+</mapper>
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberRoleDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,rolePk
+	    ]]>
+	</sql>
+
+
+	<delete id="deleteByMemberPk">
+    <![CDATA[
+        DELETE FROM b2b_member_role WHERE
+        memberPk = #{memberPk} 
+    ]]>
+	</delete>
+
+	<delete id="deleteByMemberPkAndType" parameterType="java.util.Map">
+		DELETE m
+		FROM
+		b2b_member_role m
+		LEFT JOIN b2b_role r ON m.rolePk = r.pk
+		WHERE
+		m.memberPk = #{memberPk}
+		AND r.companyType = #{companyType}
+
+	</delete>
+	<select id="searchMemberRoles" resultType="cn.cf.dto.B2bMemberRoleDtoEx" parameterType="java.util.Map">
+		SELECT
+		m.pk as pk,
+		m.memberPk as memberPk,
+		r.pk as rolePk,
+		r. NAME as roleName,
+		r.companyType
+		FROM
+		b2b_member_role m
+		LEFT JOIN b2b_role r ON m.rolePk = r.pk
+		WHERE
+		m.memberPk =#{memberPk}
+		<if test="companyType==1">
+			AND r.companyType != 2
+			AND r.companyType != 3
+			AND r.companyType != 4
+		</if>
+		<if test="companyType==2">
+			AND r.companyType != 1
+			AND r.companyType != 3
+			AND r.companyType != 4
+		</if>
+		<if test="companyType==3">
+			AND r.companyType != 1
+			AND r.companyType != 2
+			AND r.companyType != 4
+		</if>
+		<if test="companyType==4">
+			AND r.companyType != 1
+			AND r.companyType != 2
+			AND r.companyType != 3
+		</if>
+		GROUP BY
+		r.pk
+	</select>
+	
+	<select id="searchMemberRolesByMemberPk" resultType="cn.cf.dto.B2bMemberRoleDto" parameterType="String">
+		SELECT * from b2b_member_role where b2b_member_role.memberPk=#{memberPk};
+	</select>
+	
+	
+</mapper>
+

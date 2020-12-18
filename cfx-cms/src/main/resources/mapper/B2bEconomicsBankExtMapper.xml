@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsBankExtDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,bankName,gateway,creditTotalAmount,isVisable
+	    ]]>
+    </sql>
+
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}			</if>
+            <if test="@Ognl@isNotEmpty(bankName)">
+                AND bankName = #{bankName}			</if>
+            <if test="@Ognl@isNotEmpty(gateway)">
+                AND gateway = #{gateway}			</if>
+            <if test="@Ognl@isNotEmpty(creditTotalAmount)">
+                AND creditTotalAmount = #{creditTotalAmount}			</if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}			</if>
+           
+        </where>
+    </sql>
+
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM b2b_economics_bank
+        <include refid="searchGridWhere" />
+    </select>
+   
+
+    <select id="searchEconomicsBankCounts" resultType="int">
+        select count(1)
+        from b2b_economics_bank where 1 = 1
+        <if test="bankName !=null and bankName !=''">
+            and bankName like '%${bankName}%'
+        </if>
+        <if test="gateway !=null and gateway !=''">
+            and gateway like '%${gateway}%'
+        </if>
+        <if test="isVisable !=null and isVisable !=''">
+            and isVisable = #{isVisable}
+        </if>
+    </select>
+
+    <select id="searchEconomicsBankList" resultType="cn.cf.dto.B2bEconomicsBankDto">
+        SELECT
+			a.pk,
+			a.bankName,
+			a.gateway,
+			a.creditTotalAmount,
+			a.isVisable
+		FROM
+			b2b_economics_bank a
+		WHERE
+			1 = 1
+        <if test="bankName !=null and bankName !=''">
+            and a.bankName like '%${bankName}%'
+        </if>
+        <if test="gateway !=null and gateway !=''">
+            and a.gateway like '%${gateway}%'
+        </if>
+        <if test="isVisable !=null and isVisable !=''">
+            and a.isVisable = #{isVisable}
+        </if>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start}, #{limit}
+        </if>
+    </select>
+    <select id="searchEconomicsBankByName"  resultType="cn.cf.dto.B2bEconomicsBankDto">
+        select *
+        from b2b_economics_bank where bankName = #{bankName}
+        <if test="pk!=null and pk!=''">
+            and PK !=#{pk}
+        </if>
+    </select>
+
+    <update id="updateEconomicsBank">
+        update b2b_economics_bank
+        <set>
+            <if test="bankName !=null and bankName !=''">
+                bankName = #{bankName},
+            </if>
+            <if test="gateway !=null and gateway !=''">
+                gateway = #{gateway},
+            </if>
+          
+            <if test="isVisable !=null and isVisable !=''">
+                isVisable = #{isVisable},
+            </if>
+             <if test="creditTotalAmount !=null and creditTotalAmount !=''">
+                creditTotalAmount = #{creditTotalAmount}
+            </if>
+        </set>
+        where PK = #{pk}
+    </update>
+    <insert id="insertEconomicsBank">
+        insert b2b_economics_bank
+        (
+        pk,bankName,gateway,isVisable,creditTotalAmount
+        )
+        VALUES(#{pk},#{bankName},#{gateway},#{isVisable},#{creditTotalAmount})
+    </insert>
+
+    <select id="searchAuthorizedBanks"  resultType="cn.cf.dto.B2bEconomicsBankCompanyDto">
+        SELECT
+        ebc.pk,ebc.bankPk,ebc.bankName,ebc.creditAmount,ebc.availableAmount as availableAmount,ebc.contractAmount as contractAmount,
+        ebc.creditAmount as creditAmount,ebc.creditStartTime,ebc.creditEndTime,ebc.amountType as amountType
+        FROM
+        b2b_economics_bank_company ebc
+        WHERE
+        <if test="creditPk !=null and creditPk !=''">
+            ebc.creditPk = #{creditPk}
+        </if>
+        <if test="companyPk !=null and companyPk !=''">
+            ebc.companyPk = #{companyPk}
+        </if>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start}, #{limit}
+        </if>
+    </select>
+
+    <select id="searchAuthorizedBankCounts"  resultType="int">
+        SELECT
+        count(1)
+        FROM
+        b2b_economics_bank_company ebc
+        WHERE
+        <if test="creditPk !=null and creditPk !=''">
+            ebc.creditPk = #{creditPk}
+        </if>
+        <if test="companyPk !=null and companyPk !=''">
+            ebc.companyPk = #{companyPk}
+        </if>
+    </select>
+    <delete id="delCompanyBank">
+        delete from b2b_economics_bank_company where creditPk = #{creditPk}
+    </delete>
+    <insert id="insertCompanyBank">
+        insert b2b_economics_bank_company(pk,companyPk,bankPk,bankName,creditPk) VALUES(#{pk},#{companyPk},#{bankPk},#{bankName},#{creditPk})
+    </insert>
+    
+    
+    <select id="searchListOrderName" resultType="cn.cf.dto.B2bEconomicsBankDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank
+		where isVisable = 1 order By bankName desc
+	</select>
+</mapper>
+

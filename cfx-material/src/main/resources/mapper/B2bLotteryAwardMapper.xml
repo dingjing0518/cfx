@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryAwardDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,activityPk,name,awardType,awardVariety,awardName,relevancyPk,amount,awardPercent,insertTime,updateTime,isDelete,isVisable,awardRule,status,awardSort,showSort,startTime,endTime,packageNumber
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_lottery_award (
+         pk, activityPk, name, awardType, awardVariety, awardName, relevancyPk, amount, awardPercent, insertTime, updateTime, isDelete, isVisable, awardRule, status, awardSort, showSort,startTime,endTime,packageNumber
+        ) VALUES (
+         #{pk}, #{activityPk}, #{name}, #{awardType}, #{awardVariety}, #{awardName}, #{relevancyPk}, #{amount}, #{awardPercent}, #{insertTime}, #{updateTime}, #{isDelete}, #{isVisable}, #{awardRule}, #{status}, #{awardSort}, #{showSort}, #{startTime}, #{endTime}, #{packageNumber}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bLotteryAward">
+    <![CDATA[
+        UPDATE b2b_lottery_award SET
+	        activityPk = #{activityPk} , name = #{name} , awardType = #{awardType} , awardVariety = #{awardVariety} , awardName = #{awardName} , relevancyPk = #{relevancyPk} , amount = #{amount} , awardPercent = #{awardPercent} , insertTime = #{insertTime} , updateTime = #{updateTime} ,
+	        isDelete = #{isDelete} , isVisable = #{isVisable} , awardRule = #{awardRule} , status = #{status} , awardSort = #{awardSort} , showSort = #{showSort}, startTime = #{startTime}, endTime = #{endTime},packageNumber = #{packageNumber}
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bLotteryAward">
+    <![CDATA[
+        DELETE FROM b2b_lottery_award WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(awardType)">
+				AND awardType = #{awardType}			</if>
+			<if test="@Ognl@isNotEmpty(awardVariety)">
+				AND awardVariety = #{awardVariety}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(amount)">
+				AND amount = #{amount}			</if>
+			<if test="@Ognl@isNotEmpty(awardPercent)">
+				AND awardPercent = #{awardPercent}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(awardRule)">
+				AND awardRule = #{awardRule}			</if>
+			<if test="@Ognl@isNotEmpty(amountFlag)">
+			AND amount >0			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_lottery_award
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where pk = #{pk}	</select>
+	<select id="getByActivityPk" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where activityPk = #{activityPk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where name = #{name}	</select>
+	<select id="getByAwardName" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where awardName = #{awardName}	</select>
+	<select id="getByRelevancyPk" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where relevancyPk = #{relevancyPk}	</select>
+	<select id="getByAwardRule" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where awardRule = #{awardRule}	</select>
+
+
+	<update id="updateAwardObj" parameterType="cn.cf.model.B2bLotteryAward">
+		UPDATE b2b_lottery_award
+		<set>
+			<if test="activityPk != null and activityPk !=''">
+				activityPk = #{activityPk},
+			</if>
+			<if test="name != null and name !=''">
+				name = #{name},
+			</if>
+			<if test="awardType != null and awardType !=''">
+				awardType = #{awardType},
+			</if>
+			<if test="awardVariety != null and awardVariety !=''">
+				awardVariety = #{awardVariety},
+			</if>
+			<if test="awardName != null and awardName !=''">
+				awardName = #{awardName},
+			</if>
+			<if test="relevancyPk != null and relevancyPk !=''">
+				relevancyPk = #{relevancyPk},
+			</if>
+			<if test="amount != null and amount !=''">
+				amount = #{amount},
+			</if>
+			<if test="awardPercent != null and awardPercent !=''">
+				awardPercent = #{awardPercent},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="isDelete != null and isDelete !=''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="isVisable != null and isVisable !=''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="awardRule != null and awardRule !=''">
+				awardRule = #{awardRule},
+			</if>
+			<if test="status != null and status !=''">
+				status = #{status},
+			</if>
+			<if test="awardSort != null and awardSort !=''">
+				awardSort = #{awardSort},
+			</if>
+			<if test="showSort != null and showSort !=''">
+				showSort = #{showSort},
+			</if>
+			<if test="startTime != null and startTime !=''">
+				startTime = #{startTime},
+			</if>
+			<if test="endTime != null and endTime !=''">
+				endTime = #{endTime},
+			</if>
+			<if test="packageNumber != null and packageNumber !=''">
+				packageNumber = #{packageNumber}
+			</if>
+
+		</set>
+		where pk = #{pk}
+	</update>
+	
+	
+	
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.util.Map">
+		SELECT
+			aw.pk AS pk,
+			aw.activityPk AS activityPk,
+			aw.NAME AS name,
+			aw.awardType AS awardType,
+			aw.awardVariety AS awardVariety,
+			aw.awardName AS awardName,
+			aw.relevancyPk AS relevancyPk,
+			aw.amount AS amount,
+			aw.awardPercent AS awardPercent,
+			aw.insertTime AS insertTime,
+			aw.updateTime AS updateTime,
+			aw.isDelete AS isDelete,
+			aw.isVisable AS isVisable,
+			aw.awardRule AS awardRule,
+			aw.STATUS AS status,
+			aw.awardSort AS awardSort,
+			aw.showSort AS showSort,
+			aw.startTime AS startTime,
+			aw.endTime AS endTime,
+			aw.packageNumber AS packageNumber,
+			ac.name AS activityName,
+			ac.activityType AS activityType
+		FROM
+			b2b_lottery_award aw
+		LEFT JOIN b2b_lottery_activity ac ON aw.activityPk = ac.pk
+		where 1=1 AND aw.isDelete = 1
+		<if test="awardType != null">
+				AND aw.awardType = #{awardType}			</if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM
+		b2b_lottery_award aw
+		LEFT JOIN b2b_lottery_activity ac ON aw.activityPk = ac.pk
+		where
+		1=1 AND aw.isDelete = 1
+		<if test="awardType != null">
+			AND aw.awardType = #{awardType}
+		</if>
+	</select>
+		
+</mapper>
+

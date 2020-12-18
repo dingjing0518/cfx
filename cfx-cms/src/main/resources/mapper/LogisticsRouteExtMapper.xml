@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsRouteDao">
+    <!-- 用于select查询公用抽取的列 -->
+    <select id="countLogisticsRoute" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(l.pk) FROM lg_line l
+        <include refid="searchGridWhere" />
+    </select>
+
+    <select id="getLogisticsRoute" parameterType="java.util.Map"
+            resultType="cn.cf.model.LogisticsRouteGridModel">
+        SELECT
+        l.pk,
+        if(${colRouteName},  l.`name`, INSERT (  l.`name`, 3, 5, '*****')) as name,
+        if(${colLogisticsComName}, lc.`name`, INSERT ( lc.`name`, 3, 5, '*****')) as companyName,
+        DATE_FORMAT(l.updateTime,'%Y-%m-%d %H:%i:%s') AS updateTime,
+        l.`status`,
+        if(${colFromAddress}, CONCAT(
+        IFNULL(l.fromProviceName,''),
+        IFNULL(l.fromCityName,''),
+        IFNULL(l.fromAreaName,''),
+        IFNULL(l.fromTownName,'')
+        ) ,"*****") as fromAddress ,
+       if(${colToAddress},  CONCAT(
+        IFNULL(l.toProviceName,''),
+        IFNULL(l.toCityName,''),
+        IFNULL(l.toAreaName,''),
+        IFNULL(l.toTownName,'')
+        ),"*****") as toAddress
+        FROM
+        lg_line l
+        LEFT JOIN lg_company lc ON lc.pk = l.companyPk
+        <include refid="searchGridWhere" />
+
+        <if test="orderName != null">
+            order by l.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="searchLogisticsRoute" parameterType="java.util.Map"
+            resultType="cn.cf.entity.LogisticsRouteExport">
+        SELECT
+        <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+        
+        
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+    
+        l.productName,
+        l.gradeName,
+        '0'
+        AS fromWeight,
+        IFNULL(l.leastWeight,0) AS toWeight,
+        IFNULL(l.freight,0)
+        AS salePrice,
+        IFNULL(l.basicPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime
+        FROM
+        lg_line l
+        LEFT
+        JOIN lg_company lc ON lc.pk = l.companyPk
+        <include refid="searchGridWhere" />
+
+        <if test="orderName != null">
+            order by l.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="searchLogisticsPrice" parameterType="java.util.Map"
+            resultType="cn.cf.entity.LogisticsRouteExport">
+        SELECT
+       <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+        l.productName,
+        l.gradeName,
+        IFNULL(lp.fromWeight,0) AS fromWeight,
+        IFNULL(lp.toWeight,0) AS toWeight,
+        IFNULL(lp.salePrice,0) AS salePrice,
+        IFNULL(lp.basisPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime
+        FROM
+        lg_line l
+        LEFT JOIN lg_company lc ON lc.pk = l.companyPk
+        LEFT JOIN lg_line_price lp ON lp.linePk = l.pk AND lp.isDelete = 1
+        <include refid="searchGridWhere" />
+
+        <if test="orderName != null">
+            order by l.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="companyPk!=null and companyPk!=''">
+                AND l.companyPk = #{companyPk}
+            </if>
+            <if test="status !=null and status !='' ">
+                AND l.status =#{status}
+            </if>
+            <if test="fromUpdateTime !=null and fromUpdateTime !=''">
+                AND str_to_date(l.updateTime, '%Y-%m-%d') >=
+                #{fromUpdateTime}
+            </if>
+            <if test="toUpdateTime !=null and toUpdateTime !=''">
+                AND str_to_date(l.updateTime, '%Y-%m-%d') &lt;=
+                #{toUpdateTime}
+            </if>
+            <if test="fromAddress != null and fromAddress !='' ">
+                AND ( l.fromProviceName like '%${fromAddress}%' or
+                l.fromCityName
+                like '%${fromAddress}%' or l.fromAreaName like
+                '%${fromAddress}%' or
+                l.fromTownName like '%${fromAddress}%' )	</if>
+            <if test="toAddress !=null and toAddress !='' ">
+                AND ( l.toProviceName like '%${toAddress}%' or
+                l.toCityName
+                like '%${toAddress}%' or l.toAreaName like
+                '%${toAddress}%' or
+                l.toTownName like '%${toAddress}%')	</if>
+            <if test="isDelete !=null and isDelete !='' ">
+                AND l.isDelete = #{isDelete}
+            </if>
+            <if test="insertTime !=null and insertTime !=''">
+				and str_to_date (l.insertTime,'%Y-%m-%d %H:%i:%s') &lt;=
+				str_to_date(#{insertTime}, '%Y-%m-%d %H:%i:%s')
+			</if>
+            
+        </where>
+    </sql>
+
+
+    <update id="delete" parameterType="String">
+        UPDATE lg_line
+        <set>
+            isDelete = 2
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+    <select id="selectPriceList" parameterType="String"
+            resultType="cn.cf.dto.LogisticsLinePriceDto">
+        SELECT * FROM lg_line_price where linePk = #{pk} and
+        isDelete=1
+    </select>
+
+    <select id="selectOne" parameterType="String"
+            resultType="cn.cf.dto.LogisticsRouteDto">
+        SELECT l.pk,
+        IFNULL(l.name,'') AS name,
+        IFNULL(l.companyPk,'') AS companyPk ,
+        IFNULL(l.productPk,'') AS
+        productPk ,
+        l.status,
+        IFNULL(l.productName,'') AS productName ,
+        IFNULL(l.gradeName,'') AS gradeName,
+        l.gradePk,
+        IFNULL(l.fromProvicePk,'') AS fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL( l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.toProviceName,'')
+        AS toProviceName,
+        IFNULL(l.toProvicePk,'') AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS
+        toCityPk,
+        IFNULL(l.toAreaName,'') AS toAreaName,
+        IFNULL(l.toAreaPk,'')
+        AS toAreaPk,
+        l.leastWeight,
+        l.freight,
+        l.basicPrice,
+        IFNULL(l.toTownPk,'') AS toTownPk ,
+        IFNULL(l.toTownName,'') AS
+        toTownName,
+        IFNULL(l.fromTownPk,'') AS fromTownPk,
+        IFNULL(l.fromTownName,'') AS fromTownName ,
+        lc.name AS companyName
+        FROM
+        lg_line l
+        LEFT JOIN lg_company lc ON lc.pk =
+        l.companyPk
+        where l.pk
+        = #{pk}
+    </select>
+
+
+
+    <select id="getByName" parameterType="String"
+            resultType="cn.cf.dto.LogisticsRouteDto">
+        SELECT l.pk,
+        IFNULL(l.name,'') AS name,
+        IFNULL(l.companyPk,'') AS companyPk ,
+        IFNULL(l.productPk,'') AS
+        productPk ,
+        IFNULL(l.productName,'') AS productName ,
+        IFNULL(l.gradeName,'') AS gradeName,
+        l.gradePk,
+        IFNULL(l.fromProvicePk,'') AS fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL(l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.toProviceName,'')
+        AS toProviceName,
+        IFNULL(l.toProvicePk,'') AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS
+        toCityPk,
+        IFNULL(l.toAreaName,'') AS toAreaName,
+        IFNULL(l.toAreaPk,'')
+        AS toAreaPk,
+        l.leastWeight,
+        l.freight,
+        l.basicPrice,
+        IFNULL(l.name,'') AS
+        name,
+        IFNULL(l.companyPk,'') AS companyPk ,
+        IFNULL(l.productPk,'') AS
+        productPk ,
+        IFNULL(l.productName,'') AS productName ,
+        IFNULL(l.gradeName,'') AS gradeName,
+        IFNULL(l.fromProvicePk,'') AS
+        fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL( l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.toProviceName,'')
+        AS toProviceName,
+        IFNULL(l.toProvicePk,'') AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS
+        toCityPk,
+        IFNULL(l.toAreaName,'') AS toAreaName,
+        IFNULL(l.toAreaPk,'')
+        AS toAreaPk,
+        IFNULL(l.toTownPk,'') AS toTownPk,
+        IFNULL(l.toTownName,'')
+        AS toTownName,
+        IFNULL(l.fromTownPk,'') AS fromTownPk,
+        IFNULL(l.fromTownName,'') AS fromTownName
+        FROM lg_line l
+        where l.name = #{name} and l.isDelete = 1
+    </select>
+
+    <update id="update" parameterType="cn.cf.dto.LogisticsRouteDto">
+        UPDATE lg_line
+        <set>
+            <if test="name != null and name !=''">
+                name = #{name} ,
+            </if>
+            <if test="companyPk != null and companyPk !=''">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="status != null ">
+                status = #{status} ,
+            </if>
+            <if test="productPk != null">
+                productPk = #{productPk} ,
+            </if>
+            <if test="productName != null">
+                productName = #{productName} ,
+            </if>
+            <if test="gradePk != null ">
+                gradePk = #{gradePk} ,
+            </if>
+            <if test="gradeName != null">
+                gradeName = #{gradeName} ,
+            </if>
+            <if test="fromProvicePk != null and fromProvicePk !=''">
+                fromProvicePk = #{fromProvicePk} ,
+            </if>
+            <if test="fromProviceName != null and fromProviceName !=''">
+                fromProviceName = #{fromProviceName} ,
+            </if>
+            <if test="fromCityPk != null and fromCityPk !=''">
+                fromCityPk = #{fromCityPk} ,
+            </if>
+            <if test="fromCityName != null and fromCityName !=''">
+                fromCityName = #{fromCityName} ,
+            </if>
+            <if test="fromAreaPk != null ">
+                fromAreaPk = #{fromAreaPk} ,
+            </if>
+            <if test="fromAreaName != null ">
+                fromAreaName = #{fromAreaName} ,
+            </if>
+            <if test="fromTownPk != null">
+                fromTownPk = #{fromTownPk},
+            </if>
+            <if test="fromTownName != null">
+                fromTownName = #{fromTownName},
+            </if>
+            <if test="toProvicePk != null and toProvicePk !=''">
+                toProvicePk = #{toProvicePk} ,
+            </if>
+            <if test="toProviceName != null and toProviceName !=''">
+                toProviceName = #{toProviceName} ,
+            </if>
+            <if test="toCityPk != null and toCityPk !=''">
+                toCityPk = #{toCityPk} ,
+            </if>
+            <if test="toCityName != null and toCityName !=''">
+                toCityName = #{toCityName} ,
+            </if>
+            <if test="toAreaPk != null">
+                toAreaPk = #{toAreaPk} ,
+            </if>
+            <if test="toAreaName != null">
+                toAreaName = #{toAreaName} ,
+            </if>
+            <if test="toTownPk != null">
+                toTownPk = #{toTownPk},
+            </if>
+            <if test="toTownName != null">
+                toTownName = #{toTownName},
+            </if>
+                leastWeight = #{leastWeight} ,
+            <if test="freight != null">
+                freight = #{freight} ,
+            </if>
+            <if test="basicPrice != null">
+                basicPrice = #{basicPrice} ,
+            </if>
+            updateTime = SYSDATE()
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_line (
+       			pk,
+				name,
+				companyPk,
+				productPk,
+				status,
+				productName,
+				gradeName,
+				gradePk,
+				fromProvicePk,
+				fromProviceName,
+				fromCityPk,
+				fromCityName,
+				fromAreaPk,
+				fromAreaName,
+				toProviceName,
+				toProvicePk,
+				toCityName,
+				toCityPk,
+				toAreaName,
+				toAreaPk,
+				leastWeight,
+				freight,
+				basicPrice,
+				isDelete,
+				insertTime,
+				updateTime,
+				toTownPk,
+				toTownName,
+				fromTownName,
+				fromTownPk
+        ) VALUES (
+         #{pk}, #{name}, #{companyPk}, #{productPk}, #{status}, #{productName},
+          #{gradeName}, #{gradePk}, #{fromProvicePk}, #{fromProviceName}, #{fromCityPk}, #{fromCityName}, #{fromAreaPk},
+          #{fromAreaName}, #{toProviceName}, #{toProvicePk}, #{toCityName}, #{toCityPk}, #{toAreaName}, #{toAreaPk}, #{leastWeight},
+          #{freight}, #{basicPrice}, #{isDelete},#{insertTime}, #{updateTime},#{toTownPk},#{toTownName},#{fromTownName},#{fromTownPk}
+        )
+    ]]>
+    </insert>
+
+    <select id="searchList" parameterType="java.util.Map"
+            resultType="cn.cf.dto.LogisticsRouteDto">
+        SELECT l.pk,
+        IFNULL(l.name,'') AS name,
+        IFNULL(l.companyPk,'') AS
+        companyPk ,
+        IFNULL(l.productPk,'') AS productPk ,
+        IFNULL(l.productName,'') AS productName ,
+        IFNULL(l.gradeName,'') AS
+        gradeName,
+        l.gradePk,
+        IFNULL(l.fromProvicePk,'') AS fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL( l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.toProviceName,'')
+        AS toProviceName,
+        IFNULL(l.toProvicePk,'') AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS
+        toCityPk,
+        IFNULL(l.toAreaName,'') AS toAreaName,
+        IFNULL(l.toAreaPk,'')
+        AS toAreaPk,
+        IFNULL(l.leastWeight,'') AS leastWeight,
+        IFNULL(l.freight,'') AS freight,
+        IFNULL(l.basicPrice,'') AS basicPrice,
+        l.isDelete,
+        l.status,
+        l.insertTime,
+        IFNULL(l.name,'') AS name,
+        IFNULL(l.companyPk,'') AS companyPk ,
+        IFNULL(l.productPk,'') AS
+        productPk ,
+        IFNULL(l.productName,'') AS productName ,
+        IFNULL(l.gradeName,'') AS gradeName,
+        IFNULL(l.fromProvicePk,'') AS
+        fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL(l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.toProviceName,'')
+        AS toProviceName,
+        IFNULL(l.toProvicePk,'') AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS
+        toCityPk,
+        IFNULL(l.toAreaName,'') AS toAreaName,
+        IFNULL(l.toAreaPk,'')
+        AS toAreaPk,
+        IFNULL(l.toTownPk,'') AS toTownPk,
+        IFNULL(l.toTownName,'')
+        AS toTownName,
+        IFNULL(l.fromTownPk,'') AS fromTownPk,
+        IFNULL(l.fromTownName,'') AS fromTownName
+        FROM lg_line l
+        INNER JOIN
+        lg_company lg ON lg.pk = l.companyPk
+        where lg.isDelete = 1 and
+        lg.auditStatus = 1 and isVisable = 1
+        <if test="fromProvicePk != null and fromProvicePk !=''">
+            and l.fromProvicePk = #{fromProvicePk}
+        </if>
+        <if test="fromCityPk != null and fromCityPk !=''">
+            and l.fromCityPk = #{fromCityPk}
+        </if>
+        <if test="fromAreaPk != null and fromAreaPk !=''">
+            and l.fromAreaPk = #{fromAreaPk}
+        </if>
+        <if test="fromTownPk != null and fromTownPk!=''">
+            and l.fromTownPk = #{fromTownPk}
+        </if>
+        <if test="toProvicePk != null and toProvicePk !=''">
+            and l.toProvicePk = #{toProvicePk}
+        </if>
+        <if test="toCityPk != null and toCityPk !=''">
+            and l.toCityPk = #{toCityPk}
+        </if>
+        <if test="toAreaPk != null and toAreaPk !=''">
+            and l.toAreaPk = #{toAreaPk}
+        </if>
+        <if test="toTownPk != null and toTownPk !=''">
+            and l.toTownPk = #{toTownPk}
+        </if>
+        <if test="productPk != null and productPk !=''">
+            and l.productPk = #{productPk}
+        </if>
+        <if test="gradePk != null">
+            and l.gradePk = #{gradePk}
+        </if>
+        <if test="status != null and status !=''">
+            and l.status = #{status}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            and l.isDelete = #{isDelete}
+        </if>
+        <if test="companyPk != null and companyPk!=''">
+            and l.companyPk = #{companyPk}
+        </if>
+        <if test="pk != null and pk !=''">
+            and l.pk = #{pk}
+        </if>
+    </select>
+
+    <select id="searchListByPk" parameterType="java.util.Map"
+            resultType="cn.cf.dto.LogisticsRouteDto">
+        SELECT l.pk,
+        IFNULL(l.name,'') AS name,
+        IFNULL(l.companyPk,'') AS
+        companyPk ,
+        lg.name AS companyName,
+        IFNULL(l.productPk,'') AS productPk
+        ,
+        IFNULL(l.productName,'') AS productName ,
+        l.gradePk,
+        IFNULL(l.gradeName,'') AS gradeName,
+        IFNULL(l.fromProvicePk,'') AS
+        fromProvicePk,
+        IFNULL(l.fromProviceName,'') AS fromProviceName,
+        IFNULL(l.fromCityPk,'') AS fromCityPk,
+        IFNULL( l.fromCityName,'') AS
+        fromCityName ,
+        IFNULL(l.fromAreaPk,'') AS fromAreaPk,
+        IFNULL(l.fromAreaName,'') AS fromAreaName ,
+        IFNULL(l.fromTownPk,'') AS
+        fromTownPk,
+        IFNULL(l.fromTownName,'') AS fromTownName ,
+        IFNULL(l.toProviceName,'') AS toProviceName,
+        IFNULL(l.toProvicePk,'')
+        AS toProvicePk ,
+        IFNULL(l.toCityName ,'') AS toCityName ,
+        IFNULL(l.toCityPk,'') AS toCityPk,
+        IFNULL(l.toAreaName,'') AS
+        toAreaName,
+        IFNULL(l.toAreaPk,'') AS toAreaPk,
+        IFNULL(l.toTownName,'')
+        AS toTownName,
+        IFNULL(l.toTownPk,'') AS toTownPk ,
+        IFNULL(l.leastWeight,'') AS leastWeight,
+        IFNULL(l.freight,'') AS
+        freight,
+        IFNULL(l.basicPrice,'') AS basicPrice,
+        l.isDelete,
+        l.status,
+        l.insertTime,
+        lg.isDelete AS companyIsDelete,
+        lg.isVisable AS
+        companyIsVisable ,
+        lg.auditStatus AS companyAuditStatus
+        FROM lg_line
+        l
+        INNER JOIN lg_company lg ON lg.pk = l.companyPk
+        where 1=1
+        <if test="fromProvicePk != null and fromProvicePk !=''">
+            and l.fromProvicePk = #{fromProvicePk}
+        </if>
+        <if test="fromCityPk != null and fromCityPk !=''">
+            and l.fromCityPk = #{fromCityPk}
+        </if>
+        <if test="fromAreaPk != null and fromAreaPk !=''">
+            and l.fromAreaPk = #{fromAreaPk}
+        </if>
+        <if test="fromTownPk != null and fromTownPk!=''">
+            and l.fromTownPk = #{fromTownPk}
+        </if>
+        <if test="toProvicePk != null and toProvicePk !=''">
+            and l.toProvicePk = #{toProvicePk}
+        </if>
+        <if test="toCityPk != null and toCityPk !=''">
+            and l.toCityPk = #{toCityPk}
+        </if>
+        <if test="toAreaPk != null and toAreaPk !=''">
+            and l.toAreaPk = #{toAreaPk}
+        </if>
+        <if test="toTownPk != null and toTownPk !=''">
+            and l.toTownPk = #{toTownPk}
+        </if>
+        <if test="productPk != null and productPk !=''">
+            and l.productPk = #{productPk}
+        </if>
+        <if test="gradePk != null and gradePk !=''">
+            and l.gradePk = #{gradePk}
+        </if>
+        <if test="status != null and status !=''">
+            and l.status = #{status}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            and l.isDelete = #{isDelete}
+        </if>
+        <if test="companyPk != null and companyPk!=''">
+            and l.companyPk = #{companyPk}
+        </if>
+        <if test="pk != null and pk !=''">
+            and l.pk = #{pk}
+        </if>
+    </select>
+    
+  <select id="countAllLogisticsRoute" parameterType="java.util.Map"
+            resultType="int">
+  select 	count(a.`name`)  from (  SELECT
+       <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+        l.productName,
+        l.gradeName,
+        IFNULL(lp.fromWeight,0) AS fromWeight,
+        IFNULL(lp.toWeight,0) AS toWeight,
+        IFNULL(lp.salePrice,0) AS salePrice,
+        IFNULL(lp.basisPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime
+        FROM
+        lg_line l
+        LEFT JOIN lg_company lc ON lc.pk = l.companyPk
+        LEFT JOIN lg_line_price lp ON lp.linePk = l.pk AND lp.isDelete = 1
+        <include refid="searchGridWhere" />
+        
+       	UNION ALL
+        
+        
+        SELECT
+        <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+        
+        
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+    
+        l.productName,
+        l.gradeName,
+        '0'
+        AS fromWeight,
+        IFNULL(l.leastWeight,0) AS toWeight,
+        IFNULL(l.freight,0)
+        AS salePrice,
+        IFNULL(l.basicPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime
+        FROM
+        lg_line l
+        LEFT
+        JOIN lg_company lc ON lc.pk = l.companyPk
+        <include refid="searchGridWhere" />
+        )  a
+    </select>
+    
+    
+     <select id="getAllLogisticsRoute" parameterType="java.util.Map"
+           resultType="cn.cf.entity.LogisticsRouteExport">
+  select a.* from (  SELECT
+       <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+        l.productName,
+        l.gradeName,
+        IFNULL(lp.fromWeight,0) AS fromWeight,
+        IFNULL(lp.toWeight,0) AS toWeight,
+        IFNULL(lp.salePrice,0) AS salePrice,
+        IFNULL(lp.basisPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime,
+        l.insertTime
+        FROM
+        lg_line l
+        LEFT JOIN lg_company lc ON lc.pk = l.companyPk
+        LEFT JOIN lg_line_price lp ON lp.linePk = l.pk AND lp.isDelete = 1
+        <include refid="searchGridWhere" />
+        
+      	UNION ALL
+        
+        
+        SELECT
+        <choose>
+            <when test="colName == 'LG_ROUTE_COL_ROUTENAME' ">
+                INSERT(l.`name`, 3, 5, '*****') AS name,
+            </when>
+            <otherwise>
+            l.`name` ,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colLogisticsName == 'LG_ROUTE_COL_LOGISTICSCOMNAME' ">
+                INSERT(  lc.`name`, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+               lc.`name` AS companyName,
+            </otherwise>
+        </choose>
+        
+         <choose>
+            <when test="colFromAddress == 'LG_ROUTE_COL_FROMADDRESS' ">
+                 '*****' AS fromProviceName,
+                     '*****' AS fromCityName,
+                        '*****' AS fromAreaName,
+                         '*****' AS fromTownName,
+            </when>
+            <otherwise>
+             l.fromProviceName,
+                l.fromCityName,
+                  l.fromAreaName,
+                   l.fromTownName,
+            </otherwise>
+        </choose>
+        
+        
+          <choose>
+            <when test="colToAddress == 'LG_ROUTE_COL_TOADDRESS' ">
+                 '*****' AS toProviceName,
+                   '*****' AS toCityName,
+                     '*****' AS toAreaName,
+                       '*****' AS toTownName,
+            </when>
+            <otherwise>
+             l.toProviceName,
+               l.toAreaName,
+               l.toCityName,
+                  l.toTownName,
+            </otherwise>
+        </choose>
+    
+        l.productName,
+        l.gradeName,
+        '0'
+        AS fromWeight,
+        IFNULL(l.leastWeight,0) AS toWeight,
+        IFNULL(l.freight,0)
+        AS salePrice,
+        IFNULL(l.basicPrice,0) AS basicPrice,
+        str_to_date(l.updateTime,'%Y-%m-%d %H:%i:%s') as updateTime,
+        l.insertTime
+        FROM
+        lg_line l
+        LEFT
+        JOIN lg_company lc ON lc.pk = l.companyPk
+        <include refid="searchGridWhere" />
+        )  a 
+        
+         <if test="orderName != null">
+            order by a.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+        
+    </select>
+    
+</mapper>

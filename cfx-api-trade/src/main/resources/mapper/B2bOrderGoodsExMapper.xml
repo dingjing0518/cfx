@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderGoodsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,weight,boxes,originalPrice,presentPrice,originalFreight,presentFreight,originalTotalFreight,presentTotalFreight,weightShipped,boxesShipped,orderStatus,childOrderNumber,logisticsPk,logisticsStepInfoPk,afterBoxes,afterWeight,logisticsCarrierPk,logisticsCarrierName,goodsType,goodsInfo,childContractNo
+	    ]]>
+	</sql>
+	<select id="searchOrderGoodsList" resultType="cn.cf.dto.B2bOrderGoodsDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		o.*
+		FROM b2b_order_goods o
+		where 
+		 o.orderNumber = #{orderNumber}
+		<!-- 此标识区分是否已经全部发货 -->	
+		<if test="flag != null">
+			and  o.afterWeight - o.weightShipped  >0
+		</if>
+		<if test="cancel != null">
+			and o.orderStatus != -1
+		</if>
+		order by o.goodsPk desc
+		</select>
+		
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+
+		INSERT INTO b2b_order_goods (goodsPk,
+		orderNumber,weight, boxes,originalPrice, presentPrice,originalFreight, 
+		presentFreight, originalTotalFreight,presentTotalFreight,orderStatus,childOrderNumber,logisticsPk,
+		logisticsStepInfoPk,goodsType,afterBoxes,afterWeight,logisticsCarrierPk,logisticsCarrierName,
+		childContractNo,goodsInfo,block
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.goodsPk},
+			#{item.orderNumber},#{item.weight},#{item.boxes}, #{item.originalPrice},#{item.presentPrice},
+			#{item.originalFreight},#{item.presentFreight}, #{item.originalTotalFreight},#{item.presentTotalFreight},#{item.orderStatus}, 
+			#{item.childOrderNumber},#{item.logisticsPk},#{item.logisticsStepInfoPk},#{item.goodsType},#{item.afterBoxes},
+			#{item.afterWeight},#{item.logisticsCarrierPk},#{item.logisticsCarrierName},#{item.childContractNo},#{item.goodsInfo},
+			#{item.block}
+			)
+		</foreach>
+	</insert>
+	
+	<update id="updateOrderStatus">
+		update b2b_order_goods
+		set orderStatus = #{orderStatus}
+		where orderNumber = #{orderNumber}
+		and orderStatus !=-1
+	</update>
+	
+	<select id="getbyChildContractNo"   resultType="cn.cf.dto.B2bOrderGoodsDtoEx"> 
+	SELECT
+ 
+IFNULL( SUM(IF(orderStatus>0  , afterWeight,weight)),0)  AS weight,
+	IFNULL(SUM(boxes), 0) AS boxes
+FROM
+	b2b_order_goods
+WHERE
+	childContractNo = #{childContractNo}
+AND orderStatus !=- 1
+	
+	</select>
+	<update id="updateOrderGoods">
+		update b2b_order_goods
+		<set>
+			<if test="presentPrice != null">
+				presentPrice = #{presentPrice},
+			</if>
+			<if test="presentFreight != null">
+				presentFreight = #{presentFreight},
+			</if>
+			<if test="presentTotalFreight != null">
+				presentTotalFreight = #{presentTotalFreight},
+			</if>
+			<if test="weightShipped != null">
+				weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null">
+				boxesShipped = #{boxesShipped},
+			</if>
+			<if test="orderStatus != null">
+				orderStatus = #{orderStatus},
+			</if>
+			<if test="afterBoxes != null">
+				afterBoxes = #{afterBoxes},
+			</if>
+			<if test="afterWeight != null">
+				afterWeight = #{afterWeight},
+			</if>
+			<if test="otherDiscount !=null">
+				otherDiscount =#{otherDiscount},
+			</if>
+		</set>
+		where childOrderNumber = #{childOrderNumber}
+	</update>
+</mapper>
+

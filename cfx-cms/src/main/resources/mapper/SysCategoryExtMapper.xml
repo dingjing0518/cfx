@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysCategoryExtDao">
+
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,parentId,isDelete,isVisable,sort,showType
+	    ]]>
+	</sql>
+
+	<select id="valiDateCounts" resultType="int">
+		select count(1) from sys_category
+		where isDelete = 1
+		<if test="name != null and name !=''">
+			and name = #{name}
+		</if>
+		<if test="parentId != null and parentId !=''">
+			and parentId = #{parentId}
+		</if>
+		<if test="pk != null and pk !=''">
+			and pk !=#{pk}
+		</if>
+	</select>
+
+	<select id="getCategorys" resultType="cn.cf.dto.SysCategoryExtDto">
+		SELECT
+		<include refid="columns" />
+		from sys_category where isDelete = 1 and isVisable = 1
+		GROUP BY parentId
+	</select>
+
+	<select id="getByParentId" resultType="cn.cf.dto.SysCategoryExtDto" parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_category where isDelete = 1 and isVisable = 1
+		and parentId = #{parentPk}
+	</select>
+	<select id="getNewsCates" resultType="cn.cf.dto.SysCategoryExtDto" parameterType="java.util.Map">
+		SELECT
+		nc.categoryPk
+		FROM
+		sys_category c
+		RIGHT JOIN sys_news_category nc ON c.pk = nc.categoryPk
+		WHERE
+		nc.newsPk = #{newsPk}
+	</select>
+
+	<select id="searchListByParentPk" resultType="cn.cf.dto.SysCategoryExtDto" parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		from sys_category where
+		isDelete=1 and isVisable=1
+		<if test="parentPks != null and parentPks !=''">
+			${parentPks}
+		</if>
+
+	</select>
+
+	<select id="getAllCategory" resultType="cn.cf.dto.SysCategoryDto">
+	SELECT 	<include refid="columns" /> from sys_category where isDelete = 1
+	</select>
+</mapper>
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.CmsDao">
+
+
+     
+    <select id="getSaleByStorePk" resultType="cn.cf.dto.MarketingOrderMemberDto"  parameterType="java.lang.String">
+     SELECT c.accountPk as stAccount ,
+            c.companyPk as  storePk,
+            y.province as stProvince,
+            y.city as stCity ,
+            y.area as stArea,
+            CONCAT( y.province,y.city ,y.area) as stAddress
+      FROM marketing_company  c
+      INNER JOIN   marketing_personnel   p
+     ON ( p.accountPk = c.accountPk  AND p.isDelete = 1 AND p.isVisable =1 )
+      left join b2b_store s on  s.pk = c.companyPk
+      left join b2b_company y on  y.pk = s.companyPk
+      WHERE
+         c.companyPk = #{storePk}
+         AND c.companyType = 2
+     </select>
+
+     
+     <select id="getSaleByPurCompanyPk" resultType="cn.cf.dto.MarketingOrderMemberDto"  parameterType="java.lang.String">
+         SELECT c.accountPk as purAccount ,
+                c.companyPk as  purchaserPk,
+                y.province as purProvince,
+                y.city as purCity ,
+                y.area as purArea,
+                CONCAT( y.province,y.city ,y.area) as purAddress
+                FROM marketing_company  c
+          INNER JOIN   marketing_personnel   p
+          ON ( p.accountPk = c.accountPk  AND p.isDelete = 1 AND p.isVisable =1 )
+          left join b2b_company y on  y.pk = c.companyPk
+          WHERE
+             c.companyPk = #{purchaserPk}
+         AND  c.companyType = 1
+     </select>
+
+    <select id="getCfOrderByOredrPk" resultType="cn.cf.dto.B2bOrderDto"  parameterType="java.lang.String">
+        SELECT *  FROM b2b_order
+        WHERE
+            orderNumber = #{orderPk}
+    </select>
+
+    <insert id="insertOrderMember" useGeneratedKeys="true"  keyProperty="orderPk">
+    <![CDATA[
+        INSERT INTO marketing_order_member (
+            orderPk, type, storePk, purchaserPk, purProvince, purCity, purArea, purAddress, stProvince, stCity, stArea, stAddress,purAccount,stAccount
+        ) VALUES (
+                     #{orderPk}, #{type}, #{storePk}, #{purchaserPk}, #{purProvince}, 
+                     #{purCity}, #{purArea}, #{purAddress}, #{stProvince}, #{stCity}, #{stArea}, #{stAddress},#{purAccount},#{stAccount}
+                 )
+        ]]>
+	</insert>
+
+	<select id="getByPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT	*  FROM b2b_company where pk = #{pk}	</select>
+		
+   	<select id="getByStorePk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String"> 
+		SELECT	c.*  FROM b2b_company c
+		INNER JOIN  b2b_store s on c.pk = s.companyPk
+		 where s.pk = #{storePk}	</select>
+		 
+		 
+    <select id="getCfContractByOredrPk" resultType="cn.cf.dto.B2bContractDto"  parameterType="java.lang.String">
+        SELECT *  FROM b2b_contract
+        WHERE
+            contractNo = #{orderPk}
+    </select>
+    
+      <select id="getMarketingOrderMemberByPk" resultType="cn.cf.dto.MarketingOrderMemberDto"  parameterType="java.lang.String">
+        SELECT *  FROM marketing_order_member
+        WHERE
+            orderPk = #{orderPk}
+    </select>
+    
+    
+</mapper>

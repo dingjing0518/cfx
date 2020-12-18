@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgMemberDeliveryOrderDaoEx">
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,deliveryOrderPk,insertTime,isDelete
+	    ]]>
+	</sql>
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_member_deliveryorder (
+         pk, memberPk, deliveryOrderPk, insertTime, isDelete
+        ) VALUES (
+         #{pk}, #{memberPk}, #{deliveryOrderPk}, now(), #{isDelete}
+        )
+    ]]>
+	</insert>
+
+	<!-- 跟俊业务员pk查询该业务员哪些订单可见 -->
+	<select id="getVisibleDeliveryOrderByMemberPk" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT lg_member_deliveryorder.`deliveryOrderPk` 
+		FROM lg_member_deliveryorder 
+		WHERE lg_member_deliveryorder.`memberPk`=#{memberPk}   AND lg_member_deliveryorder.`isDelete`=1
+	</select>
+
+
+</mapper>

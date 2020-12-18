@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+	<mapper namespace="cn.cf.dao.B2bContractExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		contractNo,contractStatus,contractSource,saleDepartment,startTime,endTime,days,covenant,supplementary,priceType,member,
+		employeePk,salesman,salesmanNumber,supplierPk,purchaserPk,storePk,storeName,contractType,
+		purchaserType,contractRate,contractCount,totalAmount,logisticsModel,logisticsModelPk,logisticsModelType,carrier,carrierPk,
+		isDelete,insertTime,updateTime,paymentName,paymentType,
+		paymentTime,economicsGoodsName,economicsGoodsType,source,orderAmount,plantName,plantPk,
+		supplierInfo,purchaserInfo,addressInfo,	block
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(contractNo)">
+				AND contractNo LIKE '%${contractNo}%'			</if>
+			<if test="@Ognl@isNotEmpty(contractStatus)">
+				AND contractStatus = #{contractStatus}			</if>
+			<if test="@Ognl@isNotEmpty(contractSource)">
+				AND contractSource = #{contractSource}			</if>
+			<if test="@Ognl@isNotEmpty(saleDepartment)">
+				AND saleDepartment = #{saleDepartment}			</if>
+			<if test="@Ognl@isNotEmpty(saleCompany)">
+				AND saleCompany = #{saleCompany}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeBegin)">
+				AND startTime >= #{startTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeEnd)">
+				AND startTime &lt;= #{startTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeBegin)">
+				AND endTime >= #{endTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeEnd)">
+				AND endTime &lt;= #{endTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(days)">
+				AND days = #{days}			</if>
+			<if test="@Ognl@isNotEmpty(covenant)">
+				AND covenant = #{covenant}			</if>
+			<if test="@Ognl@isNotEmpty(supplementary)">
+				AND supplementary = #{supplementary}			</if>
+			<if test="@Ognl@isNotEmpty(priceType)">
+				AND priceType = #{priceType}			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(salesman)">
+				AND salesman = #{salesman}			</if>
+			<if test="@Ognl@isNotEmpty(salesmanNumber)">
+				AND salesmanNumber = #{salesmanNumber}			</if>
+			<if test="@Ognl@isNotEmpty(requireAccount)">
+				AND requireAccount = #{requireAccount}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName LIKE '%${storeName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contractType)">
+				AND contractType = #{contractType}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserType)">
+				AND purchaserType = #{purchaserType}			</if>
+			<if test="@Ognl@isNotEmpty(contractRate)">
+				AND contractRate = #{contractRate}			</if>
+			<if test="@Ognl@isNotEmpty(contractCount)">
+				AND contractCount = #{contractCount}			</if>
+			<if test="@Ognl@isNotEmpty(totalAmount)">
+				AND totalAmount = #{totalAmount}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModel)">
+				AND logisticsModel = #{logisticsModel}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				AND logisticsModelPk = #{logisticsModelPk}			</if>
+			<if test="@Ognl@isNotEmpty(telephone)">
+				AND telephone = #{telephone}			</if>
+			<if test="@Ognl@isNotEmpty(carrier)">
+				AND carrier = #{carrier}			</if>
+			<if test="@Ognl@isNotEmpty(carrierPk)">
+				AND carrierPk = #{carrierPk}			</if>
+			<if test="@Ognl@isNotEmpty(remark)">
+				AND remark = #{remark}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(toAddress)">
+				AND toAddress = #{toAddress}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeStart)">
+				AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND paymentName = #{paymentName}			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				AND paymentType = #{paymentType}			</if>
+			<if test="@Ognl@isNotEmpty(payTimeStart)">
+				AND str_to_date(paymentTime, '%Y-%m-%d') >= #{payTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(payTimeEnd)">
+				AND str_to_date(paymentTime, '%Y-%m-%d') &lt;= #{payTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND economicsGoodsType = #{economicsGoodsType}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+			<if test="purchaserName != null and purchaserName !=''">
+                 AND json_extract(purchaserInfo, '$.purchaserName') like '%${purchaserName}%'
+            </if>
+			AND isDelete = 1
+		</where>
+	</sql>
+
+	<update id="updateContract" parameterType="cn.cf.dto.B2bContractExtDto">
+
+		UPDATE b2b_contract set contractStatus = #{contractStatus} where contractNo = #{contractNo}
+
+	</update>
+
+	<select id="searchGridCountExt" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		count(1)
+		FROM
+		b2b_contract
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bContractExtDto"
+		parameterType="java.util.Map">
+	SELECT
+		con.contractNo, con.contractStatus, con.contractSource, con.saleDepartment, con.startTime, con.endTime, con.days,
+		con.covenant, con.supplementary, con.priceType, con.member, con.employeePk, con.salesman, con.salesmanNumber,
+		con.supplierPk, con.purchaserPk, con.storePk,
+		con.contractType, con.purchaserType, con.contractRate, con.contractCount,con.orderAmount, con.totalAmount, con.logisticsModel,
+		con.logisticsModelPk, con.logisticsModelType, con.carrier, con.carrierPk, con.isDelete, con.insertTime, updateTime, con.paymentName, con.paymentType,
+		con.paymentTime, con.economicsGoodsName, con.economicsGoodsType, con.source, con.plantName,
+		con.plantPk,
+		con.supplierInfo,
+		con.purchaserInfo,
+		con.addressInfo,
+		 CASE con.contractStatus
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待审批'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'部分发货'
+		WHEN 5 THEN
+		'待收货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN - 1 THEN
+		'已关闭'
+		END AS contractStatusName,
+		<choose>
+			<when test="storeNameCol == 'OPER_CONTRACTMG_COL_STORENAME'">
+				INSERT (con.storeName,3,5,'*****') AS storeName,
+			</when>
+			<when test="storeNameCol == 'YARN_ORDER_CONTRACTMG_COL_STORENAME'">
+				INSERT (con.storeName,3,5,'*****') AS storeName,
+			</when>
+			<when test="storeNameCol == 'MARKET_CONTRACT_MANAGE_COL_STORENAME'">
+				INSERT (con.storeName,3,5,'*****') AS storeName,
+			</when>
+			
+			<otherwise>
+				con.storeName,
+			</otherwise>
+		</choose>
+		con.block
+		FROM
+		(
+		SELECT
+		<include refid="columns"/>
+		FROM
+		b2b_contract
+		<include refid="searchGridWhere"/>
+		<if test="orderName != null and orderName != ''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+		) con
+		<!-- LEFT JOIN b2b_address ad ON con.addressPk = ad.pk -->
+		<if test="orderName != null and orderName != ''">
+			order by ${orderName} ${orderType}
+		</if>
+	</select>
+	
+	
+	<select id = "getContractByPurchaserPk" parameterType="java.util.Map" resultType="cn.cf.entity.OrderNumEntity" >
+		SELECT  a.*,b.* FROM (	SELECT
+			IFNULL(SUM(CASE 
+							WHEN o.block = "cf" 
+							THEN  og.weight 
+							ELSE  	 og.weight / 1000		
+							END	
+						),0) AS weight,
+				IFNULL(count(og.contractNo ),0)AS number
+			FROM
+				b2b_contract_goods og
+		INNER JOIN b2b_contract o ON o.contractNo = og.contractNo
+			WHERE
+				str_to_date(
+					o.receivablesTime,
+					'%Y-%m-%d'
+				) = str_to_date(#{date}, '%Y-%m-%d')
+			AND o.contractStatus > 2
+			AND o.economicsGoodsType = #{economicsGoodsType}
+		AND o.purchaserPk =  #{purchaserPk}
+		AND og.contractStatus != -1) a ,
+(SELECT
+		 	IFNULL(SUM(og.totalAmount),0) AS amount
+			FROM
+				b2b_contract og
+			WHERE
+				str_to_date(
+					og.receivablesTime,
+					'%Y-%m-%d'
+				) = str_to_date(#{date}, '%Y-%m-%d')
+			AND og.contractStatus > 2
+			AND og.economicsGoodsType = #{economicsGoodsType}
+		AND og.purchaserPk =  #{purchaserPk} ) b
+		
+	</select>
+</mapper>
+

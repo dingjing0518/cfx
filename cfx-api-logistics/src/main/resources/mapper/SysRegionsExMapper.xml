@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysRegionsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,parentPk,isDelete,isVisable
+	    ]]>
+	</sql>
+
+	<select id="getByNameEx" resultType="cn.cf.dto.SysRegionsDto"
+		parameterType="Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_regions 
+		where name = #{name} 
+		<if test="parentPk != null and parentPk!='' ">
+			and sys_regions.parentPk = #{parentPk}
+		</if>
+		<if test="isDelete != null ">
+			and sys_regions.isDelete = #{isDelete}
+		</if>
+		<if test="isVisable != null ">
+			and sys_regions.isVisable = #{isVisable}
+		</if>
+	</select>
+	
+</mapper>
+

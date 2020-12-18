@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SxMaterialExtDao">
+
+<!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+        pk,name,sort,isDelete,isVisable,insertTime
+        ]]>
+    </sql>
+    
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name LIKE '%${name}%'			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeStart)">
+				AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+				AND isDelete=1
+		</where>
+	</sql>
+    
+    
+    <select id="getByMap" resultType="cn.cf.dto.SxMaterialDto"
+        parameterType="java.util.Map">
+        SELECT 
+         <include refid="columns" /> 
+         FROM sx_material
+        <include refid="searchGridWhere" />
+    </select>
+    
+    <select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sx_material
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchGridExt" resultType="cn.cf.dto.SxMaterialExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,name,sort,isDelete,isVisable,
+			(CASE isVisable
+				WHEN 1 THEN
+					'启用'
+				WHEN 2 THEN
+					'禁用'
+				END
+			) isVisableName,
+		(
+		CASE isBlend
+		WHEN 1 THEN
+		'是'
+		WHEN 2 THEN
+		'否'
+		END
+		) isBlendName,
+		insertTime
+		FROM sx_material
+		<include refid="searchGridWhere" />
+		<if test="orderName != null and orderName !=''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="searchGridExtTwoCount" parameterType="java.util.Map"
+			resultType="int">
+		SELECT
+		count(1)
+		FROM
+		sx_material a
+		LEFT JOIN sx_material b ON a.parentPk = b.pk
+		<include refid="searchGridWhereTwo" />
+	</select>
+	<select id="searchGridTwoExt" resultType="cn.cf.dto.SxMaterialExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		a.pk,
+		a. NAME,
+		a.sort,
+		a.isDelete,
+		a.isVisable,
+		(
+		CASE a.isVisable
+		WHEN 1 THEN
+		'是'
+		WHEN 2 THEN
+		'否'
+		END
+		) isVisableName,
+		(
+		CASE a.isBlend
+		WHEN 1 THEN
+		'是'
+		WHEN 2 THEN
+		'否'
+		END
+		) isBlendName,
+		a.insertTime,
+		a.parentPk,
+		b. NAME AS parentName
+		FROM
+		sx_material a
+		LEFT JOIN sx_material b ON a.parentPk = b.pk
+		<include refid="searchGridWhereTwo" />
+		<if test="orderName != null and orderName !=''">
+			order by a.${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<sql id="searchGridWhereTwo">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			a.isDelete=1
+		
+			<if test="name != null and name !=''">
+				AND a.name LIKE '%${name}%'
+			</if>
+			<if test="parentName != null and parentName !=''">
+				AND b. NAME LIKE '%${parentName}%'
+			</if>
+			
+			<choose>
+				<when test="parentPk != null and parentPk !=''">
+				 	AND a. parentPk = #{parentPk}
+				</when>
+				<otherwise>
+						AND a.parentPk != '-1'
+				</otherwise>
+			</choose>
+		
+			<if test="sort != null and sort !=''">
+				AND a.sort = #{sort}
+			</if>
+			<if test="isVisable != null and isVisable !=''">
+				AND a.isVisable = #{isVisable}
+			</if>
+			<if test="insertTimeStart != null and insertTimeStart !=''">
+				AND str_to_date(a.insertTime, '%Y-%m-%d') >= #{insertTimeStart}
+			</if>
+			<if test="insertTimeEnd != null and insertTimeEnd !=''">
+				AND str_to_date(a.insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}
+			</if>
+
+		</where>
+	</sql>
+
+	<select id="check" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from sx_material
+		<where>
+		1=1
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk != #{pk}
+			</if>
+			
+			<if test="@Ognl@isNotEmpty(name)">
+				AND (name = #{name}
+			</if>
+				<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+				
+			)
+			AND isDelete=1
+		</where>
+		
+		
+	</select>
+	
+	
+	<update id="updateMaterial" parameterType="cn.cf.dto.SxMaterialExtDto">
+		UPDATE sx_material
+		<set>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="isBlend != null and isBlend != ''">
+				isBlend = #{isBlend},
+			</if>
+
+			<if test="parentPk != null and parentPk != ''">
+				parentPk = #{parentPk},
+			</if>
+
+			<if test="sort != null and sort != ''">
+				sort = #{sort},
+			</if>
+		
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+
+	<select id="getSecondMaterialList" resultType="cn.cf.dto.SxMaterialDto" parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sx_material
+		where parentPk = #{parentPk} and isDelete = 1 and isVisable = 1
+	</select>
+    
+</mapper>
+

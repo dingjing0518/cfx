@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLoanNumberDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,loanNumber,contractNumber,bankPk,bankName,loanStatus,loanAmount,loanStartTime,loanEndTime,repaymentTime,principal,interest,penalty,compound,economicsGoodsName,economicsGoodsType,purchaserPk,purchaserName,supplierPk,supplierName,organizationCode,customerNumber,loanAccount,insertTime,totalRate,bankRate,sevenRate,repaidInterest,repaidSerCharge,isOverdue,qrCode,returnUrl
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderNumber">
+    <![CDATA[
+        INSERT INTO b2b_loan_number (
+         orderNumber, loanNumber, contractNumber, bankPk, bankName, loanStatus, loanAmount, loanStartTime, loanEndTime, repaymentTime, principal, interest, penalty, compound, economicsGoodsName, economicsGoodsType, purchaserPk, purchaserName, supplierPk, supplierName, organizationCode, customerNumber, loanAccount, insertTime, totalRate, bankRate, sevenRate, repaidInterest, repaidSerCharge, isOverdue, qrCode, returnUrl
+        ) VALUES (
+         #{orderNumber}, #{loanNumber}, #{contractNumber}, #{bankPk}, #{bankName}, #{loanStatus}, #{loanAmount}, #{loanStartTime}, #{loanEndTime}, #{repaymentTime}, #{principal}, #{interest}, #{penalty}, #{compound}, #{economicsGoodsName}, #{economicsGoodsType}, #{purchaserPk}, #{purchaserName}, #{supplierPk}, #{supplierName}, #{organizationCode}, #{customerNumber}, #{loanAccount}, #{insertTime}, #{totalRate}, #{bankRate}, #{sevenRate}, #{repaidInterest}, #{repaidSerCharge}, #{isOverdue}, #{qrCode}, #{returnUrl}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bLoanNumber">
+    <![CDATA[
+        UPDATE b2b_loan_number SET
+	        loanNumber = #{loanNumber} , contractNumber = #{contractNumber} , bankPk = #{bankPk} , bankName = #{bankName} , loanStatus = #{loanStatus} , loanAmount = #{loanAmount} , loanStartTime = #{loanStartTime} , loanEndTime = #{loanEndTime} , repaymentTime = #{repaymentTime} , principal = #{principal} , interest = #{interest} , penalty = #{penalty} , compound = #{compound} , economicsGoodsName = #{economicsGoodsName} , economicsGoodsType = #{economicsGoodsType} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , organizationCode = #{organizationCode} , customerNumber = #{customerNumber} , loanAccount = #{loanAccount} , insertTime = #{insertTime} , totalRate = #{totalRate} , bankRate = #{bankRate} , sevenRate = #{sevenRate} , repaidInterest = #{repaidInterest} , repaidSerCharge = #{repaidSerCharge} , isOverdue = #{isOverdue} , qrCode = #{qrCode} , returnUrl = #{returnUrl}  
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bLoanNumber">
+    <![CDATA[
+        DELETE FROM b2b_loan_number WHERE
+        orderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(loanNumber)">
+				AND loanNumber = #{loanNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractNumber)">
+				AND contractNumber = #{contractNumber}			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(loanStatus)">
+				AND loanStatus = #{loanStatus}			</if>
+			<if test="@Ognl@isNotEmpty(loanAmount)">
+				AND loanAmount = #{loanAmount}			</if>
+			<if test="@Ognl@isNotEmpty(loanStartTimeBegin)">
+				AND loanStartTime >= #{loanStartTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(loanStartTimeEnd)">
+				AND loanStartTime &lt;= #{loanStartTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeBegin)">
+				AND loanEndTime >= #{loanEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeEnd)">
+				AND loanEndTime &lt;= #{loanEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(repaymentTimeBegin)">
+				AND repaymentTime >= #{repaymentTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(repaymentTimeEnd)">
+				AND repaymentTime &lt;= #{repaymentTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(principal)">
+				AND principal = #{principal}			</if>
+			<if test="@Ognl@isNotEmpty(interest)">
+				AND interest = #{interest}			</if>
+			<if test="@Ognl@isNotEmpty(penalty)">
+				AND penalty = #{penalty}			</if>
+			<if test="@Ognl@isNotEmpty(compound)">
+				AND compound = #{compound}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND economicsGoodsType = #{economicsGoodsType}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}			</if>
+			<if test="@Ognl@isNotEmpty(customerNumber)">
+				AND customerNumber = #{customerNumber}			</if>
+			<if test="@Ognl@isNotEmpty(loanAccount)">
+				AND loanAccount = #{loanAccount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(totalRate)">
+				AND totalRate = #{totalRate}			</if>
+			<if test="@Ognl@isNotEmpty(bankRate)">
+				AND bankRate = #{bankRate}			</if>
+			<if test="@Ognl@isNotEmpty(sevenRate)">
+				AND sevenRate = #{sevenRate}			</if>
+			<if test="@Ognl@isNotEmpty(repaidInterest)">
+				AND repaidInterest = #{repaidInterest}			</if>
+			<if test="@Ognl@isNotEmpty(repaidSerCharge)">
+				AND repaidSerCharge = #{repaidSerCharge}			</if>
+			<if test="@Ognl@isNotEmpty(isOverdue)">
+				AND isOverdue = #{isOverdue}			</if>
+			<if test="@Ognl@isNotEmpty(qrCode)">
+				AND qrCode = #{qrCode}			</if>
+			<if test="@Ognl@isNotEmpty(returnUrl)">
+				AND returnUrl = #{returnUrl}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_loan_number
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where orderNumber = #{orderNumber}	</select>
+	<select id="getByLoanNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where loanNumber = #{loanNumber}	</select>
+	<select id="getByContractNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where contractNumber = #{contractNumber}	</select>
+	<select id="getByBankPk" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where bankPk = #{bankPk}	</select>
+	<select id="getByBankName" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where bankName = #{bankName}	</select>
+	<select id="getByEconomicsGoodsName" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where economicsGoodsName = #{economicsGoodsName}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where purchaserName = #{purchaserName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where supplierName = #{supplierName}	</select>
+	<select id="getByOrganizationCode" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where organizationCode = #{organizationCode}	</select>
+	<select id="getByCustomerNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where customerNumber = #{customerNumber}	</select>
+	<select id="getByLoanAccount" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where loanAccount = #{loanAccount}	</select>
+	<select id="getByQrCode" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where qrCode = #{qrCode}	</select>
+	<select id="getByReturnUrl" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_loan_number where returnUrl = #{returnUrl}	</select>
+</mapper>
+

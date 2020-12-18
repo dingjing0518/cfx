@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMenuDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,parentPk,name,type,displayName,sort,isDelete,companyType,block
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_menu (
+         pk, parentPk, name, type, displayName, sort, isDelete, companyType,block
+        ) VALUES (
+         #{pk}, #{parentPk}, #{name}, #{type}, #{displayName}, #{sort}, #{isDelete}, #{companyType} ,#{block}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bMenu">
+    <![CDATA[
+        UPDATE b2b_menu SET
+	        parentPk = #{parentPk} , name = #{name} , type = #{type} , displayName = #{displayName} , sort = #{sort} ,
+	        isDelete = #{isDelete} , companyType = #{companyType}  ,block = #{block}
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bMenu">
+    <![CDATA[
+        DELETE FROM b2b_menu WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(displayName)">
+				AND displayName = #{displayName}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_menu
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu where pk = #{pk}	</select>
+	<select id="getByParentPk" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu where parentPk = #{parentPk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu where name = #{name}	</select>
+	<select id="getByDisplayName" resultType="cn.cf.dto.B2bMenuDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_menu where displayName = #{displayName}	</select>
+</mapper>
+

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgMemberInvoicesDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,month,billingAmount,insertTime,updateTime,contactTel,contactName,contactAddress,applyTime,status,bankAccount,bankName,regTel,regAddress,taxID,name,invoiceTime
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_member_invoices (
+         pk, month, billingAmount, insertTime, updateTime, contactTel, contactName, contactAddress, applyTime, status, bankAccount, bankName, regTel, regAddress, taxID, name, invoiceTime
+        ) VALUES (
+         #{pk}, #{month}, #{billingAmount}, #{insertTime}, #{updateTime}, #{contactTel}, #{contactName}, #{contactAddress}, #{applyTime}, #{status}, #{bankAccount}, #{bankName}, #{regTel}, #{regAddress}, #{taxId}, #{name}, #{invoiceTime}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgMemberInvoices">
+    <![CDATA[
+        UPDATE lg_member_invoices SET
+	        month = #{month} , billingAmount = #{billingAmount} , insertTime = #{insertTime} , updateTime = #{updateTime} , contactTel = #{contactTel} , contactName = #{contactName} , contactAddress = #{contactAddress} , applyTime = #{applyTime} , status = #{status} , bankAccount = #{bankAccount} , bankName = #{bankName} , regTel = #{regTel} , regAddress = #{regAddress} , taxID = #{taxId} , name = #{name} , invoiceTime = #{invoiceTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgMemberInvoices">
+    <![CDATA[
+        DELETE FROM lg_member_invoices WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(month)">
+				AND month = #{month}			</if>
+			<if test="@Ognl@isNotEmpty(billingAmount)">
+				AND billingAmount = #{billingAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(contactTel)">
+				AND contactTel = #{contactTel}			</if>
+			<if test="@Ognl@isNotEmpty(contactName)">
+				AND contactName = #{contactName}			</if>
+			<if test="@Ognl@isNotEmpty(contactAddress)">
+				AND contactAddress = #{contactAddress}			</if>
+			<if test="@Ognl@isNotEmpty(applyTimeBegin)">
+				AND applyTime >= #{applyTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(applyTimeEnd)">
+				AND applyTime &lt;= #{applyTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(regTel)">
+				AND regTel = #{regTel}			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				AND regAddress = #{regAddress}			</if>
+			<if test="@Ognl@isNotEmpty(taxId)">
+				AND taxID = #{taxId}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceTimeBegin)">
+				AND invoiceTime >= #{invoiceTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceTimeEnd)">
+				AND invoiceTime &lt;= #{invoiceTimeEnd}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_member_invoices
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where pk = #{pk}	</select>
+	<select id="getByMonth" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where month = #{month}	</select>
+	<select id="getByContactTel" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where contactTel = #{contactTel}	</select>
+	<select id="getByContactName" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where contactName = #{contactName}	</select>
+	<select id="getByContactAddress" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where contactAddress = #{contactAddress}	</select>
+	<select id="getByBankAccount" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where bankAccount = #{bankAccount}	</select>
+	<select id="getByBankName" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where bankName = #{bankName}	</select>
+	<select id="getByRegTel" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where regTel = #{regTel}	</select>
+	<select id="getByRegAddress" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where regAddress = #{regAddress}	</select>
+	<select id="getByTaxId" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where taxID = #{taxId}	</select>
+	<select id="getByName" resultType="cn.cf.dto.LgMemberInvoicesDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_member_invoices where name = #{name}	</select>
+</mapper>
+

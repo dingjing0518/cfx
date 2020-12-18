@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.C2bMarrieddealDaoEx">
+ <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(supplierPk)">
+                AND supplierPk = #{supplierPk}
+            </if>
+            <if test="@Ognl@isNotEmpty(supplierName)">
+                AND supplierName = #{supplierName}
+            </if>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}
+            </if>
+            <if test="@Ognl@isNotEmpty(status)">
+	            AND status = #{status}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditStatus)">
+                AND auditStatus = #{auditStatus}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditTimeBegin)">
+                AND auditTime >= #{auditTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditTimeEnd)">
+                AND auditTime &lt;= #{auditTimeEnd}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditPk)">
+                AND auditPk = #{auditPk}
+            </if>
+            <if test="@Ognl@isNotEmpty(contactsTel)">
+                AND contactsTel = #{contactsTel}
+            </if>
+            <if test="@Ognl@isNotEmpty(contacts)">
+                AND contacts = #{contacts}
+            </if>
+            <if test="@Ognl@isNotEmpty(brandPk)">
+                AND brandPk IN
+                <foreach item="item" index="index" collection="brandPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(brandName)">
+                AND brandName = #{brandName}
+            </if>
+            <if test="@Ognl@isNotEmpty(productName)">
+                AND productName = #{productName}
+            </if>
+            <if test="@Ognl@isNotEmpty(productPk)">
+                AND productPk IN
+                <foreach item="item" index="index" collection="productPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(specifications)">
+                AND specifications = #{specifications}
+            </if>
+            <if test="@Ognl@isNotEmpty(specName)">
+                AND specName = #{specName}
+            </if>
+            <if test="@Ognl@isNotEmpty(specPk)">
+                AND specPk IN
+                <foreach item="item" index="index" collection="specPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(seriesName)">
+                AND seriesName = #{seriesName}
+            </if>
+            <if test="@Ognl@isNotEmpty(seriesPk)">
+                AND seriesPk IN
+                <foreach item="item" index="index" collection="seriesPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(gradeName)">
+                AND gradeName = #{gradeName}
+            </if>
+            <if test="@Ognl@isNotEmpty(gradePk)">
+                AND gradePk IN
+                <foreach item="item" index="index" collection="gradePk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(varietiesName)">
+                AND varietiesName = #{varietiesName}
+            </if>
+            <if test="@Ognl@isNotEmpty(varietiesPk)">
+                AND varietiesPk IN
+                <foreach item="item" index="index" collection="varietiesPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(seedvarietyName)">
+                AND seedvarietyName = #{seedvarietyName}
+            </if>
+            <if test="@Ognl@isNotEmpty(seedvarietyPk)">
+                AND seedvarietyPk IN
+                <foreach item="item" index="index" collection="seedvarietyPk" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="@Ognl@isNotEmpty(startTimeBegin)">
+                AND startTime >= #{startTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(startTimeEnd)">
+                AND startTime &lt;= #{startTimeEnd}
+            </if>
+            <if test="@Ognl@isNotEmpty(endTimeBegin)">
+                AND endTime >= #{endTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(endTimeEnd)">
+                AND endTime &lt;= #{endTimeEnd}
+            </if>
+            <if test="@Ognl@isNotEmpty(buyCounts)">
+                AND buyCounts = #{buyCounts}
+            </if>
+            <if test="@Ognl@isNotEmpty(flag)">
+                AND flag = #{flag}
+            </if>
+            <if test="@Ognl@isNotEmpty(refuseReason)">
+                AND refuseReason = #{refuseReason}
+            </if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}
+            </if>
+            <if test="@Ognl@isNotEmpty(time1) ">
+                and insertTime &gt;= #{time1}
+            </if>
+            <if test="@Ognl@isNotEmpty(time2) ">
+                and insertTime &lt;= #{time2}
+            </if>
+             <if test="@Ognl@isNotEmpty(isHidden) ">
+                and isHidden != 2
+            </if>
+            <if test="@Ognl@isNotEmpty(searchKey) ">
+                and (brandName like '%${searchKey}%' or productName like '%${searchKey}%' or specName like '%${searchKey}%'
+                or specifications like '%${searchKey}%' or gradeName like '%${searchKey}%' or seriesName like '%${searchKey}%'
+                or varietiesName like '%${searchKey}%' or seedvarietyName like '%${searchKey}%')
+            </if>
+        </where>
+    </sql>
+    
+    
+    
+ 
+
+ <select id="exist" parameterType="cn.cf.model.C2bMarrieddeal" resultType="int">
+        SELECT count(*) FROM c2b_marrieddeal where auditStatus=1
+        <if test="startTime != null and startTime !=''">
+           and startTime = #{startTime}
+        </if>
+        <if test="purchaserPk != null and purchaserPk !=''">
+           and purchaserPk = #{purchaserPk}
+        </if>
+        <if test="varietiesPk != null and varietiesPk !=''">
+           and varietiesPk = #{varietiesPk}
+        </if>
+        <if test="seedvarietyPk != null and seedvarietyPk !=''">
+           and seedvarietyPk = #{seedvarietyPk}
+        </if>
+        <if test="specPk != null and specPk !=''">
+           and specPk = #{specPk}
+        </if>
+        <if test="productPk != null and productPk !=''">
+           and productPk = #{productPk}
+        </if>
+        <if test="gradePk != null and gradePk !=''">
+           and gradePk = #{gradePk}
+        </if>
+        <if test="seriesPk != null and seriesPk !=''">
+           and seriesPk = #{seriesPk}
+        </if>
+    </select>
+    
+    
+      <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchMyGrid" resultType="cn.cf.dto.C2bMarrieddealDtoEx"
+            parameterType="java.util.Map">
+        SELECT ccm.pk, ccm.memberPk, ccm.memberName, ccm.status, auditStatus, auditTime, auditPk, ccm.contactsTel,
+        ccm.contacts,
+        ccm.brandPk, ccm.brandName, ccm.productPk, ccm.productName, ccm.specPk, ccm.specName, ccm.specifications,
+        ccm.gradePk,
+        ccm.gradeName, ccm.seriesPk, ccm.seriesName, ccm.varietiesPk, ccm.varietiesName, ccm.seedvarietyPk,
+        ccm.seedvarietyName, ccm.`purchaserName`, ccm.`purchaserPk`,
+        ccm.startTime, ccm.endTime, ccmb.`supplierPk`,ccmb.`bidStatus`, ccm.`supplierName`,
+        ccm.buyCounts, ccm.flag, ccm.refuseReason, ccm.province, ccm.provinceName, ccm.city, ccm.cityName, ccm.area,
+        ccm.areaName,
+        ccm.address, ccm.usePk, ccm.useName, ccm.remarks, ccm.price, isDelete, ccm.insertTime, ccm.updateTime
+        FROM c2b_marrieddeal AS ccm LEFT JOIN `c2b_marrieddeal_bid` AS ccmb ON ccm.`pk`=ccmb.marrieddealPk
+        <if test="companyPk != null and companyPk !=''">
+            and ccmb.`supplierPk` = #{companyPk}
+        </if>
+        <include refid="searchGridWhere"/>
+        ORDER BY ccm.status DESC,  ccm.insertTime DESC
+        <if test="start != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchMyGridCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM c2b_marrieddeal AS ccm LEFT JOIN `c2b_marrieddeal_bid` AS ccmb ON ccm.`pk`=ccmb.marrieddealPk
+        <if test="companyPk != null and companyPk !=''">
+            and ccmb.`supplierPk` = #{companyPk}
+        </if>
+        <include refid="searchGridWhere"/>
+    </select>
+    
+    
+    
+    
+    
+     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+   
+		
+		 
+		
+ 
+	
+ 
+</mapper>
+

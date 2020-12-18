@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,creditStatus,creditReason,creditContacts,creditContactsTel,creditAddress,creditInsertTime,creditAuditTime,memberPk,virtualPayPassword
+	    ]]>
+	</sql>
+
+	<update id="updateByCompany">
+		update b2b_credit
+		<set>
+			<if test="companyName !=null  and companyName !=''">
+				companyName = #{companyName},
+			</if>
+			<if test="creditStatus !=null and creditStatus !=''">
+				creditStatus = #{creditStatus},
+			</if>
+			<if test="creditReason !=null and creditReason !=''">
+				creditReason = #{creditReason},
+			</if>
+			<if test="creditContacts !=null and creditContacts !=''">
+				creditContacts = #{creditContacts},
+			</if>
+			<if test="creditContactsTel !=null and creditContactsTel !=''">
+				creditContactsTel = #{creditContactsTel},
+			</if>
+			<if test="creditAddress !=null and creditAddress !=''">
+				creditAddress = #{creditAddress},
+			</if>
+			<if test="creditInsertTime !=null">
+				creditInsertTime = #{creditInsertTime},
+			</if>
+			<if test="creditAuditTime !=null">
+				creditAuditTime = #{creditAuditTime},
+			</if>
+			<if test="memberPk !=null and memberPk !=''">
+				memberPk = #{memberPk},
+			</if>
+			<if test="virtualPayPassword !=null and virtualPayPassword !=''">
+				virtualPayPassword = #{virtualPayPassword},
+			</if>
+			<if test="creditInfo !=null and creditInfo !=''">
+				creditInfo = #{creditInfo},
+			</if>
+		</set>
+		where companyPk = #{companyPk}
+	</update>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditStatus)">
+				AND creditStatus = #{creditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditReason)">
+				AND creditReason = #{creditReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditContacts)">
+				AND creditContacts = #{creditContacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditContactsTel)">
+				AND creditContactsTel = #{creditContactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditAddress)">
+				AND creditAddress = #{creditAddress}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditInsertTimeBegin)">
+				AND creditInsertTime >= #{creditInsertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditInsertTimeEnd)">
+				AND creditInsertTime &lt;= #{creditInsertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(creditAuditTimeBegin)">
+				AND creditAuditTime >= #{creditAuditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(creditAuditTimeEnd)">
+				AND creditAuditTime &lt;= #{creditAuditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualAccount)">
+				AND virtualAccount = #{virtualAccount}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualContactName)">
+				AND virtualContactName = #{virtualContactName}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualContactPhone)">
+				AND virtualContactPhone = #{virtualContactPhone}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualStatus)">
+				AND virtualStatus = #{virtualStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualBalanceAmount)">
+				AND virtualBalanceAmount = #{virtualBalanceAmount}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualAvailableBalanceAmount)">
+				AND virtualAvailableBalanceAmount =
+				#{virtualAvailableBalanceAmount}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualPayPassword)">
+				AND virtualPayPassword = #{virtualPayPassword}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualInsertTimeBegin)">
+				AND virtualInsertTime >= #{virtualInsertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualInsertTimeEnd)">
+				AND virtualInsertTime &lt;= #{virtualInsertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(virtualUpdateTimeBegin)">
+				AND virtualUpdateTime >= #{virtualUpdateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(virtualUpdateTimeEnd)">
+				AND virtualUpdateTime &lt;= #{virtualUpdateTimeEnd}			</if>
+		</where>
+	</sql>
+	
+	<select id="getCreditExpirationReminder" resultType="cn.cf.dto.B2bCreditDtoEx">
+		SELECT
+			c.*
+		FROM
+			b2b_credit c
+		LEFT JOIN b2b_credit_goods cg ON c.companyPk = cg.companyPk
+		where DATEDIFF(cg.creditEndTime,NOW()) = 2
+	</select>
+	
+</mapper>
+

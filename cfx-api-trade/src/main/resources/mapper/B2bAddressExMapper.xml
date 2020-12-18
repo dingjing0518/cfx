@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAddressDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,insertTime,address,provinceName,province,cityName,city,areaName,area,town,townName,isDelete,contacts,contactsTel,isDefault
+	    ]]>
+	</sql>
+
+	<select id="searchExistence" 	 parameterType="cn.cf.dto.B2bAddressDto" resultType="int">
+		select count(1) from   b2b_address where 1=1
+		<if test="@Ognl@isNotEmpty(pk)">
+				AND pk != #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+		 
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+		 
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+		 
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			
+			</if>
+				AND isDelete =1
+	</select>
+	
+	<update id="updateNoDefault">
+		update  b2b_address
+		<set>
+			isDefault = 2
+		</set>
+		where companyPk = #{companyPk}
+	</update>
+
+	<select id="searchDTO" resultType="cn.cf.model.B2bAddress">
+		select
+		<include refid="columns" />
+		from b2b_address where 1=1
+		<if test="@Ognl@isNotEmpty(companyPk)">
+			AND companyPk = #{companyPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(address)">
+			AND address = #{address}
+		</if>
+		<if test="@Ognl@isNotEmpty(province)">
+			AND province = #{province}
+		</if>
+		<if test="@Ognl@isNotEmpty(city)">
+			AND city = #{city}
+		</if>
+		<if test="@Ognl@isNotEmpty(area)">
+			AND area = #{area}
+		</if>
+		<if test="@Ognl@isNotEmpty(town)">
+			AND town = #{town}
+		</if>
+		<if test="@Ognl@isNotEmpty(contacts)">
+			AND contacts = #{contacts}
+		</if>
+		<if test="@Ognl@isNotEmpty(contactsTel)">
+			AND contactsTel = #{contactsTel}
+		</if>
+		AND isDelete =1
+	</select>
+	
+	
+	
+	<update id="updateEx" parameterType="cn.cf.model.B2bAddress">
+        UPDATE b2b_address 
+        <set>
+        	<if test="companyPk != null and companyPk !=''">
+        		 companyPk = #{companyPk} ,
+        	</if>
+        	<if test="address != null and address !=''">
+        		 address = #{address} ,
+        	</if>
+        	<if test="provinceName != null and provinceName !=''">
+        		 provinceName = #{provinceName} ,
+        	</if>
+        	<if test="province != null and province !=''">
+        		 province = #{province} ,
+        	</if>
+        	<if test="cityName != null and cityName !=''">
+        		 cityName = #{cityName} ,
+        	</if>
+        	<if test="city != null and city !=''">
+        		 city = #{city} ,
+        	</if>
+        	<if test="area != null and area !=''">
+        		 area = #{area} ,
+        	</if>
+        	<if test="areaName != null and areaName !=''">
+        		 areaName = #{areaName} ,
+        	</if>
+        		 town = #{town} ,
+        		 townName = #{townName} ,
+        	<if test="isDelete != null and isDelete !=''">
+        		 isDelete = #{isDelete} ,
+        	</if>
+        	<if test="contacts != null ">
+        		 contacts = #{contacts} ,
+        	</if>
+        	<if test="contactsTel != null ">
+        		 contactsTel = #{contactsTel} ,
+        	</if>
+        	<if test="isDefault != null and isDefault !=''">
+        		 isDefault = #{isDefault} ,
+        	</if>
+        	<if test="signingCompany != null and signingCompany !=''">
+        		 signingCompany = #{signingCompany} ,
+        	</if>
+        </set>
+        WHERE pk = #{pk}  	        
+	</update>
+	
+	<!-- 根据companyPk查询默认收货地址 -->
+	<select id="getDefaultAddressByCompanyPk" resultType="cn.cf.model.B2bAddress">
+		SELECT * FROM b2b_address 
+		WHERE b2b_address.`companyPk`=#{companyPk}  
+		AND b2b_address.`isDelete`=1 AND b2b_address.`isDefault`=1
+		limit 1
+	</select>
+	
+	<!-- 根据companyPk查询该公司的第一条收货地址 -->
+	<select id="getFirstAddressByCompanyPk" resultType="cn.cf.model.B2bAddress">
+		SELECT * FROM b2b_address 
+		WHERE b2b_address.`companyPk`=#{companyPk}  
+		AND b2b_address.`isDelete`=1 order by b2b_address.insertTime 
+		limit 1
+	</select>
+	
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(isDefault)">
+				AND isDefault = #{isDefault}			</if>
+		</where>
+	</sql>
+	
+	<select id="searchListEx" resultType="cn.cf.dto.B2bAddressDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_address
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+	
+	<select id="searchAddressByOrder" resultType="cn.cf.dto.B2bAddressDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_address
+		where isDelete = 1  and companyPk = #{companyPk}
+		order by isDefault asc,insertTime desc
+	</select>
+	<!-- 根据pk查询地址 -->
+	<select id="getByPkEx" resultType="cn.cf.dto.B2bAddressDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_address where pk = #{pk} and b2b_address.isDelete=1
+	</select>
+	<select id="searchOne" resultType="cn.cf.dto.B2bAddressDto">
+ 
+		SELECT
+	*
+FROM
+	b2b_address
+WHERE
+	signingCompany = #{signingCompany}
+AND areaName =  #{areaName}
+AND address =  #{address}
+AND townName =  #{townName}
+AND cityName =  #{cityName}
+AND provinceName =  #{provinceName}
+AND contactsTel =  #{contactsTel}
+AND contacts =  #{contacts}
+and companyPk= #{companyPk}
+and isDelete=1
+		
+		LIMIT 1
+	</select>
+</mapper>
+

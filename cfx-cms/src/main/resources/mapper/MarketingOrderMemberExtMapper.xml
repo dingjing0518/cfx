@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.MarketingOrderMemberExtDao">
+
+    <sql id="searchOrderMGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="orderNumber != null and orderNumber !=''">
+                AND o.orderNumber like '%${orderNumber}%'
+            </if>
+            <if test="purchaserName != null and purchaserName !=''">
+                 AND json_extract(o.purchaserInfo, '$.purchaserName') like '%${purchaserName}%'
+            </if>
+            <if test="storeName != null and storeName !=''">
+                AND  o.storeName  like '%${storeName}%'
+            </if>
+            <if test="receivablesStartTime != null and receivablesStartTime !=''">
+                <![CDATA[ AND str_to_date(o.receivablesTime,'%Y-%m-%d') >= #{receivablesStartTime} ]]>
+            </if>
+            <if test="receivablesEndTime != null and receivablesEndTime !=''">
+                <![CDATA[ AND str_to_date(o.receivablesTime,'%Y-%m-%d') <= #{receivablesEndTime} ]]>
+            </if>
+            <if test="insertStartTime != null and insertStartTime !=''">
+                <![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') >= #{insertStartTime} ]]>
+            </if>
+            <if test="insertEndTime != null and insertEndTime !=''">
+                <![CDATA[ AND str_to_date(o.insertTime,'%Y-%m-%d') <= #{insertEndTime} ]]>
+            </if>
+            <if test="insertTime != null and insertTime !=''">
+                <![CDATA[ AND o.insertTime <= #{insertTime} ]]>
+            </if>
+            <if test="paymentStartTime != null and paymentStartTime !=''">
+                <![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') >= #{paymentStartTime} ]]>
+            </if>
+            <if test="paymentEndTime != null and paymentEndTime !=''">
+                <![CDATA[ AND str_to_date(o.paymentTime,'%Y-%m-%d') <= #{paymentEndTime} ]]>
+            </if>
+            <if test="paymentType != null and paymentType !=''">
+                AND o.paymentType = #{paymentType}
+            </if>
+            <if test="orderStatus != null  ">
+                AND o.orderStatus = #{orderStatus}
+            </if>
+            <if test="source !=null and source !=''">
+                AND o.source = #{source}
+            </if>
+            <if test="block !=null and block !=''">
+                AND o.block = #{block}
+            </if>
+        </where>
+    </sql>
+
+    <select id="searchOrderCount" resultType="int" parameterType="java.util.Map">
+        SELECT    	COUNT(m.orderPk)
+        FROM (SELECT orderPk FROM marketing_order_member
+                WHERE type = 1
+                <if test="businessPk != null and  businessPk !=''">
+                    AND ( purAccount = #{businessPk} or stAccount  = #{businessPk})
+                </if>
+                <if test="regionList !=null and regionList !=''">
+                    and ( <foreach collection="regionList" index="index" item="item"
+                                   open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(purAddress) LIKE '${item.province}${item.city}%',
+                    concat(purAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                  or
+                <foreach collection="regionList" index="index" item="item"
+                         open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(stAddress) LIKE '${item.province}${item.city}%',
+                    concat(stAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                   or ( purAccount = #{loginPk} or stAccount  = #{loginPk})
+            	)
+        		</if>
+              ) m
+        JOIN  (SELECT orderNumber FROM b2b_order  o
+          <include refid="searchOrderMGridWhere" />
+        ) o ON o.orderNumber = m.orderPk
+    </select>
+    
+
+
+    <select id="searchOrderList"  resultType="cn.cf.dto.B2bOrderExtDto" parameterType="java.util.Map">
+        SELECT   DISTINCT
+         o.orderNumber AS orderNumber,
+        o.purchaserInfo,
+        o.supplierInfo,
+        o.addressInfo,
+       	if(${colPurPerson},    m1.name , INSERT (   m1.name ,  1, 1, '*')) as purPerson,
+       	if(${colSupPerson}, m2.name, INSERT (m2.name ,  1, 1, '*')) as supPerson,
+	    if(${colStoreName}, o.storeName, INSERT ( o.storeName, 3, 5, '*****')) as storeName,
+        o.actualAmount AS actualAmount,
+        o.source AS source,
+        o.purchaseType AS purchaseType,
+        o.paymentName AS paymentName,
+        o.paymentTime AS paymentTime,
+        o.insertTime AS insertTime,
+        o.meno AS meno,
+        o.receivablesTime,
+        CASE o.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		o.receivablesTime,
+		o.orderStatus,
+		o.block,
+		o.economicsGoodsType
+        FROM (SELECT orderPk,purAccount,stAccount FROM marketing_order_member
+        WHERE type = 1
+        <if test="businessPk != null and  businessPk !=''">
+            AND ( purAccount = #{businessPk} or stAccount  = #{businessPk})
+        </if>
+        <if test="regionList !=null and regionList !=''">
+            and ( <foreach collection="regionList" index="index" item="item"
+                           open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(purAddress) LIKE '${item.province}${item.city}%',
+                    concat(purAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                      or
+                <foreach collection="regionList" index="index" item="item"
+                             open="(" separator="or" close=")">
+                        if(#{item.area} is null or #{item.area} ='',
+                        concat(stAddress) LIKE '${item.province}${item.city}%',
+                        concat(stAddress) = concat(#{item.province},#{item.city},#{item.area})
+                        )
+                </foreach>
+                      or ( purAccount = #{loginPk} or stAccount  = #{loginPk})
+              )
+        </if>
+        ) om
+        JOIN  (SELECT o.* FROM b2b_order  o
+        <include refid="searchOrderMGridWhere" />
+        ) o ON o.orderNumber = om.orderPk
+		left join manage_account m1  on m1.pk = om.purAccount
+		left join manage_account m2  on m2.pk = om.stAccount
+        <if test="orderName != null and orderName!=''">
+            ORDER BY ${orderName} ${orderType}
+        </if>
+        <if test="start != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    
+     <select id="exportOrderList"  resultType="cn.cf.dto.B2bOrderExtDto" parameterType="java.util.Map">
+     	SELECT
+		ifnull(a.orderNumber,'') AS orderNumber,
+		ifnull(ROUND(a.orderAmount,2),0) AS orderAmount,
+		ifnull( ROUND(a.actualAmount,2),0 ) AS actualAmount,
+         a.purchaserInfo,
+         a.supplierInfo,
+         a.addressInfo,
+         (CASE  json_extract( b.goodsInfo, '$.stampDuty') 
+        WHEN 1 THEN '否'
+        WHEN 2 THEN '是'
+          ELSE  '否'
+        END)   stampDutyName,
+         b.goodsInfo,
+		a.insertTime AS insertTime,
+		ifnull(a.meno,'') AS meno,
+        if(${colMemberName},ifnull(a.memberName,''), INSERT (ifnull(a.memberName,''),4,4, '****')) as memberName,
+		CASE a.purchaseType
+		WHEN 1 THEN
+		'自采'
+		WHEN 2 THEN
+		'代采'
+		WHEN 3 THEN
+		'平台采'
+		END AS purchaseTypeName,	
+		if(${colStoreName},ifnull(a.storeName,''), INSERT (ifnull(a.storeName,''), 3, 5, '*****')) as storeName,
+		a.paymentName AS paymentName,
+		a.source AS source,
+		a.paymentTime AS paymentTime,
+		b.childOrderNumber AS childOrderNumber,
+		IF (b.afterWeight = 0,b.weight,b.afterWeight) afterWeight,
+		IF (b.afterBoxes = 0,b.boxes,b.afterBoxes) afterBoxes,
+		ifnull(ROUND(b.originalPrice,2),0) AS originalPrice,
+		ifnull(ROUND(b.presentPrice,2),0) AS presentPrice,
+		ifnull(ROUND((b.presentPrice)* (IF (
+		b.afterWeight = 0,
+		b.weight,
+		b.afterWeight
+		)),2),0) AS presentTotalPrice,
+		ifnull(ROUND(b.presentTotalFreight,2),0) AS presentTotalFreight,
+		CASE a.source
+		WHEN 1 THEN
+		"pc"
+		WHEN 2 THEN
+		"wap"
+		WHEN 3 THEN
+		"app"
+		WHEN 4 THEN
+		"后台"
+		END AS sourceName,
+		if(${colPurPerson},  ifnull(a.purPerson,'') , INSERT ( ifnull(a.purPerson,'') ,  1, 1, '*')) as purPerson,
+        if(${colSupPerson},ifnull(a.supPerson,''), INSERT (ifnull(a.supPerson,''),  1, 1, '*')) as supPerson,
+		CASE b.orderStatus
+		WHEN 0 THEN
+		'待审核'
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待确认'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'已发货'
+		WHEN 5 THEN
+		'部分发货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN 7 THEN
+		'部分发货'
+		WHEN - 1 THEN
+		'已取消'
+		END AS orderStatusName,
+		a. receivablesTime
+		FROM
+		b2b_order_goods b
+		 JOIN ( SELECT   
+          m1.name  as purPerson,
+       	m2.name as supPerson,
+       	o.*
+        FROM (SELECT orderPk,purAccount,stAccount FROM marketing_order_member
+        WHERE type = 1
+        <if test="businessPk != null and  businessPk !=''">
+            AND ( purAccount = #{businessPk} or stAccount  = #{businessPk})
+        </if>
+        <if test="regionList !=null and regionList !=''">
+            and (                     <foreach collection="regionList" index="index" item="item"
+                           open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(purAddress) LIKE '${item.province}${item.city}%',
+                    concat(purAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                      or
+                <foreach collection="regionList" index="index" item="item"
+                             open="(" separator="or" close=")">
+                        if(#{item.area} is null or #{item.area} ='',
+                        concat(stAddress) LIKE '${item.province}${item.city}%',
+                        concat(stAddress) = concat(#{item.province},#{item.city},#{item.area})
+                        )
+                </foreach>
+                      or ( purAccount = #{loginPk} or stAccount  = #{loginPk})
+              )
+        </if>
+        ) om
+        JOIN  (SELECT o.* FROM b2b_order  o
+        <include refid="searchOrderMGridWhere" />
+        ) o ON o.orderNumber = om.orderPk
+		left join manage_account m1  on m1.pk = om.purAccount
+		left join manage_account m2  on m2.pk = om.stAccount
+		) a ON b.orderNumber = a.orderNumber
+        
+    </select>
+    
+    <sql id="searchContactGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(contractNo)">
+				AND contractNo LIKE '%${contractNo}%'			</if>
+			<if test="contractStatus != null">
+				AND contractStatus = #{contractStatus}			</if>
+			<if test="@Ognl@isNotEmpty(contractSource)">
+				AND contractSource = #{contractSource}			</if>
+			<if test="@Ognl@isNotEmpty(saleDepartment)">
+				AND saleDepartment = #{saleDepartment}			</if>
+			<if test="@Ognl@isNotEmpty(saleCompany)">
+				AND saleCompany = #{saleCompany}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeBegin)">
+				AND startTime >= #{startTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeEnd)">
+				AND startTime &lt;= #{startTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeBegin)">
+				AND endTime >= #{endTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeEnd)">
+				AND endTime &lt;= #{endTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(days)">
+				AND days = #{days}			</if>
+			<if test="@Ognl@isNotEmpty(covenant)">
+				AND covenant = #{covenant}			</if>
+			<if test="@Ognl@isNotEmpty(supplementary)">
+				AND supplementary = #{supplementary}			</if>
+			<if test="@Ognl@isNotEmpty(priceType)">
+				AND priceType = #{priceType}			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(salesman)">
+				AND salesman = #{salesman}			</if>
+			<if test="@Ognl@isNotEmpty(salesmanNumber)">
+				AND salesmanNumber = #{salesmanNumber}			</if>
+			<if test="@Ognl@isNotEmpty(requireAccount)">
+				AND requireAccount = #{requireAccount}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			 <if test="purchaserName != null and purchaserName !=''">
+                 AND json_extract(o.purchaserInfo, '$.purchaserName') like '%${purchaserName}%'
+            </if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName LIKE '%${storeName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contractType)">
+				AND contractType = #{contractType}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserType)">
+				AND purchaserType = #{purchaserType}			</if>
+			<if test="@Ognl@isNotEmpty(contractRate)">
+				AND contractRate = #{contractRate}			</if>
+			<if test="@Ognl@isNotEmpty(contractCount)">
+				AND contractCount = #{contractCount}			</if>
+			<if test="@Ognl@isNotEmpty(totalAmount)">
+				AND totalAmount = #{totalAmount}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModel)">
+				AND logisticsModel = #{logisticsModel}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				AND logisticsModelPk = #{logisticsModelPk}			</if>
+			<if test="@Ognl@isNotEmpty(telephone)">
+				AND telephone = #{telephone}			</if>
+			<if test="@Ognl@isNotEmpty(carrier)">
+				AND carrier = #{carrier}			</if>
+			<if test="@Ognl@isNotEmpty(carrierPk)">
+				AND carrierPk = #{carrierPk}			</if>
+			<if test="@Ognl@isNotEmpty(remark)">
+				AND remark = #{remark}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(toAddress)">
+				AND toAddress = #{toAddress}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeStart)">
+				AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND paymentName = #{paymentName}			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				AND paymentType = #{paymentType}			</if>
+			<if test="@Ognl@isNotEmpty(payTimeStart)">
+				AND str_to_date(paymentTime, '%Y-%m-%d') >= #{payTimeStart}			</if>
+			<if test="@Ognl@isNotEmpty(payTimeEnd)">
+				AND str_to_date(paymentTime, '%Y-%m-%d') &lt;= #{payTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND economicsGoodsType = #{economicsGoodsType}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+			AND isDelete = 1
+		</where>
+	</sql>
+     <select id="searchContactCount" resultType="int" parameterType="java.util.Map">
+        SELECT    	COUNT(m.orderPk)
+        FROM (SELECT orderPk FROM marketing_order_member
+                WHERE type = 3
+                <if test="businessPk != null and  businessPk !=''">
+                    AND ( purAccount = #{businessPk} or stAccount  = #{businessPk})
+                </if>
+                <if test="regionList !=null and regionList !=''">
+                    and ( <foreach collection="regionList" index="index" item="item"
+                                   open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(purAddress) LIKE '${item.province}${item.city}%',
+                    concat(purAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                  or
+                <foreach collection="regionList" index="index" item="item"
+                         open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(stAddress) LIKE '${item.province}${item.city}%',
+                    concat(stAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                   or ( purAccount = #{loginPk} or stAccount  = #{loginPk})
+            	)
+        		</if>
+              ) m
+        JOIN  (SELECT contractNo FROM b2b_contract  
+          <include refid="searchContactGridWhere" />
+        ) o ON o.contractNo = m.orderPk
+    </select>
+
+
+
+<select id="searchContactList"  resultType="cn.cf.dto.B2bContractExtDto" parameterType="java.util.Map">
+        SELECT   DISTINCT
+         con.contractNo, con.contractStatus, con.contractSource, con.saleDepartment, con.startTime, con.endTime, con.days,
+		con.covenant, con.supplementary, con.priceType, con.member, con.employeePk, con.salesman, con.salesmanNumber,
+		con.supplierPk, con.purchaserPk, con.storePk,
+		con.contractType, con.purchaserType, con.contractRate, con.contractCount,con.orderAmount, con.totalAmount, con.logisticsModel,
+		con.logisticsModelPk, con.logisticsModelType, con.carrier, con.carrierPk, con.isDelete, con.insertTime, updateTime, con.paymentName, con.paymentType,
+		con.paymentTime, con.economicsGoodsName, con.economicsGoodsType, con.source, con.plantName,
+		con.plantPk,
+		con.supplierInfo,
+		con.purchaserInfo,
+		con.addressInfo,
+		<choose>
+			<when test="storeNameCol == 'MARKET_CONTRACT_MANAGE_COL_STORENAME'">
+				INSERT (con.storeName,3,5,'*****') AS storeName,
+			</when>
+			<otherwise>
+				con.storeName,
+			</otherwise>
+		</choose>
+		con.block,
+		 CASE con.contractStatus
+		WHEN 1 THEN
+		'待付款'
+		WHEN 2 THEN
+		'待审批'
+		WHEN 3 THEN
+		'待发货'
+		WHEN 4 THEN
+		'部分发货'
+		WHEN 5 THEN
+		'待收货'
+		WHEN 6 THEN
+		'已完成'
+		WHEN - 1 THEN
+		'已关闭'
+		END AS contractStatusName
+        FROM (SELECT orderPk,purAccount,stAccount FROM marketing_order_member
+        WHERE type = 3
+        <if test="businessPk != null and  businessPk !=''">
+            AND ( purAccount = #{businessPk} or stAccount  = #{businessPk})
+        </if>
+        <if test="regionList !=null and regionList !=''">
+            and ( <foreach collection="regionList" index="index" item="item"
+                           open="(" separator="or" close=")">
+                    if(#{item.area} is null or #{item.area} ='',
+                    concat(purAddress) LIKE '${item.province}${item.city}%',
+                    concat(purAddress) = concat(#{item.province},#{item.city},#{item.area})
+                    )
+                </foreach>
+                      or
+                <foreach collection="regionList" index="index" item="item"
+                             open="(" separator="or" close=")">
+                        if(#{item.area} is null or #{item.area} ='',
+                        concat(stAddress) LIKE '${item.province}${item.city}%',
+                        concat(stAddress) = concat(#{item.province},#{item.city},#{item.area})
+                        )
+                </foreach>
+                      or ( purAccount = #{loginPk} or stAccount  = #{loginPk})
+              )
+        </if>
+        ) om
+        JOIN  (SELECT * FROM b2b_contract 
+        <include refid="searchContactGridWhere" />
+        ) con ON con.contractNo = om.orderPk
+		left join manage_account m1  on m1.pk = om.purAccount
+		left join manage_account m2  on m2.pk = om.stAccount
+        <if test="orderName != null and orderName!=''">
+            ORDER BY ${orderName} ${orderType}
+        </if>
+        <if test="start != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+</mapper>
+

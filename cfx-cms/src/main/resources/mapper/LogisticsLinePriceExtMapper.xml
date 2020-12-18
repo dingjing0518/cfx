@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsLinePriceDao">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_line_price (
+       			pk,
+				linePk,
+				fromWeight,
+				toWeight,
+				basisPrice,
+				salePrice,
+				isDelete,
+				insertTime,
+				updateTime
+        ) VALUES (
+         #{pk}, #{linePk}, #{fromWeight}, #{toWeight}, #{basisPrice}, #{salePrice},#{isDelete},#{insertTime},#{updateTime}
+        )
+    ]]>
+    </insert>
+
+    <update id="update" parameterType="cn.cf.dto.LogisticsLinePriceDto">
+        UPDATE lg_line_price
+        <set>
+            <if test="linePk != null and linePk !=''">
+                linePk = #{linePk} ,
+            </if>
+            <if test="fromWeight != null and fromWeight !=''">
+                fromWeight = #{fromWeight} ,
+            </if>
+            <if test="toWeight != null and toWeight !=''">
+                toWeight = #{toWeight} ,
+            </if>
+            <if test="basisPrice != null and basisPrice !=''">
+                basisPrice = #{basisPrice} ,
+            </if>
+            <if test="salePrice != null and salePrice !=''">
+                salePrice = #{salePrice} ,
+            </if>
+            updateTime = SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+    <select id="searchList" parameterType="java.util.Map"
+            resultType="cn.cf.dto.LogisticsLinePriceDto">
+        SELECT *
+        FROM lg_line_price
+        where 1=1
+        <if test="linePk != null and linePk !=''">
+            and linePk = #{linePk}
+        </if>
+        <if test="isDelete != null and isDelete !=''">
+            and isDelete = #{isDelete}
+        </if>
+    </select>
+
+
+    <update id="delete" parameterType="String">
+        UPDATE lg_line_price
+        <set>
+            isDelete = 2
+        </set>
+        WHERE linePk = #{linePk}
+    </update>
+
+
+    <select id="logisticsPrice" parameterType="String"
+            resultType="cn.cf.dto.LogisticsLinePriceDto">
+        SELECT *
+        FROM lg_line_price ll
+        WHERE ll. linePk = #{linePk}
+        AND ll.fromWeight &lt;=  #{weight}
+        AND ll.toWeight  &gt; #{weight}
+
+    </select>
+
+</mapper>

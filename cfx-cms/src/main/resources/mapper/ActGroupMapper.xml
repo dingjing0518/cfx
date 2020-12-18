@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.ActGroupDao">
+
+<resultMap type="cn.cf.dto.ActGroupDto" id="GroupResult">
+		<result property="id" column="id_"/>
+		<result property="name" column="name_"/>
+		<result property="type" column="type_"/>
+		
+</resultMap>
+	
+	
+	<delete id="deleteActGroup" parameterType="cn.cf.model.ActGroup">
+    <![CDATA[
+        DELETE FROM ACT_ID_GROUP WHERE
+        id_ = #{id} 
+    ]]>
+	</delete>
+	
+	<delete id="deleteActListGroup" parameterType="java.util.Map">
+		    <![CDATA[
+		        DELETE FROM ACT_ID_MEMBERSHIP WHERE
+		        USER_ID_ = #{accountId} and GROUP_ID_=#{groupId}
+		    ]]>
+	</delete>
+	
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		ID_,NAME_,TYPE_
+	    ]]>
+	</sql>
+	
+	<select id="findByUserId" parameterType="String" resultMap="GroupResult">
+		SELECT g.ID_ AS id,g.NAME_ AS NAME FROM ACT_ID_GROUP g LEFT JOIN ACT_ID_MEMBERSHIP m ON m.GROUP_ID_=g.ID_ LEFT JOIN ACT_ID_USER u ON u.ID_=m.USER_ID_ WHERE u.ID_=#{userId}
+	</select>
+	
+	<select id="findActGroup" resultType="cn.cf.model.ActGroup"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM ACT_ID_GROUP
+		where 1=1 AND ID_ = #{id}
+		
+	</select>
+	
+	<insert id="addActGroup" parameterType="cn.cf.model.ActGroup">
+		insert into ACT_ID_GROUP values(#{id},null,#{name},1);
+	</insert>
+	
+	<update id="updateActGroup" parameterType="cn.cf.model.ActGroup">
+		update ACT_ID_GROUP
+		<set>
+			<if test="name!=null and name!='' ">
+				name_=#{name},
+			</if>
+		</set>
+		where id_=#{id}
+	</update>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(id)">
+				AND ID_ = #{id}
+			</if>
+		
+			<if test="@Ognl@isNotEmpty(name)">
+				AND NAME_ = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND TYPE_ = #{type}
+			</if>
+		
+		</where>
+	</sql>
+
+	<select id="getAllGroupList" parameterType="java.util.Map"
+		resultMap="GroupResult">
+		select * from ACT_ID_GROUP
+	</select>
+	
+	
+	
+	<select id="searchActGroupCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from ACT_ID_GROUP
+
+	</select>
+	<select id="searchActGroupList" parameterType="java.util.Map"
+		resultMap="GroupResult">
+		select * from ACT_ID_GROUP
+		
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	
+	<insert id="insertActUserGroup" parameterType="java.util.Map">
+		
+        INSERT INTO ACT_ID_MEMBERSHIP (
+         USER_ID_, GROUP_ID_
+        ) VALUES (
+         #{accountId}, #{groupId}    
+        )
+ 
+
+	</insert>
+	
+	
+	<update id="updateActUserGroup" parameterType="java.util.Map">
+	UPDATE ACT_ID_MEMBERSHIP
+	<set>
+
+		<if test="groupId != null and groupId != ''">
+			GROUP_ID_ = #{groupId},
+		</if>
+	</set>
+	WHERE USER_ID_ = #{accountId}
+</update>
+
+<select id="selectByPk" parameterType="java.util.Map" resultMap="GroupResult">
+	select * from ACT_ID_GROUP
+	 <include refid="searchGridWhere" />
+	</select>
+	
+</mapper>
+

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderGoodsExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,
+		TRUNCATE(weight,4) AS weight,
+		TRUNCATE(afterWeight,4) AS afterWeight,
+		boxes,
+		afterBoxes,
+		originalPrice,
+		presentPrice,
+	 ROUND((CASE afterWeight
+	        WHEN 0 THEN originalPrice * weight
+	        ELSE originalPrice * afterWeight
+	    END),2) AS originalTotalPrice,
+
+	ROUND((CASE afterWeight
+	        WHEN 0 THEN (presentPrice) * weight
+	        ELSE (presentPrice) * afterWeight
+	    END),2) AS presentTotalPrice,
+		ROUND(originalFreight,2) AS originalFreight,
+		ROUND(presentFreight,2) AS presentFreight,
+	ROUND((CASE afterWeight
+	        WHEN 0 THEN originalFreight * weight
+	        ELSE originalFreight * afterWeight
+	    END),2) AS originalTotalFreight,
+	ROUND(presentTotalFreight,2) AS presentTotalFreight,
+		weightShipped,
+		boxesShipped,
+		orderStatus,
+		childOrderNumber,
+
+		logisticsPk,
+		logisticsStepInfoPk,
+		logisticsCarrierPk,
+		logisticsCarrierName,
+		goodsType,
+		goodsInfo
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND varietiesName = #{varietiesName}			</if>
+			<if test="@Ognl@isNotEmpty(varietiesPk)">
+				AND varietiesPk = #{varietiesPk}			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				AND seedvarietyName = #{seedvarietyName}			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyPk)">
+				AND seedvarietyPk = #{seedvarietyPk}			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND specName = #{specName}			</if>
+			<if test="@Ognl@isNotEmpty(specPk)">
+				AND specPk = #{specPk}			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				AND seriesName = #{seriesName}			</if>
+			<if test="@Ognl@isNotEmpty(seriesPk)">
+				AND seriesPk = #{seriesPk}			</if>
+			<if test="@Ognl@isNotEmpty(gradeChineseName)">
+				AND gradeChineseName = #{gradeChineseName}			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName = #{gradeName}			</if>
+			<if test="@Ognl@isNotEmpty(gradePk)">
+				AND gradePk = #{gradePk}			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				AND batchNumber = #{batchNumber}			</if>
+			<if test="@Ognl@isNotEmpty(weight)">
+				AND weight = #{weight}			</if>
+			<if test="@Ognl@isNotEmpty(afterWeight)">
+				AND afterWeight = #{afterWeight}			</if>
+			<if test="@Ognl@isNotEmpty(boxes)">
+				AND boxes = #{boxes}			</if>
+			<if test="@Ognl@isNotEmpty(afterBoxes)">
+				AND afterBoxes = #{afterBoxes}			</if>
+			<if test="@Ognl@isNotEmpty(originalPrice)">
+				AND originalPrice = #{originalPrice}			</if>
+			<if test="@Ognl@isNotEmpty(presentPrice)">
+				AND presentPrice = #{presentPrice}			</if>
+			<if test="@Ognl@isNotEmpty(originalTotalPrice)">
+				AND originalTotalPrice = #{originalTotalPrice}			</if>
+			<if test="@Ognl@isNotEmpty(presentTotalPrice)">
+				AND presentTotalPrice = #{presentTotalPrice}			</if>
+			<if test="@Ognl@isNotEmpty(originalFreight)">
+				AND originalFreight = #{originalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(presentFreight)">
+				AND presentFreight = #{presentFreight}			</if>
+			<if test="@Ognl@isNotEmpty(originalTotalFreight)">
+				AND originalTotalFreight = #{originalTotalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(presentTotalFreight)">
+				AND presentTotalFreight = #{presentTotalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(weightShipped)">
+				AND weightShipped = #{weightShipped}			</if>
+			<if test="@Ognl@isNotEmpty(boxesShipped)">
+				AND boxesShipped = #{boxesShipped}			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}			</if>
+			<if test="@Ognl@isNotEmpty(childOrderNumber)">
+				AND childOrderNumber = #{childOrderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND packNumber = #{packNumber}			</if>
+			<if test="@Ognl@isNotEmpty(plantName)">
+				AND plantName = #{plantName}			</if>
+			<if test="@Ognl@isNotEmpty(plantPk)">
+				AND plantPk = #{plantPk}			</if>
+			<if test="@Ognl@isNotEmpty(warePk)">
+				AND warePk = #{warePk}			</if>
+			<if test="@Ognl@isNotEmpty(wareCode)">
+				AND wareCode = #{wareCode}			</if>
+			<if test="@Ognl@isNotEmpty(wareName)">
+				AND wareName = #{wareName}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsPk)">
+				AND logisticsPk = #{logisticsPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsStepInfoPk)">
+				AND logisticsStepInfoPk = #{logisticsStepInfoPk}			</if>
+			<if test="@Ognl@isNotEmpty(specifications)">
+				AND specifications = #{specifications}			</if>
+			<if test="@Ognl@isNotEmpty(unit)">
+				AND unit = #{unit}			</if>
+			
+		
+			<if test="@Ognl@isNotEmpty(logisticsCarrierPk)">
+				AND logisticsCarrierPk = #{logisticsCarrierPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsCarrierName)">
+				AND logisticsCarrierName = #{logisticsCarrierName}			</if>
+		</where>
+	</sql>
+	<select id="getB2bOrderGoods" resultType="cn.cf.dto.B2bOrderGoodsExtDto">
+		SELECT og.orderNumber,
+	og.weight,
+	og.afterWeight,
+	og.boxes,
+	og.afterBoxes,
+	ROUND(og.originalPrice,2) AS originalPrice,
+	ROUND(og.presentPrice,2) AS presentPrice,
+	ROUND((CASE og.afterWeight
+		WHEN 0 THEN og.originalPrice * og.weight
+		ELSE og.originalPrice * og.afterWeight
+		END),2)AS originalTotalPrice,
+	ROUND(og.originalFreight,2) AS originalFreight,
+	ROUND(og.presentFreight,2) AS presentFreight,
+	ROUND(og.originalTotalFreight,2) AS originalTotalFreight,
+	ROUND(og.presentTotalFreight,2) AS presentTotalFreight,
+	og.weightShipped,
+	og.boxesShipped,
+	og.orderStatus,
+	og.childOrderNumber,
+	og.logisticsPk,
+	og.logisticsStepInfoPk,
+	og.logisticsCarrierPk,
+	og.logisticsCarrierName,
+	og.goodsType,
+	og.goodsInfo,
+	 (CASE  json_extract(og.goodsInfo, '$.stampDuty') 
+        WHEN 1 THEN '否'
+        WHEN 2 THEN '是'
+          ELSE  '否'
+        END)   stampDutyName
+		FROM b2b_order_goods og 
+		where orderNumber = #{orderNumber}
+		<if test="noOrderStatus != null">
+		and orderStatus!=#{noOrderStatus}
+		</if>
+		<if test="start != null">
+		limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="getSxOrderGoods" resultType="cn.cf.dto.B2bOrderGoodsExtDto">
+			SELECT
+		og.orderNumber,
+		og.boxes,
+		og.weightShipped,
+		og.boxesShipped,
+		og.orderStatus,
+		og.childOrderNumber ,
+		og.logisticsPk,
+		og.logisticsStepInfoPk,
+		og.afterBoxes ,
+		og.logisticsCarrierPk,
+		og.logisticsCarrierName,
+		og.goodsType,
+		og.afterWeight,
+		ROUND(og.originalPrice,2) AS originalPrice,
+		ROUND(og.presentPrice,2) AS presentPrice,
+		ROUND((CASE og.afterWeight
+		WHEN 0 THEN og.originalPrice * og.weight
+		ELSE og.originalPrice * og.afterWeight
+		END),2)AS originalTotalPrice,
+		ROUND((CASE og.afterWeight
+		WHEN 0 THEN og.presentPrice * og.weight
+		ELSE 	og.presentPrice * og.afterWeight
+		END),2) AS presentTotalPrice,
+
+		ROUND(og.originalFreight,2) AS originalFreight,
+		ROUND(og.presentFreight,2) AS presentFreight,
+
+		ROUND(og.originalTotalFreight,2) AS originalTotalFreight,
+
+		ROUND(og.presentTotalFreight,2) AS presentTotalFreight,
+		og.goodsInfo,
+		g.brandName  
+		FROM b2b_order_goods og 
+		left join  b2b_goods g  on g.pk = og.goodsPk
+		where og.orderNumber = #{orderNumber}
+		<if test="start != null">
+		limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="getB2bOrderGoodsCount" resultType="int">
+		SELECT count(1) FROM b2b_order_goods og 
+		where orderNumber = #{orderNumber}
+	</select>
+	
+	
+	<!-- 关闭订单 -->
+	<update id="closeOrder" parameterType="java.lang.String">
+		UPDATE b2b_order_goods SET b2b_order_goods.orderStatus=-1
+		WHERE
+		orderNumber = #{orderNumber}
+	</update>
+
+	<select id="getB2bOrderGoodsWA" parameterType="java.util.List" resultType="cn.cf.entity.OrderGoodsWeightAmount">
+		select IF(block = 'sx',(CASE afterWeight
+				        WHEN 0 THEN (weight/1000)
+				        ELSE (afterWeight/1000)
+				    END),(CASE afterWeight
+						WHEN 0 THEN weight
+						ELSE afterWeight
+						END)) AS weight,
+					presentPrice,
+					goodsInfo,
+					presentTotalFreight
+		from b2b_order_goods where orderStatus !=-1 and orderNumber IN
+		<foreach collection="orderNumberList" index="index" item="item"
+            open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+
+	<select id="searchStoreByOrder"  parameterType="java.lang.String" resultType="cn.cf.entity.SupplierSaleDataReport" >
+		select s.pk,s.`name`,p.accountName,  p.accountPk ,${date} from b2b_store s 
+			INNER JOIN (
+			select 
+				o.storePk
+			from b2b_order_goods og
+			join b2b_order o 	on og.orderNumber=o.orderNumber
+			where str_to_date(o.receivablesTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')	and o.orderStatus>2 AND o.block = "cf"
+			GROUP BY o.storePk
+			) a ON a.storePk = s.pk
+			LEFT JOIN marketing_company mc ON mc.companyPk = s.pk AND mc.companyType = 2
+			LEFT JOIN marketing_personnel p ON ( mc.accountPk = p.accountPk AND p.isDelete = 1 AND p.isVisable = 1)
+	</select>
+	
+	<select id="getByStorePk"  parameterType="java.util.Map" resultType="cn.cf.dto.B2bOrderGoodsExtDto" >
+		select 
+			og.orderNumber,og.goodsInfo,ifnull(og.presentPrice,0) as presentPrice,
+			ifnull(og.presentTotalFreight,0) as presentTotalFreight,
+			CASE WHEN og.afterWeight = 0  THEN og.weight ELSE og.afterWeight END  AS weight
+			from b2b_order_goods og
+			join b2b_order o 	on og.orderNumber=o.orderNumber
+			where 
+			str_to_date(o.receivablesTime,'%Y-%m-%d') =str_to_date(#{date},'%Y-%m-%d')	
+			and o.orderStatus>2  AND o.block = #{block}  
+			and o.storePk = #{storePk} 
+			and og.orderStatus!=-1
+			
+	</select>
+	
+	
+</mapper>
+

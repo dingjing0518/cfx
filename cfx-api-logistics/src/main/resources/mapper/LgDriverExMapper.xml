@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDriverDaoEx">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,name,companyPk,mobile,isDelete,licenseUrl,insertTime,updateTime
+	    ]]>
+    </sql>
+
+ <!--    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_lg_driver (
+          pk,name,companyPk,mobile,isDelete,licenseUrl,insertTime,updateTime
+        ) VALUES (
+         #{pk},#{name},#{companyPk},#{mobile}, #{isDelete}, #{licenseUrl},#{insertTime},#{updateTime}
+        )
+    ]]>
+    </insert> -->
+    <select id="searchEntity" 	 parameterType="cn.cf.dto.LgDriverDto" resultType="int">
+        select count(1) from   lg_driver where 1=1
+        <if test="@Ognl@isNotEmpty(pk)">
+            AND pk != #{pk}			</if>
+        <if test="@Ognl@isNotEmpty(companyPk)">
+            AND companyPk = #{companyPk}
+        </if>
+        <if test="@Ognl@isNotEmpty(mobile)">
+            AND mobile = #{mobile}
+        </if>
+        AND isDelete =1
+    </select>
+    
+    
+      <update id="updatePartField" parameterType="cn.cf.model.LgDriver">
+        UPDATE lg_driver
+        <trim prefix="set" suffixOverrides=",">
+            <if test="companyPk != null and companyPk !=''">
+                companyPk = #{companyPk},
+            </if>
+            <if test="name != null and name !=''">
+                name = #{name},
+            </if>
+            <if test="mobile != null and mobile !=''">
+                mobile = #{mobile},
+            </if>
+            <if test="licenseUrl != null and licenseUrl !=''">
+                licenseUrl = #{licenseUrl},
+            </if>
+            <if test="isDelete != null">
+                isDelete = #{isDelete},
+            </if>
+            <if test="insertTime != null  ">
+                insertTime = #{insertTime} ,
+            </if>
+            <if test="updateTime != null ">
+                updateTime = #{updateTime} ,
+            </if>
+        </trim>
+        WHERE
+        pk = #{pk}
+    </update>
+    
+ <!--    <delete id="delete" parameterType="cn.cf.model.LgDriver">
+        <![CDATA[
+        DELETE FROM lg_lg_driver WHERE
+        pk = #{id}
+    ]]>
+    </delete>
+    
+    <sql id="searchGridWhere">
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}		
+             </if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}			
+             </if>
+            <if test="@Ognl@isNotEmpty(name)">
+                AND name like '%${name}%'			
+             </if>
+              <if test="@Ognl@isNotEmpty(mobile)">
+                AND mobile like '%${mobile}%'  		
+               </if>
+            <if test="@Ognl@isNotEmpty(insertTimeBegin)">
+                AND insertTime &gt;= #{insertTimeBegin}			
+            </if>
+            <if test="@Ognl@isNotEmpty(insertTimeEnd)">
+                AND insertTime &lt;= #{insertTimeEnd}			
+             </if>
+            <if test="@Ognl@isNotEmpty(updateTimeBegin)">
+                AND updateTime &gt;= #{updateTimeBegin}			
+            </if>
+            <if test="@Ognl@isNotEmpty(updateTimeEnd)">
+                AND updateTime &lt;= #{updateTimeEnd}			
+             </if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}			
+             </if>
+        </where>
+    </sql>
+    
+     <select id="searchGrid" resultType="cn.cf.dto.LgDriverDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM lg_lg_driver
+        <include refid="searchGridWhere" />
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+    
+    
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM lg_lg_driver
+        <include refid="searchGridWhere" />
+    </select> -->
+    
+</mapper>
+

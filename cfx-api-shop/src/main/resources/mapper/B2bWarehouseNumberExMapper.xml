@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bWarehouseNumberDaoEx">
+ 
+	<select id="selectEntity" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_warehouse_number
+		where     isDelete = 1 
+			<if test="type !=null ">
+				AND type = #{type}
+			</if>
+				<if test="number !=null ">
+				AND number = #{number}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+		<if test="pk !=null and pk!= '' ">
+			AND pk != #{pk}
+		</if>
+	</select>
+ <select id="getOneByNumber"  resultType="cn.cf.dto.B2bWarehouseNumberDto">
+ 
+ SELECT
+	*
+FROM
+	b2b_warehouse_number
+WHERE
+	number = #{number}
+AND storePk = #{storePk}
+AND isDelete = 1
+ORDER BY
+	RAND()
+LIMIT 1
+ </select>
+</mapper>
+

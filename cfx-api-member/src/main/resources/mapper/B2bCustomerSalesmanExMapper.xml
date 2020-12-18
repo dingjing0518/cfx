@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCustomerSalesmanDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,customerPk,memberPk,mobile,productPk,productName,filiale,filialeName,employeeNumber,employeeName,purchaserPk,purchaserName,storePk
+	    ]]>
+	</sql>
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(customerPk)">
+				AND customerPk = #{customerPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}
+			</if>
+			<if test="@Ognl@isNotEmpty(filiale)">
+				AND filiale = #{filiale}
+			</if>
+			<if test="@Ognl@isNotEmpty(filialeName)">
+				AND filialeName = #{filialeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+		</where>
+	</sql>
+
+	<select id="countFilialeAndProductPkIs" resultType="int"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM
+		b2b_customer_salesman
+		WHERE
+		 memberPk=#{memberPk} and storePk = #{storePk}
+		 <if test="purchaserPk and purchaserPk!=''">
+		 and	purchaserPk = #{purchaserPk}
+		 </if>
+		<if test="saleType==1">
+			and ((productPk="" and filiale!="") or ( productPk!="" and
+			filiale=""))
+		</if>
+		<if test="saleType==2">
+			and ((productPk!="" and filiale!="" ) or (productPk!=""
+			and filiale="")
+			or (productPk="" and filiale="") )
+		</if>
+		<if test="saleType==3">
+			and ((productPk!="" and filiale!="" ) or ( productPk=""
+			and filiale!=""
+			) or (productPk="" and filiale="") )
+		</if>
+		<if test="saleType==4">
+			and ((productPk!="" and filiale!="" ) or (productPk="" and
+			filiale!="")
+			or (productPk!="" and filiale="") )
+		</if>
+
+	</select>
+
+	<select id="isRepeat" resultType="int" parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM
+		b2b_customer_salesman
+		WHERE
+		purchaserPk =
+		#{purchaserPk}
+		AND productPk = #{productPk}
+		AND filiale= #{filiale}
+		and
+		storePk=#{storePk}
+	</select>
+	
+	<select id="isRepeatBySx">
+	SELECT
+	count(1)
+FROM
+	b2b_customer_salesman
+WHERE
+	     purchaserPk = #{purchaserPk}
+	and  memberPk=#{memberPk}
+AND (filiale = #{filiale}  or filiale="" or filiale is null )
+AND storePk = #{storePk}
+	
+	</select>
+
+	<delete id="deleteByMemberPk">
+		DELETE FROM b2b_customer_salesman WHERE
+		memberPk =
+		#{memberPk}
+
+	</delete>
+	<delete id="deleteByCustomerPk">
+		DELETE FROM b2b_customer_salesman WHERE
+		customerPk =
+		#{customerPk}
+
+	</delete>
+
+	<select id="searchGoodsBySaleMan" resultType="cn.cf.dto.B2bCustomerSalesmanDto">
+		SELECT
+		<include refid="columns" />
+		FROM
+		b2b_customer_salesman
+		WHERE
+		 memberPk=#{memberPk} 
+		<if test="purchaserPk and purchaserPk!=''">
+		 and	purchaserPk = #{purchaserPk}
+		 </if>
+		 and storePk = #{storePk}
+		 
+		<!-- <if test="salesType==1">
+			and productPk!=""
+			and filiale!=""
+		</if>
+		<if test="salesType==2">
+			and productPk =""
+			and filiale !=""
+		</if>
+		<if test="salesType==3">
+			and productPk!=""
+			and filiale=""
+		</if>
+		<if test="salesType==4">
+			and productPk=""
+			and filiale=""
+		</if> -->
+	</select>
+	<select id="searchMemberBySaleMan" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_customer_salesman
+		where 1=1
+			<if test="productPk != null">
+				AND (productPk = #{productPk} or productPk is null)		</if>
+			<if test="filiale != null">
+				AND (filiale = #{filiale} or filiale is null)			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+	</select>
+</mapper>
+

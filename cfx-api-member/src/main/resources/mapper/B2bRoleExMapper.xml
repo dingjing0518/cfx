@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bRoleDaoEx">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,isDelete,isVisable,sort,companyType
+	    ]]>
+	</sql>
+
+
+	<select id="searchAllRoleList" resultType="cn.cf.dto.B2bRoleDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_role
+		where 1=1
+		<if test="@Ognl@isNotEmpty(pk)">
+			AND pk = #{pk}
+		</if>
+		<if test="@Ognl@isNotEmpty(name)">
+			AND name = #{name}
+		</if>
+		<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+			AND insertTime >= #{insertTimeBegin}
+		</if>
+		<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+			AND insertTime &lt;= #{insertTimeEnd}			</if>
+		<if test="@Ognl@isNotEmpty(isDelete)">
+			AND isDelete = #{isDelete}
+		</if>
+		<if test="@Ognl@isNotEmpty(isVisable)">
+			AND isVisable = #{isVisable}
+		</if>
+		<if test="@Ognl@isNotEmpty(sort)">
+			AND sort = #{sort}
+		</if>
+		<if test="companyType >0">
+			AND companyType = #{companyType}
+		</if>
+		<if test="companyType == 0 ">
+			AND companyType != #{companyType}
+		</if>
+		order by sort desc
+	</select>
+</mapper>

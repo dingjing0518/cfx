@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,provinceName,province,cityName,city,areaName,area,town,townName,plantPk,plantName,isDelete,status,storePk,lowPrice,name,lgCompanyPk,lgCompanyName
+	    ]]>
+	</sql>
+
+	<insert id="insertLogisticsErp" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp (
+         pk, provinceName, province, cityName, city, areaName, area, town, townName, plantPk, plantName, isDelete, status,storePk,lowPrice,name,lgCompanyPk,lgCompanyName
+        ) VALUES (
+         #{pk}, #{provinceName}, #{province}, #{cityName}, #{city}, #{areaName}, #{area}, #{town}, #{townName}, #{plantPk}, #{plantName}, #{isDelete}, #{status}, #{storePk},#{lowPrice},#{name},#{lgCompanyPk},#{lgCompanyName}       
+        )
+    ]]>
+	</insert>
+	
+	<delete id="deleteByStorePk" parameterType="cn.cf.dto.LogisticsErpDto">
+    <![CDATA[
+        DELETE FROM logistics_erp WHERE
+        storePk = #{storePk} 
+    ]]>
+	</delete>
+
+	<update id="updateLogisticsErp" parameterType="cn.cf.dto.LogisticsErpDto">
+	
+        UPDATE logistics_erp
+        <set>
+        	<if test="provinceName != null and provinceName !=''">
+        		provinceName = #{provinceName} ,
+        	</if>
+        	<if test="province != null and province !=''">
+        		province = #{province} ,
+        	</if>
+        	<if test="cityName != null and cityName !=''">
+        		cityName = #{cityName} ,
+        	</if>
+        	<if test="city != null and city !=''">
+        		city = #{city} ,
+        	</if>
+        	<if test="areaName != null and areaName !=''">
+        	 	areaName = #{areaName} ,
+        	</if>
+        	<if test="area != null and area !=''">
+        	 	area = #{area} ,
+        	</if>
+        	<if test="town != null and town !=''">
+        		town = #{town} ,
+        	</if>
+        	<if test="townName != null and townName !=''">
+        		townName = #{townName} ,
+        	</if>
+        	<if test="plantPk != null and plantPk !=''">
+        		plantPk = #{plantPk} ,
+        	</if>
+        	<if test="plantName != null and plantName !=''">
+        		plantName = #{plantName} ,
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		isDelete = #{isDelete} ,
+        	</if>
+        	<if test="status != null and status !=''">
+        		status = #{status} , 
+        	</if>
+        	<if test="storePk != null and storePk !=''">
+        		storePk = #{storePk},  
+        	</if>
+        	<if test="lowPrice != null and lowPrice !=''">
+        		lowPrice = #{lowPrice} , 
+        	</if>
+        	<if test="name != null and name !=''">
+        		name = #{name},  
+        	</if>
+        	<if test="lgCompanyPk != null and lgCompanyPk !=''">
+        		lgCompanyPk = #{lgCompanyPk},  
+        	</if>
+        	<if test="lgCompanyName != null and lgCompanyName !=''">
+        		lgCompanyName = #{lgCompanyName}  
+        	</if>
+        </set>      
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+	<select id="getListByStorePk"  resultType="cn.cf.dto.LogisticsErpDto" parameterType="java.lang.String" >
+		select 
+		<include refid="columns" />
+		 from  logistics_erp where storePk = #{storePk}
+	</select>
+</mapper>
+

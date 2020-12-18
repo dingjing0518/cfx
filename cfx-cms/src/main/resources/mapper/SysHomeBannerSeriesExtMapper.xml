@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysHomeBannerSeriesExtDao">
+
+    <update id="updateBannerByProductnamePk"
+            parameterType="java.lang.String">
+        UPDATE sys_home_bannerseries
+        <set>
+            isDelete=2,
+        </set>
+        where productnamePk = #{productnamePk}
+    </update>
+
+
+    <update id="updateObj" parameterType="cn.cf.dto.SysHomeBannerSeriesDto">
+        UPDATE sys_home_bannerseries
+        <set>
+            <if test="productnamePk !=null and productnamePk !=''">
+                productnamePk=#{productnamePk},
+            </if>
+            <if test="specPk !=null and specPk !=''">
+                specPk=#{specPk},
+            </if>
+            <if test="specName !=null and specName !=''">
+                specName=#{specName},
+            </if>
+            <if test="varietiesPk !=null and varietiesPk !=''">
+                varietiesPk=#{varietiesPk},
+            </if>
+            <if test="varietiesName !=null and varietiesName !=''">
+                varietiesName=#{varietiesName},
+            </if>
+            <if test="seriesPk !=null and seriesPk !=''">
+                seriesPk=#{seriesPk},
+            </if>
+            <if test="seriesName !=null and seriesName !=''">
+                seriesName=#{seriesName},
+            </if>
+            <if test="sort !=null and sort !=''">
+                sort=#{sort},
+            </if>
+            <if test="isVisable !=null and isVisable !=''">
+                isVisable=#{isVisable},
+            </if>
+            <if test="isDelete !=null and isDelete !=''">
+                isDelete=#{isDelete},
+            </if>
+
+            <if test="insertTime !=null and insertTime !=''">
+                insertTime=#{insertTime},
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                updateTime=#{updateTime},
+            </if>
+        </set>
+        where pk = #{pk}
+    </update>
+
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}			</if>
+            <if test="@Ognl@isNotEmpty(seriesPk)">
+                AND seriesPk = #{seriesPk}			</if>
+            <if test="@Ognl@isNotEmpty(seriesName)">
+                AND seriesName = #{seriesName}			</if>
+            <if test="@Ognl@isNotEmpty(specPk)">
+                AND specPk = #{specPk}			</if>
+            <if test="@Ognl@isNotEmpty(productnamePk)">
+                AND productnamePk = #{productnamePk}			</if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}			</if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}			</if>
+            <if test="@Ognl@isNotEmpty(sort)">
+                AND sort = #{sort}			</if>
+            <if test="@Ognl@isNotEmpty(insertTimeBegin)">
+                AND insertTime >= #{insertTimeBegin}			</if>
+            <if test="@Ognl@isNotEmpty(insertTimeEnd)">
+                AND insertTime &lt;= #{insertTimeEnd}			</if>
+            <if test="@Ognl@isNotEmpty(updateTimeBegin)">
+                AND updateTime >= #{updateTimeBegin}			</if>
+            <if test="@Ognl@isNotEmpty(updateTimeEnd)">
+                AND updateTime &lt;= #{updateTimeEnd}			</if>
+        </where>
+    </sql>
+
+    <select id="searchCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM sys_home_bannerseries s
+        LEFT JOIN sys_home_bannerproductname p ON s.productnamePk = p.pk
+        where 1=1
+        <if test="pk != null and pk != ''">
+            AND s.pk != #{pk}			</if>
+        <if test="productnamePk != null and productnamePk != ''">
+            AND s.productnamePk = #{productnamePk}			</if>
+        <if test="productName != null and productName != ''">
+            AND p.productName = #{productName}			</if>
+        <if test="specPk != null and specPk != ''">
+            AND s.specPk = #{specPk}			</if>
+        <if test="seriesPk != null and seriesPk != ''">
+            AND s.seriesPk = #{seriesPk}			</if>
+        <if test="seriesName != null and seriesName != ''">
+            AND s.seriesName = #{seriesName}			</if>
+          <if test="varietiesPk !=null and varietiesPk !=''">
+             AND   s.varietiesPk = #{varietiesPk}
+            </if>
+            <if test="varietiesName !=null and varietiesName !=''">
+              AND  s.varietiesName = #{varietiesName}
+            </if>   
+        <if test="isVisable != null and isVisable != ''">
+            AND s.isVisable = #{isVisable}			</if>
+        <if test="sort != null and sort != ''">
+            AND s.sort = #{sort}			</if>
+        <if test="insertTimeStart != null and insertTimeStart != ''">
+            AND str_to_date(s.insertTime,'%Y-%m-%d') >= #{insertTimeStart}			</if>
+        <if test="insertTimeEnd != null and insertTimeEnd != ''">
+            AND str_to_date(s.insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+        <if test="updateTimeBegin != null and updateTimeBegin != ''">
+            AND s.updateTime >= #{updateTimeBegin}			</if>
+        <if test="updateTimeEnd != null and updateTimeEnd != ''">
+            AND s.updateTime &lt;= #{updateTimeEnd}			</if>
+        AND s.isDelete = 1
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGrid" resultType="cn.cf.dto.SysHomeBannerSeriesExtDto"
+            parameterType="java.util.Map">
+        SELECT
+        s.pk pk,s.seriesPk seriesPk,s.seriesName seriesName,s.specPk specPk,s.productnamePk productnamePk,s.isVisable isVisable,s.isDelete isDelete,
+        s.sort sort,s.insertTime insertTime,s.updateTime updateTime,p.productName productName, s.specName specName,s.varietiesPk,s.varietiesName
+        FROM sys_home_bannerseries s
+        LEFT JOIN sys_home_bannerproductname p ON s.productnamePk = p.pk
+        where 1=1
+        <if test="pk != null and pk != ''">
+            AND s.pk != #{pk}			</if>
+        <if test="productnamePk != null and productnamePk != ''">
+            AND s.productnamePk = #{productnamePk}			</if>
+        <if test="productName != null and productName != ''">
+            AND p.productName = #{productName}			</if>
+        <if test="specPk != null and specPk != ''">
+            AND s.specPk = #{specPk}			</if>
+        <if test="seriesPk != null and seriesPk != ''">
+            AND s.seriesPk = #{seriesPk}			</if>
+         <if test="varietiesPk != null and varietiesPk != ''">
+            AND s.varietiesPk = #{varietiesPk}			</if>
+        <if test="seriesName != null and seriesName != ''">
+            AND s.seriesName = #{seriesName}			</if>
+        <if test="isVisable != null and isVisable != ''">
+            AND s.isVisable = #{isVisable}			</if>
+        <if test="sort != null and sort != ''">
+            AND s.sort = #{sort}			</if>
+        <if test="insertTimeStart != null and insertTimeStart != ''">
+            AND str_to_date(s.insertTime,'%Y-%m-%d') >= #{insertTimeStart}			</if>
+        <if test="insertTimeEnd != null and insertTimeEnd != ''">
+            AND str_to_date(s.insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+        <if test="updateTimeBegin != null and updateTimeBegin != ''">
+            AND s.updateTime >= #{updateTimeBegin}			</if>
+        <if test="updateTimeEnd != null and updateTimeEnd != ''">
+            AND s.updateTime &lt;= #{updateTimeEnd}			</if>
+        AND s.isDelete = 1
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+</mapper>

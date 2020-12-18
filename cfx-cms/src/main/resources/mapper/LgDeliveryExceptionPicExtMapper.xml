@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryExceptionPicExtDao">
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_delivery_exception_pic (
+         pk, deliveryPk, exceptionPicUrl,  insertTime, updateTime
+        ) VALUES (
+         #{pk}, #{deliveryPk}, #{exceptionPicUrl},  SYSDATE(), SYSDATE()
+        )
+    ]]>
+	</insert>
+
+
+	<select id="selectPic" parameterType="java.lang.String"
+		resultType="cn.cf.dto.LgDeliveryExceptionPicDto">
+		SELECT
+		pk,
+		exceptionPicUrl
+		FROM
+		lg_delivery_exception_pic
+		WHERE
+		deliveryPk = #{pk}
+	</select>
+
+
+</mapper>

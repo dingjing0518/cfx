@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysBannerExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,type,auditStatus,recommend,top,url,sort,details,insertTime,isDelete,isVisable,
+		str_to_date(startTime,'%Y-%m-%d') startTime,str_to_date(endTime,'%Y-%m-%d') endTime,str_to_date(onlineTime,'%Y-%m-%d') onlineTime,linkUrl
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(recommend)">
+				AND recommend = #{recommend}			</if>
+			<if test="@Ognl@isNotEmpty(top)">
+				AND top = #{top}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(details)">
+				AND details = #{details}			</if>
+			<if test="@Ognl@isNotEmpty(startStime)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{startStime}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+				<if test="@Ognl@isNotEmpty(platform)">
+				AND platform = #{platform}			</if>
+				<if test="@Ognl@isNotEmpty(position)">
+				AND position = #{position}			</if>
+			<if test="@Ognl@isNotEmpty(startStime)">
+				AND str_to_date(startTime,'%Y-%m-%d') >= #{startStime}			</if>
+			<if test="@Ognl@isNotEmpty(startEtime)">
+				AND str_to_date(startTime,'%Y-%m-%d') &lt;= #{startEtime}			</if>
+			<if test="@Ognl@isNotEmpty(endStime)">
+				AND str_to_date(endTime,'%Y-%m-%d') >= #{endStime}			</if>
+			<if test="@Ognl@isNotEmpty(endEtime)">
+				AND str_to_date(endTime,'%Y-%m-%d') &lt;= #{endEtime}			</if>
+			<if test="@Ognl@isNotEmpty(onlineStime)">
+				AND str_to_date(onlineTime,'%Y-%m-%d') >= #{onlineStime}			</if>
+			<if test="@Ognl@isNotEmpty(onlineEtime)">
+				AND str_to_date(onlineTime,'%Y-%m-%d') &lt;= #{onlineEtime}			</if>
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl} </if>
+		</where>
+	</sql>
+	
+	
+	<update id="updateModel" parameterType="cn.cf.model.SysBanner">
+        UPDATE sys_banner 
+        <set>
+        	<if test="name != null and name !=''">
+        		 name = #{name} ,
+        	</if>
+        	<if test="type != null and type !=''">
+        		 type = #{type} ,
+        	</if>
+        	<if test="auditStatus != null and auditStatus !=''">
+        		auditStatus = #{auditStatus} ,
+        	</if>
+        	<if test="recommend != null and recommend !=''">
+        		recommend = #{recommend} ,
+        	</if>
+        	<if test="top != null and top !=''">
+        		 top = #{top} ,
+        	</if>
+        	<if test="url != null and url !=''">
+        		 url = #{url} ,
+        	</if>
+        	<if test="sort != null">
+        		 sort = #{sort} ,
+        	</if>
+        	<if test="details != null and details !=''">
+        		 details = #{details} ,
+        	</if>
+        	<if test="insertTime != null and insertTime !=''">
+        		 insertTime = #{insertTime} ,
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		 isDelete = #{isDelete} ,
+        	</if>
+        	<if test="isVisable != null and isVisable !=''">
+        		 isVisable = #{isVisable} ,
+        	</if>
+        	<if test="startTime != null and startTime !=''">
+        		startTime = #{startTime} ,
+        	</if>
+        	<if test="endTime != null and endTime !=''">
+        		 endTime = #{endTime} ,
+        	</if>
+        	<if test="onlineTime != null and onlineTime !=''">
+        		 onlineTime = #{onlineTime}, 
+        	</if>
+        	<if test="linkUrl != null">
+        		 linkUrl = #{linkUrl}, 
+        	</if>
+        	<if test="platform != null">
+        		 platform = #{platform}, 
+        	</if>
+        	<if test="position != null">
+        		 position = #{position}, 
+        	</if>
+        </set>
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+	
+	<update id="updateBanner" parameterType="cn.cf.dto.SysBannerExtDto">
+        UPDATE sys_banner 
+        <set>
+        	<if test="name != null and name !=''">
+        		 name = #{name} ,
+        	</if>
+        	<if test="type != null and type !=''">
+        		 type = #{type} ,
+        	</if>
+        	<if test="auditStatus != null and auditStatus !=''">
+        		auditStatus = #{auditStatus} ,
+        	</if>
+        	<if test="recommend != null and recommend !=''">
+        		recommend = #{recommend} ,
+        	</if>
+        	<if test="top != null and top !=''">
+        		 top = #{top} ,
+        	</if>
+        	<if test="url != null and url !=''">
+        		 url = #{url} ,
+        	</if>
+        	<if test="sort != null">
+        		 sort = #{sort} ,
+        	</if>
+        	<if test="details != null and details !=''">
+        		 details = #{details} ,
+        	</if>
+        	<if test="insertTime != null and insertTime !=''">
+        		 insertTime = #{insertTime} ,
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		 isDelete = #{isDelete} ,
+        	</if>
+        	<if test="isVisable != null and isVisable !=''">
+        		 isVisable = #{isVisable} ,
+        	</if>
+        	<if test="startTime != null and startTime !=''">
+        		startTime = #{startTime} ,
+        	</if>
+        	<if test="endTime != null and endTime !=''">
+        		 endTime = #{endTime} ,
+        	</if>
+        	<if test="onlineTime != null and onlineTime !=''">
+        		 onlineTime = #{onlineTime}, 
+        	</if>
+        	<if test="linkUrl != null">
+        		 linkUrl = #{linkUrl}, 
+        	</if>
+        	<if test="platform != null">
+        		 platform = #{platform}, 
+        	</if>
+        	<if test="position != null">
+        		 position = #{position}, 
+        	</if>
+        </set>
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+	
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM sys_banner
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.SysBannerExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,name,type,auditStatus,recommend,top,url,sort,details,insertTime,isDelete,isVisable,
+		str_to_date(startTime,'%Y-%m-%d') startTime,str_to_date(endTime,'%Y-%m-%d') endTime,str_to_date(onlineTime,'%Y-%m-%d') onlineTime,linkUrl,platform,position
+		FROM sys_banner
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+</mapper>
+

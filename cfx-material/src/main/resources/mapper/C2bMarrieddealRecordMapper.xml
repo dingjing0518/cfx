@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.C2bMarrieddealRecordDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,marrieddealPk,companyPk,insertTime,type
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO c2b_marrieddeal_record (
+         pk, marrieddealPk, companyPk, insertTime, type
+        ) VALUES (
+         #{pk}, #{marrieddealPk}, #{companyPk}, #{insertTime}, #{type}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.C2bMarrieddealRecord">
+    <![CDATA[
+        UPDATE c2b_marrieddeal_record SET
+	        marrieddealPk = #{marrieddealPk} , companyPk = #{companyPk} , insertTime = #{insertTime} , type = #{type}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.C2bMarrieddealRecord">
+    <![CDATA[
+        DELETE FROM c2b_marrieddeal_record WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(marrieddealPk)">
+				AND marrieddealPk = #{marrieddealPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM c2b_marrieddeal_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.C2bMarrieddealRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.C2bMarrieddealRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.C2bMarrieddealRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_record where pk = #{pk}	</select>
+	<select id="getByMarrieddealPk" resultType="cn.cf.dto.C2bMarrieddealRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_record where marrieddealPk = #{marrieddealPk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.C2bMarrieddealRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_record where companyPk = #{companyPk}	</select>
+</mapper>
+

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberGroupDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,parentPk
+	    ]]>
+	</sql>
+ 
+	<delete id="deleteByParentPk" parameterType="cn.cf.model.B2bMemberGroup">
+ 
+        DELETE FROM b2b_member_group WHERE
+        parentPk = #{parentPk} 
+  
+	</delete>
+	<delete id="deleteByMemberPk" parameterType="cn.cf.model.B2bMemberGroup">
+	 DELETE FROM b2b_member_group WHERE
+        memberPk = #{memberPk} 
+	</delete>
+	<select id="searchParents"  resultType="java.lang.String" >
+SELECT IFNULL(GROUP_CONCAT(parentPk),"") as parentPk from b2b_member_group
+	where memberPk=#{memberPk}
+	
+	</select>
+ <delete id="deleteByParentPkAndMemberPk">
+  DELETE FROM b2b_member_group WHERE
+        parentPk = #{memberPk} or  memberPk = #{memberPk} 
+ 
+ </delete>
+</mapper>
+

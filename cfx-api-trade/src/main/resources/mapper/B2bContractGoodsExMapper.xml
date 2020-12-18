@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bContractGoodsDaoEx">
+	
+	<insert id="insertBatch" useGeneratedKeys="true"
+		keyProperty="pk" parameterType="java.util.List">
+		
+		INSERT INTO b2b_contract_goods (goodsPk,
+         childOrderNumber,contractNo,detailNumber,brandName,boxes,weight,
+         basicPrice,freight,contractPrice,discount,carrierPk,carrier,
+         isDelete,insertTime,updateTime,contractStatus,logisticsPk,logisticsStepInfoPk,
+         goodsInfo,block,goodsType
+        ) VALUES 
+        <foreach collection="list" item="item" index="index"
+			separator=",">
+	        (#{item.goodsPk},
+	         #{item.childOrderNumber}, #{item.contractNo}, #{item.detailNumber}, #{item.brandName}, #{item.boxes}, #{item.weight},
+	         #{item.basicPrice}, #{item.freight},#{item.contractPrice},#{item.discount},#{item.carrierPk},#{item.carrier},
+	         #{item.isDelete}, #{item.insertTime}, #{item.updateTime}, #{item.contractStatus}, #{item.logisticsPk}, #{item.logisticsStepInfoPk},
+	         #{item.goodsInfo},#{item.block},#{item.goodsType}
+	         )
+			</foreach>
+	</insert>
+
+	<select id="exportContractList" resultType="cn.cf.dto.B2bContractGoodsDtoEx">
+		<![CDATA[
+		SELECT 
+			c.contractNo,
+			c.block,
+			IFNULL(c.salesman,'') salesman,
+			IFNULL(c.salesmanNumber,'') salesmanNumber,
+			c.insertTime,
+			IFNULL(c.plantName,'') plantName,
+			c.storeName,
+			c.member,
+			c.contractSource,
+			CASE c.contractSource
+				WHEN 1 THEN
+					'B2B创建'
+				WHEN 2 THEN
+					'CRM创建'
+			END AS contractSourceName,
+		 	IFNULL(c.paymentName,'') paymentName,
+			IFNULL(c.economicsGoodsName,'') economicsGoodsName,
+			CASE c.purchaserType
+				WHEN 1 THEN
+					'自采'
+				WHEN 2 THEN
+					'代采'
+			END AS purchaserTypeName,
+			c.purchaserInfo,
+			c.supplierInfo,
+			c.addressInfo, 
+			cg.childOrderNumber,
+			cg.goodsInfo,
+			cg.boxes,
+			cg.weight,
+			cg.basicPrice,
+			cg.contractPrice,
+			cg.boxesShipped,
+			cg.weightShipped,
+			CASE cg.contractStatus
+				WHEN 1 THEN
+					'待付款'
+				WHEN 2 THEN
+					'待审核'
+				WHEN 3 THEN
+					'待发货'
+				WHEN 4 THEN
+					'部分发货'
+				WHEN 5 THEN
+					'待收货'
+				WHEN 6 THEN
+					'已完成'
+				WHEN - 1 THEN
+					'已取消'
+				END AS orderStatusName,
+
+			 IF ((cg.boxes - IFNULL(cg.boxesShipped, 0)) < 0,0,(cg.boxes - IFNULL(cg.boxesShipped, 0))) AS boxesNoShipped,
+			 IF ((cg.weight - IFNULL(cg.weightShipped, 0)) < 0,0,(cg.weight - IFNULL(cg.weightShipped, 0))) AS weightNoShipped,
+			 ROUND(contractPrice * weight, 2) AS contractTotalPrice,
+			 ROUND((contractPrice + cg.freight)* weight,2) AS totalPrice,
+			 cg.freight
+		FROM
+		b2b_contract_goods cg
+		LEFT JOIN b2b_contract c ON cg.contractNo = c.contractNo
+	]]>
+	where c.isDelete = 1
+	<if test="storePk != null">
+		and c.storePk = #{storePk}
+	</if>
+	<if test="contractStatus != null">
+		and c.contractStatus = #{contractStatus}
+	</if>
+	<if test="supplierPk != null">
+		and c.supplierPk = #{supplierPk}
+	</if>
+	<if test="contractNo != null">
+		and c.contractNo like '%${contractNo}%'
+	</if>
+	<if test="startTime != null">
+		and TO_DAYS( c.insertTime ) >=TO_DAYS(#{startTime})
+		</if>
+		<if test="endTime != null">
+			and TO_DAYS( c.insertTime ) &lt;=TO_DAYS(#{endTime})
+		</if>
+	<if test="goodsInfo != null">
+		and (cg.goodsInfo like '%${goodsInfo}%')
+	</if>
+	<if test="paymentType != null">
+		and c.paymentType = #{paymentType}
+	</if>
+	<if test="salesman != null">
+		and c.salesman like '%${salesman}%'
+	</if>
+	<if test="purchaserName != null and purchaserName !=''">
+		and c.purchaserInfo like '%purchaserName%${purchaserName}%'
+	</if>
+	<if test="supplierName != null and supplierName !=''">
+			and c.supplierInfo like '%supplierName%${supplierName}%'
+		</if>
+	<if test="supplierContactsTel != null and supplierContactsTel !=''">
+			and c.supplierInfo like '%contactsTel%${supplierContactsTel}%'
+		</if>
+	<if test="purchaserPks != null">
+				AND c.purchaserPk in
+				<foreach item="item" index="index" collection="purchaserPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</if>
+	<if test="employeePk != null">
+				AND c.employeePk = #{employeePk}
+					
+	</if>
+	<if test="employeePks != null">
+				AND c.employeePk in
+				<foreach item="item" index="index" collection="employeePks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>			
+		</if>
+	
+	ORDER BY c.insertTime DESC
+	</select>
+	
+	<update id="updateContractGoods">
+		update b2b_contract_goods
+		<set>
+			<if test="boxes != null">
+				boxes = #{boxes},
+			</if>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="freight != null">
+				freight = #{freight},
+			</if>
+			<if test="contractPrice != null">
+				contractPrice = #{contractPrice},
+			</if>
+			<if test="discount != null">
+				discount = #{discount},
+			</if>
+			<if test="isDelete != null">
+				isDelete = #{isDelete},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="weightShipped != null">
+				weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null">
+				boxesShipped = #{boxesShipped},
+			</if>
+			<if test="contractStatus != null">
+				contractStatus = #{contractStatus},
+			</if>
+			<if test="goodsInfo !=null">
+				goodsInfo = #{goodsInfo},
+			</if>
+		</set>
+		where contractNo = #{contractNo}
+	</update>
+	
+	<update id="updateByPk">
+		update b2b_contract_goods
+		<set>
+			<if test="boxes != null">
+				boxes = #{boxes},
+			</if>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="freight != null">
+				freight = #{freight},
+			</if>
+			 
+			<if test="contractPrice != null">
+				contractPrice = #{contractPrice},
+			</if>
+			<if test="discount != null">
+				discount = #{discount},
+			</if>
+			<if test="isDelete != null">
+				isDelete = #{isDelete},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="weightShipped != null">
+				weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null">
+				boxesShipped = #{boxesShipped},
+			</if>
+			<if test="contractStatus != null">
+				contractStatus = #{contractStatus},
+			</if>
+			<if test="goodsInfo !=null">
+				goodsInfo = #{goodsInfo},
+			</if>
+		</set>
+		where childOrderNumber = #{childOrderNumber}
+	</update>
+	
+	<select id="searchContractGoodsList" resultType="cn.cf.dto.B2bContractGoodsDtoEx">
+		select cg.*
+		from b2b_contract_goods cg 
+		where cg.contractNo = #{contractNo}
+		<if test="flag != null">
+			and  cg.weight - cg.weightShipped  >0			
+		</if>
+	</select>
+	
+	<select id="searchListByContractNo" resultType="cn.cf.dto.B2bContractGoodsDtoEx">
+	SELECT
+	  g.tareWeight,
+	IFNULL(cog.totalweight, 0) AS orderWeight,
+		IFNULL(cog.totalboxes, 0) AS orderBoxes,
+	cg2.childOrderNumber,
+	cg2.contractNo,
+	cg2.boxes,
+	cg2.weight,
+	cg2.weightShipped,
+	cg2.boxesShipped,
+	cg2.contractStatus,
+	cg2.goodsInfo
+	
+FROM
+	b2b_contract_goods cg2
+LEFT JOIN (
+	SELECT
+		o1.childOrderNumber,
+		o1.childContractNo,
+		   IFNULL( SUM(IF(orderStatus>0  , afterWeight,weight)),0)   AS totalweight,
+		   IFNULL( SUM(IF(orderStatus>0  , afterBoxes,boxes)),0)   AS totalboxes
+	FROM
+		b2b_order_goods o1,
+		(
+			SELECT
+				childOrderNumber
+			FROM
+				b2b_contract_goods c1
+			WHERE
+				c1.contractNo = #{contractNo}
+			AND c1.contractStatus !=- 1
+		) c2
+	WHERE
+		o1.orderStatus !=- 1
+	AND o1.childContractNo = c2.childOrderNumber
+	GROUP BY
+		o1.childContractNo
+) cog ON cg2.childOrderNumber = cog.childContractNo
+LEFT JOIN b2b_goods g on cg2.goodsPk=g.pk
+WHERE
+	cg2.contractNo = #{contractNo}
+AND cg2.contractStatus !=- 1
+AND (
+	cg2.weight > cog.totalweight
+	OR cog.childOrderNumber IS NULL
+)
+	
+	</select>
+</mapper>
+

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsDatumDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,econCustmerPk,companyPk,companyName,contacts,contactsTel,companyType,capacity,datumType,remarks,rule,url
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_datum (
+         pk, econCustmerPk, companyPk, companyName, contacts, contactsTel, companyType, capacity, datumType, remarks, rule, url
+        ) VALUES (
+         #{pk}, #{econCustmerPk}, #{companyPk}, #{companyName}, #{contacts}, #{contactsTel}, #{companyType}, #{capacity}, #{datumType}, #{remarks}, #{rule}, #{url}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bEconomicsDatum">
+    <![CDATA[
+        UPDATE b2b_economics_datum SET
+	        econCustmerPk = #{econCustmerPk} , companyPk = #{companyPk} , companyName = #{companyName} , contacts = #{contacts} , contactsTel = #{contactsTel} , companyType = #{companyType} , capacity = #{capacity} , datumType = #{datumType} , remarks = #{remarks} , rule = #{rule} , url = #{url}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bEconomicsDatum">
+    <![CDATA[
+        DELETE FROM b2b_economics_datum WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(econCustmerPk)">
+				AND econCustmerPk = #{econCustmerPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}			</if>
+			<if test="@Ognl@isNotEmpty(capacity)">
+				AND capacity = #{capacity}			</if>
+			<if test="@Ognl@isNotEmpty(datumType)">
+				AND datumType = #{datumType}			</if>
+			<if test="@Ognl@isNotEmpty(remarks)">
+				AND remarks = #{remarks}			</if>
+			<if test="@Ognl@isNotEmpty(rule)">
+				AND rule = #{rule}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_economics_datum
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where pk = #{pk}	</select>
+	<select id="getByEconCustmerPk" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where econCustmerPk = #{econCustmerPk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where companyName = #{companyName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where contactsTel = #{contactsTel}	</select>
+	<select id="getByRemarks" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where remarks = #{remarks}	</select>
+	<select id="getByRule" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where rule = #{rule}	</select>
+	<select id="getByUrl" resultType="cn.cf.dto.B2bEconomicsDatumDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_datum where url = #{url}	</select>
+</mapper>
+

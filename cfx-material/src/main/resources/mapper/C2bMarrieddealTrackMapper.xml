@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.C2bMarrieddealTrackDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,marrieddealId,supplierPk,supplierName,purchaserPk,purchaserName,supplierContacts,purchaserContacts,supplierTel,purchaserTel,bidPk,bidPrice,bidTime,remark,isConfirmed,insertTime,memberPk,memberName,isDelete
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO c2b_marrieddeal_track (
+         pk, marrieddealId, supplierPk, supplierName, purchaserPk, purchaserName, supplierContacts, purchaserContacts, supplierTel, purchaserTel, bidPk, bidPrice, bidTime, remark, isConfirmed, insertTime, memberPk, memberName, isDelete
+        ) VALUES (
+         #{pk}, #{marrieddealId}, #{supplierPk}, #{supplierName}, #{purchaserPk}, #{purchaserName}, #{supplierContacts}, #{purchaserContacts}, #{supplierTel}, #{purchaserTel}, #{bidPk}, #{bidPrice}, #{bidTime}, #{remark}, #{isConfirmed}, #{insertTime}, #{memberPk}, #{memberName}, #{isDelete}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.C2bMarrieddealTrack">
+    <![CDATA[
+        UPDATE c2b_marrieddeal_track SET
+	        marrieddealId = #{marrieddealId} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} , supplierContacts = #{supplierContacts} , purchaserContacts = #{purchaserContacts} , supplierTel = #{supplierTel} , purchaserTel = #{purchaserTel} , bidPk = #{bidPk} , bidPrice = #{bidPrice} , bidTime = #{bidTime} , remark = #{remark} , isConfirmed = #{isConfirmed} , insertTime = #{insertTime} , memberPk = #{memberPk} , memberName = #{memberName} , isDelete = #{isDelete}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.C2bMarrieddealTrack">
+    <![CDATA[
+        DELETE FROM c2b_marrieddeal_track WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(marrieddealId)">
+				AND marrieddealId = #{marrieddealId}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierContacts)">
+				AND supplierContacts = #{supplierContacts}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserContacts)">
+				AND purchaserContacts = #{purchaserContacts}			</if>
+			<if test="@Ognl@isNotEmpty(supplierTel)">
+				AND supplierTel = #{supplierTel}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserTel)">
+				AND purchaserTel = #{purchaserTel}			</if>
+			<if test="@Ognl@isNotEmpty(bidPk)">
+				AND bidPk = #{bidPk}			</if>
+			<if test="@Ognl@isNotEmpty(bidPrice)">
+				AND bidPrice = #{bidPrice}			</if>
+			<if test="@Ognl@isNotEmpty(bidTimeBegin)">
+				AND bidTime >= #{bidTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(bidTimeEnd)">
+				AND bidTime &lt;= #{bidTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(remark)">
+				AND remark = #{remark}			</if>
+			<if test="@Ognl@isNotEmpty(isConfirmed)">
+				AND isConfirmed = #{isConfirmed}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM c2b_marrieddeal_track
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where pk = #{pk}	</select>
+	<select id="getByMarrieddealId" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where marrieddealId = #{marrieddealId}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where supplierName = #{supplierName}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where purchaserName = #{purchaserName}	</select>
+	<select id="getBySupplierContacts" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where supplierContacts = #{supplierContacts}	</select>
+	<select id="getByPurchaserContacts" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where purchaserContacts = #{purchaserContacts}	</select>
+	<select id="getBySupplierTel" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where supplierTel = #{supplierTel}	</select>
+	<select id="getByPurchaserTel" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where purchaserTel = #{purchaserTel}	</select>
+	<select id="getByBidPk" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where bidPk = #{bidPk}	</select>
+	<select id="getByRemark" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where remark = #{remark}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.C2bMarrieddealTrackDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_track where memberName = #{memberName}	</select>
+</mapper>
+

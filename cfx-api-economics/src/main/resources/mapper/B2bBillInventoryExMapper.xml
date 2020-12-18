@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillInventoryDaoEx">
+
+
+
+	<delete id="deleteByOrderNumber">
+        DELETE FROM b2b_bill_inventory WHERE
+        orderNumber = #{orderNumber}
+	</delete>
+
+</mapper>
+

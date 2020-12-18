@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsCreditcustomerDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,insertTime,updateTime,source,assidirPk,assidirName,productPks,status,staticTime,goodsName,assiFlag
+	    ]]>
+	</sql>
+	<select id="searchGrid" resultType="cn.cf.dto.B2bEconomicsCreditcustomerDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_creditcustomer
+		where 1 = 1
+		<if test="companyPk != null ">
+			and companyPk = #{companyPk}
+		</if>
+		<if test="status != null ">
+			and status = #{status}
+		</if>
+		<if test="updateTime != null ">
+			and insertTime > #{updateTime}
+		</if>
+	</select>
+
+
+</mapper>
+

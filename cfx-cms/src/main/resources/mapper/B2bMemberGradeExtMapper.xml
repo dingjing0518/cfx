@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberGradeExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,gradeName,gradeNumber,numberStart,numberEnd,fbGradeRatio,emGradeRatio,isDelete,isVisable,updateTime,insertTime
+	    ]]>
+	</sql>
+	<update id="updateMemberGrade" parameterType="cn.cf.dto.B2bMemberGradeExtDto">
+		UPDATE b2b_member_grade
+		<set>
+		<if test="gradeName != null and gradeName != ''">
+			gradeName = #{gradeName},
+		</if>
+		<if test="gradeNumber != null and gradeNumber != ''">
+			gradeNumber = #{gradeNumber},
+		</if>
+		<if test="numberStart != null ">
+			numberStart = #{numberStart},
+		</if>
+		<if test="numberEnd != null ">
+			numberEnd = #{numberEnd},
+		</if>
+		<if test="fbGradeRatio != null ">
+			fbGradeRatio = #{fbGradeRatio},
+		</if>
+		<if test="emGradeRatio != null ">
+			emGradeRatio = #{emGradeRatio},
+		</if>
+		<if test="isDelete != null and isDelete != ''">
+			isDelete = #{isDelete},
+		</if>
+		<if test="isVisable != null and isVisable != ''">
+			isVisable = #{isVisable},
+		</if>
+			updateTime = NOW()
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName LIKE '%${gradeName}%' 	</if>
+			<if test="@Ognl@isNotEmpty(gradeNumber)">
+				AND gradeNumber = #{gradeNumber}			</if>
+			<if test="@Ognl@isNotEmpty(numberStart)">
+				AND numberStart = #{numberStart}			</if>
+			<if test="@Ognl@isNotEmpty(numberEnd)">
+				AND numberEnd = #{numberEnd}			</if>
+			<if test="@Ognl@isNotEmpty(fbGradeRatio)">
+				AND fbGradeRatio = #{fbGradeRatio}			</if>
+			<if test="@Ognl@isNotEmpty(emGradeRatio)">
+				AND emGradeRatio = #{emGradeRatio}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+		</where>
+	</sql>
+	
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_member_grade
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bMemberGradeExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,gradeName,gradeNumber,numberStart,numberEnd,concat_ws('-',numberStart,numberEnd) rangeNumber,
+		fbGradeRatio,emGradeRatio,isDelete,isVisable,updateTime,insertTime
+		FROM b2b_member_grade
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType} 
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	<select id="isExistName" resultType="cn.cf.dto.B2bMemberGradeExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member_grade where isDelete=1 
+		
+		<if test="gradeName != null and gradeName != ''">
+			and gradeName = #{gradeName}
+		</if>
+
+		<if test="gradeNumber != null and gradeNumber != ''">
+			and gradeNumber = #{gradeNumber}
+		</if>
+		<if test="numberStart != null and numberStart != ''">
+			and numberStart = #{numberStart}
+		</if>
+		<if test="numberEnd != null and numberEnd != ''">
+			and numberEnd = #{numberEnd}
+		</if> 
+		<if test="fbGradeRatio != null and fbGradeRatio != ''">
+			and fbGradeRatio = #{fbGradeRatio}
+		</if> 
+		<if test="emGradeRatio != null and emGradeRatio != ''">
+			and emGradeRatio = #{emGradeRatio}
+		</if>
+		</select>
+<select id="getByGradeNumber" resultType="cn.cf.dto.B2bMemberGradeExtDto"
+		parameterType="java.lang.Integer">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member_grade where gradeNumber = #{gradeNumber}	</select>
+</mapper>
+

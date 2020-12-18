@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserPk,supplierPk,orderStatus,orderAmount,actualAmount,insertTime,meno,memberPk,memberName,storeName,storePk,paymentType,paymentName,economicsGoodsType,economicsGoodsName,source,paymentTime,logisticsModelPk,logisticsModelName,purchaseType,isDelete,isDeleteSp,employeeNumber,employeeName,employeePk,completeTime,orderClassify,receivablesTime,isBatches,deliverDetails,otherNumber,purchaserInfo,supplierInfo,addressInfo,ownAmount,block
+	    ]]>
+	</sql>
+	
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="orderNumber != null and orderNumber !=''">
+				And o.orderNumber like '%${orderNumber}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND o.purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND o.supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND o.orderStatus = #{orderStatus}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND o.orderAmount = #{orderAmount}			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				AND o.actualAmount = #{actualAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				and TO_DAYS( o.insertTime ) >=TO_DAYS(#{insertTimeBegin})
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				and TO_DAYS( o.insertTime ) &lt;=TO_DAYS(#{insertTimeEnd})
+			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				AND o.meno = #{meno}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND o.memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND o.memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND o.storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND o.storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				AND o.paymentType = #{paymentType}			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND o.paymentName = #{paymentName}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND o.economicsGoodsType = #{economicsGoodsType}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND o.economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND o.source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeBegin)">
+				AND o.paymentTime >= #{paymentTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeEnd)">
+				AND o.paymentTime &lt;= #{paymentTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				AND o.logisticsModelPk = #{logisticsModelPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelName)">
+				AND o.logisticsModelName = #{logisticsModelName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND o.purchaseType = #{purchaseType}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND o.isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isDeleteSp)">
+				AND o.isDeleteSp = #{isDeleteSp}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND o.employeeNumber = #{employeeNumber}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND o.employeeName like '%${employeeName}%' </if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND o.employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(employeePks)">
+				AND o.employeePk in
+				<foreach item="item" index="index" collection="employeePks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>			
+			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeBegin)">
+				AND o.completeTime >= #{completeTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeEnd)">
+				AND o.completeTime &lt;= #{completeTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(orderClassify)">
+				AND o.orderClassify = #{orderClassify}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesTimeBegin)">
+				AND o.receivablesTime >= #{receivablesTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesTimeEnd)">
+				AND o.receivablesTime &lt;= #{receivablesTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isBatches)">
+				AND o.isBatches = #{isBatches}			</if>
+			<if test="@Ognl@isNotEmpty(deliverDetails)">
+				AND o.deliverDetails = #{deliverDetails}			</if>
+			<if test="@Ognl@isNotEmpty(otherNumber)">
+				AND o.otherNumber = #{otherNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserInfo)">
+				AND o.purchaserInfo = #{purchaserInfo}			</if>
+			<if test="@Ognl@isNotEmpty(supplierInfo)">
+				AND o.supplierInfo = #{supplierInfo}			</if>
+			<if test="@Ognl@isNotEmpty(addressInfo)">
+				AND o.addressInfo = #{addressInfo}			</if>
+			<if test="@Ognl@isNotEmpty(ownAmount)">
+				AND o.ownAmount = #{ownAmount}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND o.block = #{block}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPks)">
+				AND o.purchaserPk in
+				<foreach item="item" index="index" collection="purchaserPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsInfo)">
+				and (o.orderNumber in (
+				select og.orderNumber from
+				b2b_order_goods og where goodsInfo like '%${goodsInfo}%'
+				) or o.orderNumber like '%${goodsInfo}%'
+				)
+			</if>
+			<if test="memberName != null and memberName !=''">
+				and (o.employeeName like '%${memberName}%' or o.employeeNumber like '%${memberName}%')
+			</if>
+			<if test="purchaserName != null and purchaserName !=''">
+				and o.purchaserInfo like '%purchaserName%${purchaserName}%'
+			</if>
+			<if test="contactsTel != null and contactsTel !=''">
+				and o.purchaserInfo like '%contactsTel%${contactsTel}%'
+			</if>
+			<if test="supplierName != null and supplierName !=''">
+				and o.supplierInfo like '%supplierName%${supplierName}%'
+			</if>
+			<if test="supplierContactsTel != null and supplierContactsTel !=''">
+				and o.supplierInfo like '%contactsTel%${supplierContactsTel}%'
+			</if>	
+		</where>
+	</sql>
+	
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchB2bOrderList" resultType="cn.cf.dto.B2bOrderDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		o.orderNumber,
+		o.orderClassify,
+		o.purchaserPk,
+		o.supplierPk,
+		o.orderStatus,
+		o.orderAmount,
+		o.actualAmount,
+		o.insertTime,
+		o.meno,
+		o.memberPk,
+		o.memberName,
+		o.storeName,
+		o.storePk,
+		o.paymentType,
+		o.paymentName,
+		o.source,
+		o.paymentTime,
+		o.logisticsModelPk,
+		o.logisticsModelName,
+		o.purchaseType,
+		o.isDelete,
+		o.isDeleteSp,
+		o.employeeNumber,
+		o.employeeName,
+		o.employeePk,
+		o.economicsGoodsType,
+		o.economicsGoodsName,
+		o.paymentType,
+		o.logisticsModelPk as logisticsModelType,
+		o.deliverDetails,
+		o.purchaserInfo,
+		o.supplierInfo,
+		o.addressInfo,
+		o.block
+	FROM
+		b2b_order o
+	<include refid="searchGridWhere" />
+		order by o.insertTime desc
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchB2bOrderCounts" resultType="int">
+		SELECT
+		count(1)
+		FROM b2b_order o
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="getB2bOrder" resultType="cn.cf.dto.B2bOrderDtoEx">
+	SELECT
+		o.*,o.logisticsModelPk as logisticsModelType
+		FROM b2b_order o
+		where o.orderNumber = #{orderNumber}
+	</select>
+	
+	<insert id="insertBatch" useGeneratedKeys="true" keyProperty="orderNumber"
+		parameterType="java.util.List">
+		INSERT INTO b2b_order (
+		orderNumber, purchaserPk, supplierPk, orderStatus,
+		orderAmount, actualAmount,insertTime,meno, 
+		memberPk,memberName, storeName, storePk, 
+		source,logisticsModelPk,logisticsModelName,purchaseType,
+		employeePk,employeeName,employeeNumber,orderClassify, 
+		isBatches,otherNumber,deliverDetails,addressInfo,
+		purchaserInfo,supplierInfo,block,paymentType,paymentName,paymentTime,economicsGoodsName,economicsGoodsType 
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.orderNumber}, #{item.purchaserPk},#{item.supplierPk},#{item.orderStatus},
+			#{item.orderAmount},#{item.actualAmount},#{item.insertTime},#{item.meno},
+			#{item.memberPk},#{item.memberName},#{item.storeName},#{item.storePk},
+			#{item.source},#{item.logisticsModelPk},#{item.logisticsModelName},#{item.purchaseType},
+			#{item.employeePk},#{item.employeeName},#{item.employeeNumber},#{item.orderClassify},
+			#{item.isBatches},#{item.otherNumber},#{item.deliverDetails},#{item.addressInfo},
+			#{item.purchaserInfo},#{item.supplierInfo},#{item.block},#{item.paymentType},#{item.paymentName},#{item.paymentTime},#{item.economicsGoodsName},#{item.economicsGoodsType} 
+			)
+		</foreach>
+	</insert>
+	
+		<update id="updateOrder" parameterType="cn.cf.model.B2bOrder">
+		
+        UPDATE b2b_order 
+		<set>
+			<if test="@Ognl@isNotEmpty(purchaserInfo)">
+				 purchaserInfo = #{purchaserInfo},			</if>
+			<if test="@Ognl@isNotEmpty(supplierInfo)">
+				 supplierInfo = #{supplierInfo},			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				 orderStatus = #{orderStatus},			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				 orderAmount = #{orderAmount},			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				 actualAmount = #{actualAmount},			</if>
+			<if test="@Ognl@isNotEmpty(addressInfo)">
+				 addressInfo = #{addressInfo},			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				 meno = #{meno},			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				 paymentType = #{paymentType},			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				 paymentName = #{paymentName},			</if>
+			<if test="@Ognl@isNotEmpty(paymentTime)">
+				 paymentTime = #{paymentTime},			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				 logisticsModelPk = #{logisticsModelPk},			</if>
+			 <if test="@Ognl@isNotEmpty(logisticsModelName)">
+				 logisticsModelName = #{logisticsModelName},			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				 isDelete = #{isDelete},			</if>
+			<if test="@Ognl@isNotEmpty(isDeleteSp)">
+				 isDeleteSp = #{isDeleteSp},			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				 employeeNumber = #{employeeNumber},			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				 employeeName = #{employeeName},			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				 employeePk = #{employeePk},			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				 economicsGoodsType = #{economicsGoodsType},			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				 economicsGoodsName = #{economicsGoodsName},			</if>
+			<if test="@Ognl@isNotEmpty(completeTime)">
+				 completeTime = #{completeTime}			
+			</if>
+			<if test="@Ognl@isNotEmpty(orderClassify)">
+				 orderClassify = #{orderClassify},			
+			</if>
+			<if test="@Ognl@isNotEmpty(receivablesTime)">
+				receivablesTime = #{receivablesTime},	
+			</if>
+			<if test="@Ognl@isNotEmpty(ownAmount)">
+				ownAmount = #{ownAmount},	
+			</if>
+		</set>
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+	</update>
+	
+	<select id="orderStatusCounts" resultType="map">
+		SELECT
+		count(1) AS allCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 0 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS auditCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 1 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS paymentCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 2 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS confirmedCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 3 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS shipmentCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 4 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS shippedCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 5 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS pshipmentCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 6 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS completedCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN
+		- 1
+		THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS canceledCounts
+		FROM
+		b2b_order o 
+	<include refid="searchGridWhere" />
+	</select>
+	
+	
+	<select id="exportOrderList" resultType="cn.cf.dto.ExportOrderDto">
+	<![CDATA[ 
+		SELECT
+			ifnull(o.orderNumber, '') AS orderNumber,
+			ifnull(og.childOrderNumber, '') AS childOrderNumber,
+			ifnull(o.addressInfo, '') AS addressInfo,
+			ifnull(o.purchaserInfo, '') AS purchaserInfo,
+			ifnull(o.supplierInfo, '') AS supplierInfo,
+			ifnull(og.goodsInfo, '') AS goodsInfo,
+			ifnull(o.storeName, '') AS storeName,
+			o.block,
+			CASE o.orderStatus
+		WHEN 0 THEN
+			'待审核'
+		WHEN 1 THEN
+			'待付款'
+		WHEN 2 THEN
+			'待确认'
+		WHEN 3 THEN
+			'待发货'
+		WHEN 4 THEN
+			'已发货'
+		WHEN 5 THEN
+			'部分发货'
+		WHEN 6 THEN
+			'已完成'
+		WHEN - 1 THEN
+			'已取消'
+		END AS orderStatusName,
+		 CASE o.purchaseType
+		WHEN 1 THEN
+			'自采'
+		WHEN 2 THEN
+			'代采'
+		WHEN 3 THEN
+			'后台代采'
+		END AS purchaseTypeName,
+		 IFNULL(og.boxesShipped, 0) AS boxesShipped,
+		 IFNULL(og.weightShipped, 0) AS weightShipped,
+		
+		IF (
+			(
+				og.afterBoxes - IFNULL(og.boxesShipped, 0)
+			) < 0,
+			0,
+			(
+				og.afterBoxes - IFNULL(og.boxesShipped, 0)
+			)
+		) AS boxesNoShipped,
+		
+		IF (
+			(
+				og.afterWeight - IFNULL(og.weightShipped, 0)
+			) < 0,
+			0,
+			(
+				og.afterWeight - IFNULL(og.weightShipped, 0)
+			)
+		) AS weightNoShipped,
+		 ifnull(og.originalPrice, '') AS originalPrice,
+		 ifnull(og.presentPrice, '') AS presentPrice,
+		 ROUND(
+			(presentPrice) *
+			IF (
+				afterWeight > 0,
+				afterWeight,
+				weight
+			),
+			2
+		) AS presentTotalPrice,
+		 ifnull(og.presentTotalFreight, '') AS presentTotalFreight,
+		 o.insertTime,
+		 o.actualAmount,
+		 ifnull(o.paymentName, '') AS paymentName,
+		 CASE o.source
+		WHEN 1 THEN
+			'PC'
+		WHEN 2 THEN
+			'WAP'
+		WHEN 3 THEN
+			'APP'
+		WHEN 4 THEN
+			'后台'
+		END AS sourceName,
+		 ifnull(o.memberName, '') AS memberName,
+		 ifnull(o.meno, '') AS meno,
+		 ifnull(o.employeeNumber, '') AS employeeNumber,
+		 ifnull(o.employeeName, '') AS employeeName,
+		 o.economicsGoodsType,
+		 ifnull(o.economicsGoodsName, '') AS economicsGoodsName,
+		 ifnull(o.deliverDetails, '') AS deliverDetails,
+		 og.afterBoxes,
+		 og.afterWeight,
+		 og.weight,
+		 og.boxes,
+		 og.otherDiscount
+		FROM
+			b2b_order o
+		LEFT JOIN b2b_order_goods og ON o.orderNumber = og.orderNumber
+		WHERE
+			1 = 1
+	 ]]>
+	 	<if test="employeePk !=null and employeePk !=''">
+			AND  o.employeePk=#{employeePk}
+		</if>
+		<if test="orderClassify !=null and orderClassify !=''">
+			AND  o.orderClassify=#{orderClassify}
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaserPk)">
+			AND o.purchaserPk = #{purchaserPk}
+		</if>	
+		<if test="@Ognl@isNotEmpty(supplierPk)">
+			AND o.supplierPk = #{supplierPk}
+		</if>
+		<if test="storePk!=null and storePk!=''">
+			AND o.storePk=#{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaseType)">
+			AND o.purchaseType = #{purchaseType}
+		</if>
+		<if test="orderNumber != null and orderNumber !=''">
+			AND o.orderNumber like '%${orderNumber}%'
+		</if>
+		<if test="orderStatus != null">
+			<choose>
+				<when test="orderStatus == 4">
+					AND (o.orderStatus = 4 or o.orderStatus = 5)
+				</when>
+				<otherwise>
+					AND o.orderStatus = #{orderStatus}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="paymentType != null and paymentType !=''">
+			AND o.paymentType = #{paymentType}
+		</if>
+		<if test="memberPk != null and memberPk !=''">
+			AND o.memberPk = #{memberPk}
+		</if>
+		<if test="memberName != null and memberName !=''">
+			AND (o.employeeName like  '%${memberName}%' or o.employeeNumber like '%${memberName}%')
+		</if>
+		 <if test="source != null and source !=''">
+			AND o.source = #{source}
+		</if>
+		<if test="@Ognl@isNotEmpty(isDelete)">
+			AND o.isDelete = #{isDelete}
+		</if>
+		<if test="@Ognl@isNotEmpty(isDeleteSp)">
+			AND o.isDeleteSp = #{isDeleteSp}
+		</if>
+		<if test="@Ognl@isNotEmpty(contactsTel)">
+			and o.purchaserInfo like '%contactsTel%${contactsTel}%'
+		</if>
+		<if test="purchaserName != null and purchaserName !=''">
+			and o.purchaserInfo like '%purchaserName%${purchaserName}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(deliverDetails)">
+			AND deliverDetails like '%${deliverDetails}%'
+		</if>
+		<if test="insertTimeBegin != null and insertTimeBegin !=''">
+		 <![CDATA[ AND str_to_date(o.insertTime, '%Y-%m-%d') >= #{insertTimeBegin} ]]>
+		</if>
+		<if test="insertTimeEnd != null and insertTimeEnd !=''">
+		 <![CDATA[ AND str_to_date(o.insertTime, '%Y-%m-%d') <= #{insertTimeEnd} ]]>
+		</if>
+		<if test="paymentStartTime != null and paymentStartTime !=''">
+		 <![CDATA[ AND str_to_date( o.paymentTime, '%Y-%m-%d') >= #{paymentStartTime} ]]>
+		</if>
+		<if test="paymentEndTime != null and paymentEndTime !=''">
+		 <![CDATA[ AND str_to_date( o.paymentTime, '%Y-%m-%d') <= #{paymentEndTime} ]]>
+		</if>
+		<if test="@Ognl@isNotEmpty(goodsInfo)">
+				and og.goodsInfo like '%${goodsInfo}%'
+		</if>
+		<if test="purchaserPks !=null and purchaserPks !=''">
+			AND o.purchaserPk in
+			<foreach item="item" index="index" collection="purchaserPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		order by o.insertTime desc
+	</select>
+	
+	<select id="cancelOrder" resultType="cn.cf.dto.B2bOrderDto">
+		select * from b2b_order where orderStatus = 0 or orderStatus = 1
+	</select>
+	
+</mapper>
+

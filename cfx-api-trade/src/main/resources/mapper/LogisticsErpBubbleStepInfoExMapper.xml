@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpBubbleStepInfoDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,minTareWeight,maxTareWeight,coefficient,bubblePk
+	    ]]>
+	</sql>
+
+  
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(minTareWeight)">
+				AND minTareWeight = #{minTareWeight}			</if>
+			<if test="@Ognl@isNotEmpty(maxTareWeight)">
+				AND maxTareWeight = #{maxTareWeight}			</if>
+			<if test="@Ognl@isNotEmpty(coefficient)">
+				AND coefficient = #{coefficient}			</if>
+			<if test="@Ognl@isNotEmpty(bubblePk)">
+				AND bubblePk = #{bubblePk}			</if>
+		</where>
+	</sql>
+	
+	<delete id="deleteByBubblePk">
+    <![CDATA[
+       DELETE FROM logistics_erp_bubble_stepInfo WHERE bubblePk=#{bubblePk}
+    ]]>
+	</delete>	
+	 <select id="find" resultType="cn.cf.dto.LogisticsErpBubbleStepInfoDto"
+		parameterType="cn.cf.dto.B2bGoodsDto">
+	 SELECT
+	ebs.*
+FROM
+	logistics_erp_bubble eb
+LEFT JOIN logistics_erp_bubble_stepInfo ebs ON eb.pk = ebs.bubblePk
+WHERE
+	eb.productPk = #{productPk}
+AND eb.storePk = #{storePk}
+AND eb.isDelete = 1
+AND eb.isVisable = 1
+ <![CDATA[AND ebs.minTareWeight < #{tareWeight} ]]>
+AND ebs.maxTareWeight >= #{tareWeight}
+	 
+	 </select>
+	 
+	 <select id="searchbubbleStepInfoList" resultType="cn.cf.dto.LogisticsErpBubbleStepInfoDto">
+	 SELECT
+		<include refid="columns" />
+		FROM logistics_erp_bubble_stepInfo where bubblePk = #{bubblePk}
+	 </select>
+</mapper>
+

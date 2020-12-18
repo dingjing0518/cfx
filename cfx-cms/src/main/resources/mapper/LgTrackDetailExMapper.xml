@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgTrackDetailExDao">
+
+  <select id="selectTrackDetailBydeliveryPk" parameterType="Map" resultType ="cn.cf.dto.LgTrackDto">
+    select * ,CASE orderStatus
+			WHEN 9 THEN
+				"待付款"
+			WHEN 8 THEN
+				"待财务确认"
+			WHEN 7 THEN
+				"未匹配"
+			WHEN 6 THEN
+				"已匹配"
+			WHEN 5 THEN
+				"提货中"
+			WHEN 4 THEN
+				"配送中"
+			WHEN 3 THEN
+				"已签收"
+			WHEN 2 THEN
+				"已取消"
+			ELSE
+				""
+			END AS orderStatusName from lg_track_detail where deliveryPk=#{deliveryPk} order by finishedTime desc
+  </select>
+
+    <insert id="insert" useGeneratedKeys="true"  keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_track_detail (
+         pk, deliveryPk, orderStatus,  stepDetail, finishedTime,   insertTime, updateTime
+        ) VALUES (
+         #{pk}, #{deliveryPk}, #{orderStatus},  #{stepDetail}, SYSDATE(), SYSDATE(), SYSDATE()
+        )
+    ]]>
+    </insert>
+</mapper>
+

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysSupplierRecommedDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,storeName,storePk,isRecommed,url,sort,isDelete,isOnline,insertTime,position,linkUrl,block,brandPk,
+		brandName,platform,updateTime,region,abbreviated
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+			keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_supplier_recommed (
+         pk, storeName, storePk, isRecommed, url, sort, isDelete, isOnline, insertTime, position, linkUrl, block, brandPk, brandName, platform, updateTime, region,abbreviated
+        ) VALUES (
+         #{pk}, #{storeName}, #{storePk}, #{isRecommed}, #{url}, #{sort}, #{isDelete}, #{isOnline}, #{insertTime}, #{position}, #{linkUrl}, #{block}, #{brandPk}, #{brandName}, #{platform}, #{updateTime}, #{region},#{abbreviated}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysSupplierRecommed">
+    <![CDATA[
+        UPDATE sys_supplier_recommed SET
+	        storeName = #{storeName} , storePk = #{storePk} , isRecommed = #{isRecommed} , url = #{url} , sort = #{sort} ,
+	        isDelete = #{isDelete} , isOnline = #{isOnline} , insertTime = #{insertTime} , position = #{position} ,
+	        linkUrl = #{linkUrl} , block = #{block} , brandPk = #{brandPk} , brandName = #{brandName} , platform = #{platform} ,
+	         updateTime = #{updateTime} , region = #{region},abbreviated = #{abbreviated}
+        WHERE
+        	pk = #{pk}
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.SysSupplierRecommed">
+    <![CDATA[
+        DELETE FROM sys_supplier_recommed WHERE
+        pk = #{id}
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(isRecommed)">
+				AND isRecommed = #{isRecommed}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isOnline)">
+				AND isOnline = #{isOnline}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(position)">
+				AND position like '%${position}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block like '%${block}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(brandPk)">
+				AND brandPk = #{brandPk}			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(platform)">
+				AND platform like '%${platform}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(region)">
+				AND region = #{region}			</if>
+			<if test="@Ognl@isNotEmpty(abbreviated)">
+				AND abbreviated = #{abbreviated}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+			resultType="int">
+		SELECT count(*) FROM sys_supplier_recommed
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed
+		<include refid="searchGridWhere" />
+		<if test="orderName != null ">
+			ORDER BY ${orderName} ${orderType} ,updateTime DESC
+		</if>
+
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where pk = #{pk}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where storeName = #{storeName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where storePk = #{storePk}	</select>
+	<select id="getByUrl" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where url = #{url}	</select>
+	<select id="getByPosition" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where position = #{position}	</select>
+	<select id="getByLinkUrl" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where linkUrl = #{linkUrl}	</select>
+	<select id="getByBlock" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where block = #{block}	</select>
+	<select id="getByBrandPk" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where brandPk = #{brandPk}	</select>
+	<select id="getByBrandName" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where brandName = #{brandName}	</select>
+	<select id="getByPlatform" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where platform = #{platform}	</select>
+	<select id="getByRegion" resultType="cn.cf.dto.SysSupplierRecommedDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_supplier_recommed where region = #{region}	</select>
+</mapper>
+

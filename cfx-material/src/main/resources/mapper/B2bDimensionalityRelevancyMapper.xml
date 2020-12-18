@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityRelevancyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,dimenCategory,dimenName,dimenType,dimenTypeName,isDelete,isVisable,insertTime,updateTime,linkUrl
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_dimensionality_relevancy (
+         pk, dimenCategory, dimenName, dimenType, dimenTypeName, isDelete, isVisable, insertTime, updateTime, linkUrl
+        ) VALUES (
+         #{pk}, #{dimenCategory}, #{dimenName}, #{dimenType}, #{dimenTypeName}, #{isDelete}, #{isVisable}, #{insertTime}, #{updateTime}, #{linkUrl}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bDimensionalityRelevancy">
+    <![CDATA[
+        UPDATE b2b_dimensionality_relevancy SET
+	        dimenCategory = #{dimenCategory} , dimenName = #{dimenName} , dimenType = #{dimenType} , dimenTypeName = #{dimenTypeName} , isDelete = #{isDelete} , isVisable = #{isVisable} , insertTime = #{insertTime} , updateTime = #{updateTime} , linkUrl = #{linkUrl}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bDimensionalityRelevancy">
+    <![CDATA[
+        DELETE FROM b2b_dimensionality_relevancy WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_dimensionality_relevancy
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where pk = #{pk}	</select>
+	<select id="getByDimenName" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where dimenName = #{dimenName}	</select>
+	<select id="getByDimenTypeName" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where dimenTypeName = #{dimenTypeName}	</select>
+	<select id="getByLinkUrl" resultType="cn.cf.dto.B2bDimensionalityRelevancyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where linkUrl = #{linkUrl}	</select>
+</mapper>
+

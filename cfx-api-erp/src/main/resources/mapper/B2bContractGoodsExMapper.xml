@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bContractGoodsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		childOrderNumber,contractNo,detailNumber,brandName,boxes,weight,basicPrice,freight,contractPrice,discount,carrierPk,carrier,isDelete,insertTime,updateTime,weightShipped,boxesShipped,contractStatus,logisticsPk,logisticsStepInfoPk,goodsInfo
+	    ]]>
+	</sql>
+
+	<update id="updateContractGoodsDto">
+		UPDATE b2b_contract_goods
+		<set>
+			<if test="contractStatus != null and contractStatus != ''">
+			contractStatus = #{contractStatus},
+			</if>
+			<if test="weightShipped != null and weightShipped != ''">
+			weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null and boxesShipped != ''">
+			boxesShipped = #{boxesShipped},
+			</if>
+		</set>
+		WHERE  contractNo = #{contractNo}
+		<if test="detailNumber != null and detailNumber != ''">
+			and detailNumber = #{detailNumber}
+		</if>
+	</update>
+	
+	
+	<select id="searchListExt" resultType="cn.cf.dto.B2bContractGoodsDto" parameterType="java.util.Map">
+		select *
+		from b2b_contract_goods
+		where isDelete = 1
+		<if test="contractNo != null and contractNo != ''">
+			and contractNo = #{contractNo}
+		</if>
+		<if test="detailNumber != null and detailNumber != ''">
+			and detailNumber = #{detailNumber}
+		</if>
+		<if test="flag != null and flag != ''">
+			and weight - weightShipped  >0	
+		</if>
+	</select>
+	
+</mapper>
+

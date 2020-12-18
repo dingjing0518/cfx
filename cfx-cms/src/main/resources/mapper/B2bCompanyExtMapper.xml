@@ -1,0 +1,1393 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCompanyExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isDelete,auditStatus,auditSpStatus,insertTime,updateTime,parentPk,provinceName,province,cityName,
+		city,areaName,area,contactsTel,contacts,companyType,blUrl,organizationCode,
+		ecUrl,isVisable,auditTime,auditSpTime,auditPk,auditSpPk,refuseReason,headPortrait,isPerfect,remarks,block
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			AND c.isDelete = 1 	
+			<if test="pk!=null and pk!=''">
+				AND c.pk = #{pk}			</if>
+			<if test="name !=null and name !='' ">
+				AND c.name like '%${name}%'		</if>
+			<if test="isDelete !=null and isDelete !=''">
+				AND c.isDelete = #{isDelete}			</if>
+			<if test="auditStatus !=null and auditStatus !=''">
+				AND c.auditStatus = #{auditStatus}			</if>
+			<if test="auditSpStatus !=null and auditSpStatus !=''">
+				AND c.auditSpStatus = #{auditSpStatus}			</if>
+			<if test="insertStartTime !=null and insertStartTime !=''">
+				AND str_to_date(c.insertTime, '%Y-%m-%d') >= #{insertStartTime}			</if>
+			<if test="insertEndTime !=null and insertEndTime !=''">
+			AND str_to_date(c.insertTime, '%Y-%m-%d') &lt;= #{insertEndTime}			</if>
+
+			<if test="insertTime !=null and insertTime !=''">
+				AND c.insertTime &lt;= #{insertTime}			</if>
+			<if test="updateStartTime !=null and updateStartTime !=''">
+				AND str_to_date(c.updateTime, '%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="updateEndTime !=null and updateEndTime !=''">
+				AND str_to_date(c.updateTime, '%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="auditStartTime !=null and auditStartTime !=''">
+				AND str_to_date(c.auditTime, '%Y-%m-%d') >= #{auditStartTime}			</if>
+			<if test="auditEndTime !=null and auditEndTime !=''">
+				AND str_to_date(c.auditTime, '%Y-%m-%d') &lt;= #{auditEndTime}			</if>
+			<if test="auditSpStartTime !=null and auditSpStartTime !=''">
+				AND str_to_date(c.auditSpTime, '%Y-%m-%d') >= #{auditSpStartTime}			</if>
+			<if test="auditSpEndTime !=null and auditSpEndTime !=''">
+				AND str_to_date(c.auditSpTime, '%Y-%m-%d') &lt;= #{auditSpEndTime}			</if>
+			<if test="parentPk !=null and parentPk !=''">
+				AND c.parentPk = #{parentPk}			</if>
+			<if test="provinceName !=null and provinceName !=''">
+				AND c.provinceName = #{provinceName}			</if>
+			<if test="province !=null and province !=''">
+				AND c.province = #{province}			</if>
+			<if test="cityName !=null and cityName !=''">
+				AND c.cityName = #{cityName}			</if>
+			<if test="city !=null and city !=''">
+				AND c.city = #{city}			</if>
+			<if test="areaName !=null and areaName !=''">
+				AND c.areaName = #{areaName}			</if>
+			<if test="area !=null and area !=''">
+				AND c.area = #{area}			</if>
+			<if test="contactsTel !=null and contactsTel !=''">
+				AND c.contactsTel like '%${contactsTel}%'			</if>
+			<if test="mobile !=null and mobile !=''">
+				AND mb.mobile like '%${mobile}%'			</if>
+			<if test="contacts !=null and contacts !=''">
+				AND c.contacts = #{contacts}			</if>
+			<if test="companyType !=null and companyType !=''">
+				<!-- AND companyType = #{companyType} -->
+				<!-- 检索供应商随时 检索有过申请供应商状态的公司 -->
+				<if test="companyType == 2">
+					AND c.auditSpStatus > 0 
+				</if>
+				<!-- AND companyType = #{companyType} -->
+			</if>
+			<if test="blUrl !=null and blUrl !=''">
+				AND c.blUrl = #{blUrl}			</if>
+			<if test="ocUrl !=null and ocUrl !=''">
+				AND c.ocUrl = #{ocUrl}			</if>
+			<if test="organizationCode !=null and organizationCode !=''">
+				AND c.organizationCode LIKE '%${organizationCode}%'		</if>
+			<if test="trUrl !=null and trUrl !=''">
+				AND c.trUrl = #{trUrl}			</if>
+			<if test="taxRegistration !=null and taxRegistration !=''">
+				AND c.taxRegistration = #{taxRegistration}			</if>
+			<if test="opUrl !=null and opUrl !=''">
+				AND c.opUrl = #{opUrl}			</if>
+			<if test="ecUrl !=null and ecUrl !=''">
+				AND c.ecUrl = #{ecUrl}			</if>
+			<if test="isVisable !=null and isVisable !=''">
+				AND c.isVisable = #{isVisable}			</if>
+			<if test="auditTimeBegin !=null and auditTimeBegin !=''">
+				AND str_to_date(c.auditTime, '%Y-%m-%d') >= #{auditTimeBegin}			</if>
+			<if test="auditTimeEnd !=null and auditTimeEnd !=''">
+				AND str_to_date(c.auditTime, '%Y-%m-%d') &lt;= #{auditTimeEnd}			</if>
+			<if test="auditPk !=null and auditPk !=''">
+				AND c.auditPk = #{auditPk}			</if>
+			<if test="refuseReason !=null and refuseReason !=''">
+				AND c.refuseReason = #{refuseReason}			</if>
+			<if test="isPerfect !=null and isPerfect !=''">
+				AND c.isPerfect = #{isPerfect}			</if>
+				
+		</where>
+	</sql>
+	
+	<update id="updateCompany" parameterType="cn.cf.dto.B2bCompanyExtDto">
+        UPDATE b2b_company 
+        <set>
+        	<if test="name != null and name !=''">
+        		 name = #{name},
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		  isDelete = #{isDelete},
+        	</if>
+        	<if test="auditStatus != null and auditStatus !=''">
+        		  auditStatus = #{auditStatus},
+        	</if>
+        	<if test="auditSpStatus != null and auditSpStatus !=''">
+        		  auditSpStatus = #{auditSpStatus},
+        	</if>
+        	<if test="insertTime != null">
+        		  insertTime = #{insertTime},
+        	</if>
+        	<if test="updateTime != null">
+        		  updateTime = #{updateTime},
+        	</if>
+        	<if test="parentPk != null and parentPk !=''">
+        		  parentPk = #{parentPk},
+        	</if>
+        	<if test="provinceName != null and provinceName !=''">
+        		  provinceName = #{provinceName},
+        	</if>
+        	<if test="province != null and province !=''">
+        		  province = #{province},
+        	</if>
+        	<if test="cityName != null and cityName !=''">
+        		  cityName = #{cityName},
+        	</if>
+        	<if test="city != null and city !=''">
+        		  city = #{city},
+        	</if>
+        	<if test="areaName != null and areaName !=''">
+        		  areaName = #{areaName},
+        	</if>
+        	<if test="area != null and area !=''">
+        		  area = #{area},
+        	</if>
+        	<if test="contactsTel != null and contactsTel !=''">
+        		  contactsTel = #{contactsTel},
+        	</if>
+        	<if test="contacts != null and contacts !=''">
+        		  contacts = #{contacts},
+        	</if>
+        	<if test="companyType != null and companyType !=''">
+        		  companyType = #{companyType},
+        	</if>
+        	<if test="blUrl != null and blUrl !=''">
+        		  blUrl = #{blUrl},
+        	</if>
+        	<if test="organizationCode != null and organizationCode !=''">
+        		    organizationCode = #{organizationCode},
+        	</if>
+        	<if test="ecUrl != null and ecUrl !=''">
+        		     ecUrl = #{ecUrl},
+        	</if>
+        	<if test="isVisable != null and isVisable !=''">
+        		     isVisable = #{isVisable},
+        	</if>
+        	<if test="auditTime != null">
+        		     auditTime = #{auditTime},
+        	</if>
+        	<if test="auditSpTime != null">
+        		     auditSpTime = #{auditSpTime},
+        	</if>
+        	<if test="auditPk != null and auditPk !=''">
+        		      auditPk = #{auditPk},
+        	</if>
+        	<if test="auditSpPk != null and auditSpPk !=''">
+        		      auditSpPk = #{auditSpPk},
+        	</if>
+        	<if test="refuseReason != null and refuseReason !=''">
+        		      refuseReason = #{refuseReason},
+        	</if>
+	         <if test="headPortrait != null and headPortrait !=''">
+        		      headPortrait = #{headPortrait},
+        	</if>
+        	 <if test="isPerfect != null and isPerfect !=''">
+        		      isPerfect = #{isPerfect},
+        	</if> 
+        	 <if test="infoUpdateTime != null and infoUpdateTime !=''">
+        		      infoUpdateTime = #{infoUpdateTime},
+        	</if>
+			<if test="block != null and block !=''">
+				block = #{block},
+			</if>
+        			  updateTime = NOW(),
+        			     
+        		      remarks = #{remarks},
+        </set>
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+
+	<update id="updateCompanyInvoice" parameterType="cn.cf.entity.B2bInvoiceEntity">
+		UPDATE b2b_company
+		<set>
+			<if test="provinceName != null and provinceName !=''">
+				provinceName = #{provinceName},
+			</if>
+			<if test="province != null and province !=''">
+				province = #{province},
+			</if>
+			<if test="cityName != null and cityName !=''">
+				cityName = #{cityName},
+			</if>
+			<if test="city != null and city !=''">
+				city = #{city},
+			</if>
+			<if test="areaName != null and areaName !=''">
+				areaName = #{areaName},
+			</if>
+			<if test="area != null and area !=''">
+				area = #{area},
+			</if>
+			<if test="regPhone != null and regPhone !=''">
+				contactsTel = #{regPhone},
+			</if>
+			<if test="taxidNumber != null and taxidNumber !=''">
+				organizationCode = #{taxidNumber},
+			</if>
+			<if test="bankName != null and bankName !=''">
+				bankName = #{bankName},
+			</if>
+			<if test="bankAccount != null and bankAccount !=''">
+				bankAccount = #{bankAccount},
+			</if>
+			<if test="regAddress != null and regAddress !=''">
+				regAddress = #{regAddress},
+			</if>
+
+			updateTime = NOW(),
+		</set>
+		WHERE
+		pk = #{companyPk}
+
+
+	</update>
+
+	<sql id="columnsAuth">
+	    <![CDATA[
+		c.pk as pk,c.isDelete as isDelete,c.auditStatus as auditStatus,(
+			CASE c.auditStatus
+			WHEN 1 THEN
+				'待审核'
+			WHEN 2 THEN
+				'审核通过'
+			WHEN 3 THEN
+				'审核不通过'
+			END
+		) auditStatusName,
+		(CASE c.auditSpStatus WHEN 1 THEN
+			'待审核'
+		WHEN 2 THEN
+			'审核通过'
+		WHEN 3 THEN
+			'审核不通过'
+		END ) auditSpStatusName,(
+			CASE c.isVisable
+			WHEN 2 THEN
+				'禁用'
+			WHEN 1 THEN
+				'启用'
+			END
+		)isVisableName,c.auditSpStatus as auditSpStatus,c.insertTime as insertTime,c.updateTime as updateTime,
+		c.parentPk as parentPk,c.provinceName as provinceName,c.province as province,c.cityName as cityName,c.city as city,c.areaName as areaName,c.area as area,
+
+		c.companyType as companyType,
+		c.isVisable as isVisable,
+		c.auditTime as auditTime,c.auditSpTime as auditSpTime,c.auditPk as auditPk,c.auditSpPk as auditSpPk,c.refuseReason as refuseReason,c.headPortrait as headPortrait,
+		c.isPerfect as isPerfect,c.remarks as remarks,c.block as block,infoUpdateTime,
+	    ]]>
+	</sql>
+
+	
+	<select id="searchGridCountExt" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(DISTINCT c.pk) FROM
+		b2b_company c
+		LEFT JOIN b2b_member mb ON c.pk = mb.companyPk
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bCompanyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columnsAuth" />
+		<choose>
+			<when test="contactsTelCol == 'OPER_CM_PURCHASER_COL_TEL' or contactsTelCol == 'MARKET_CM_PURCHASER_COL_TEL'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="contactsCol == 'OPER_CM_PURCHASER_COL_CONTACTS' or contactsCol == 'MARKET_CM_PURCHASER_COL_CONTACTS'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameCol == 'OPER_CM_PURCHASER_COL_COMPANYNAME' or companyNameCol == 'MARKET_CM_PURCHASER_COL_COMPANYNAME'">
+				INSERT (c.name, 3, 5, '*****') as name,
+			</when>
+
+			<otherwise>
+				c.name as name,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="orgCodeCol == 'OPER_CM_PURCHASER_COL_ORGCODE' or orgCodeCol == 'MARKET_CM_PURCHASER_COL_ORGCODE'">
+				INSERT (c.organizationCode, 1, 8, '********') as organizationCode,
+			</when>
+
+			<otherwise>
+				c.organizationCode as organizationCode,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="bussLicenseCol == 'OPER_CM_PURCHASER_COL_BUSSLICENSE' or bussLicenseCol == 'MARKET_CM_PURCHASER_COL_BUSSLICENSE'">
+				null as blUrl,
+				null as ecUrl,
+			</when>
+
+			<otherwise>
+				c.blUrl as blUrl,
+				c.ecUrl as ecUrl,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="mobileCol == 'OPER_CM_PURCHASER_COL_MOBILE' or mobileCol == 'MARKET_CM_PURCHASER_COL_MOBILE'">
+				group_concat(INSERT (mb.mobile, 4, 4, '****') separator ';') AS mobile,
+			</when>
+
+			<otherwise>
+				group_concat(mb.mobile separator ';') AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="regionCol == 'OPER_CM_PURCHASER_COL_REGION' or regionCol == 'MARKET_CM_PURCHASER_COL_REGION'">
+				INSERT (CONCAT(c.provinceName,c.cityName,c.areaName), 3, 5, '*****') AS address
+			</when>
+
+			<otherwise>
+				CONCAT(c.provinceName,c.cityName,c.areaName) AS address
+			</otherwise>
+		</choose>
+		FROM b2b_company c
+		LEFT JOIN b2b_member mb ON c.pk = mb.companyPk
+		<include refid="searchGridWhere" />
+		group by c.pk
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<!--查询供应商公司公司显示列表权限-->
+	<select id="searchGridSupplierExt" resultType="cn.cf.dto.B2bCompanyExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		<include refid="columnsAuth" />
+		<choose>
+			<when test="contactsTelCol == 'OPER_CM_SUPPLIER_COL_TEL' or contactsTelCol == 'MARKET_CM_SUPPLIER_COL_TEL'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="contactsCol == 'OPER_CM_SUPPLIER_COL_CONTACTS' or contactsCol == 'MARKET_CM_SUPPLIER_COL_CONTACTS'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameCol == 'OPER_CM_SUPPLIER_COL_COMPANYNAME' or companyNameCol == 'MARKET_CM_SUPPLIER_COL_COMPANYNAME'">
+				INSERT (c.name, 3, 5, '*****') as name,
+			</when>
+
+			<otherwise>
+				c.name as name,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="orgCodeCol == 'OPER_CM_SUPPLIER_COL_ORGCODE' or orgCodeCol == 'MARKET_CM_SUPPLIER_COL_ORGCODE'">
+				INSERT (c.organizationCode, 1, 8, '********') as organizationCode,
+			</when>
+
+			<otherwise>
+				c.organizationCode as organizationCode,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="bussLicenseCol == 'OPER_CM_SUPPLIER_COL_BUSSLICENSE' or bussLicenseCol == 'MARKET_CM_SUPPLIER_COL_BUSSLICENSE'">
+				null as blUrl,
+				null as ecUrl,
+			</when>
+
+			<otherwise>
+				c.blUrl as blUrl,
+				c.ecUrl as ecUrl,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="mobileCol == 'OPER_CM_SUPPLIER_COL_MOBILE' or mobileCol == 'MARKET_CM_SUPPLIER_COL_MOBILE'">
+				group_concat(INSERT (mb.mobile, 4, 4, '****') separator ';') AS mobile,
+			</when>
+
+			<otherwise>
+				group_concat(mb.mobile separator ';') AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="regionCol == 'OPER_CM_SUPPLIER_COL_REGION' or regionCol == 'MARKET_CM_SUPPLIER_COL_REGION'">
+				INSERT (CONCAT(c.provinceName,c.cityName,c.areaName), 3, 5, '*****') AS address
+			</when>
+
+			<otherwise>
+				CONCAT(c.provinceName,c.cityName,c.areaName) AS address
+			</otherwise>
+		</choose>
+		FROM b2b_company c
+		LEFT JOIN b2b_member mb ON c.pk = mb.companyPk
+		<include refid="searchGridWhere" />
+		group by c.pk
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="searchGridSupplierExtCounts" resultType="int"
+			parameterType="java.util.Map">
+	  SELECT
+		COUNT(pk)
+		FROM
+		(
+		SELECT
+		c.pk
+		FROM b2b_company c
+		LEFT JOIN b2b_member mb ON c.pk = mb.companyPk
+		<include refid="searchGridWhere"/>
+		GROUP BY
+		c.pk
+		) tab
+	</select>
+
+	<!--查询供应商子公司公司显示列表权限-->
+	<select id="searchGridSupplierSubExt" resultType="cn.cf.dto.B2bCompanyExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		<include refid="columnsAuth" />
+		<choose>
+			<when test="contactsTelSubCol == 'OPER_CM_SUPP_SUB_COL_TEL' or contactsTelSubCol == 'MARKET_CM_SUPP_SUB_COL_TEL'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="contactsSubCol == 'OPER_CM_SUPP_SUB_COL_CONTACTS' or contactsSubCol == 'MARKET_CM_SUPP_SUB_COL_CONTACTS'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameSubCol == 'OPER_CM_SUPP_SUB_COL_COMPANYNAME' or companyNameSubCol == 'MARKET_CM_SUPP_SUB_COL_COMPANYNAME'">
+				INSERT (c.name, 3, 5, '*****') as name,
+			</when>
+
+			<otherwise>
+				c.name as name,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="orgCodeSubCol == 'OPER_CM_SUPP_SUB_COL_ORGCODE' or orgCodeSubCol == 'MARKET_CM_SUPP_SUB_COL_ORGCODE'">
+				INSERT (c.organizationCode, 1, 8, '********') as organizationCode,
+			</when>
+
+			<otherwise>
+				c.organizationCode as organizationCode,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="bussLicenseSubCol == 'OPER_CM_SUPP_SUB_COL_BUSSLICENSE' or bussLicenseSubCol == 'MARKET_CM_SUPP_SUB_COL_BUSSLICENSE'">
+				null as blUrl,
+				null as ecUrl,
+			</when>
+
+			<otherwise>
+				c.blUrl as blUrl,
+				c.ecUrl as ecUrl,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="mobileSubCol == 'OPER_CM_SUPP_SUB_COL_MOBILE' or mobileSubCol == 'MARKET_CM_SUPP_SUB_COL_MOBILE'">
+				group_concat(INSERT (mb.mobile, 4, 4, '****') separator ';') AS mobile,
+			</when>
+
+			<otherwise>
+				group_concat(mb.mobile separator ';') AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="regionSubCol == 'OPER_CM_SUPP_SUB_COL_REGION' or regionSubCol == 'MARKET_CM_SUPP_SUB_COL_REGION'">
+				INSERT (CONCAT(c.provinceName,c.cityName,c.areaName), 3, 5, '*****') AS address
+			</when>
+
+			<otherwise>
+				CONCAT(c.provinceName,c.cityName,c.areaName) AS address
+			</otherwise>
+		</choose>
+		FROM b2b_company c
+		LEFT JOIN b2b_member mb ON c.pk = mb.companyPk
+		<include refid="searchGridWhere" />
+		group by c.pk
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchCompanyByParentAndChild" resultType="cn.cf.dto.B2bCompanyDto">
+	SELECT
+		pk,name,contactsTel,auditSpStatus,insertTime
+		FROM
+			b2b_company
+		WHERE
+			parentPk = #{pk} 
+		OR pk = #{pk}
+	</select>
+	
+	
+	<select id="getByPkExt" resultType="cn.cf.dto.B2bCompanyExtDto">
+	SELECT
+		<include refid="columns" />
+		FROM
+			b2b_company
+		WHERE pk = #{pk}
+	</select>
+	
+	
+	<select id="isExistOrganizationCode" resultType="cn.cf.dto.B2bCompanyExtDto" parameterType="java.util.Map">
+	  SELECT
+		*
+		FROM
+			b2b_company
+		WHERE 1=1
+		<if test="isVisable != null and isVisable != ''">
+			AND isVisable = #{isVisable}
+		</if>
+		<if test="isDelete != null and isDelete != ''">
+			AND isDelete = #{isDelete}
+		</if>
+		<if test="organizationCode != null and organizationCode != ''">
+			AND organizationCode = #{organizationCode}
+		</if>
+		<if test="pk != null and pk != ''">
+			AND pk != #{pk}
+		</if>
+	</select>
+	
+	<update id="updateCompanyByparentPk" parameterType="cn.cf.dto.B2bCompanyExtDto">
+		update b2b_company 
+		<set>
+		<if test="auditStatus != null">
+		 auditStatus = #{auditStatus},
+		 auditTime = NOW(),
+		</if>
+		<if test="auditSpStatus != null">
+		 auditSpStatus = #{auditSpStatus},
+		 auditSpTime = NOW()
+		</if>
+		</set>
+		where pk = #{parentPk}
+	</update>
+	
+	
+	<select id="isExistCompanyVaild" resultType="int"  parameterType="java.util.Map">
+		select count(1) from b2b_company
+		where 1 = 1
+		<if test="pk != null and pk !=''">
+			and pk != #{pk}
+		</if>
+		<if test="name != null and name != ''">
+			and BINARY name = #{name}
+		</if>
+		<if test="contactsTel != null and contactsTel !=''">
+			and contactsTel = #{contactsTel}
+		</if>
+		<if test="organizationCode != null and organizationCode !=''">
+			and organizationCode = #{organizationCode}
+		</if>
+		<if test="isDelete != null and isDelete !=''">
+			and isDelete = #{isDelete}
+		</if>
+		<if test="isVisable != null and isVisable !=''">
+			and isVisable = #{isVisable}
+		</if>
+	</select>
+
+	<select id="searchPurchaserCompanyList" resultType="cn.cf.dto.B2bCompanyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+			*
+		FROM
+		(SELECT
+			<include refid="columnsSub" />
+		<choose>
+			<when test="contactsTelCol == 'OPER_CM_PURCHASER_COL_TEL' or contactsTelCol == 'MARKET_CM_PURCHASER_COL_TEL'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="contactsCol == 'OPER_CM_PURCHASER_COL_CONTACTS' or contactsCol == 'MARKET_CM_PURCHASER_COL_CONTACTS'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameCol == 'OPER_CM_PURCHASER_COL_COMPANYNAME' or companyNameCol == 'MARKET_CM_PURCHASER_COL_COMPANYNAME'">
+				INSERT (c.name, 3, 5, '*****') as name,
+			</when>
+			<otherwise>
+				c.name as name,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="orgCodeCol == 'OPER_CM_PURCHASER_COL_ORGCODE' or orgCodeCol == 'MARKET_CM_PURCHASER_COL_ORGCODE'">
+				INSERT (c.organizationCode, 1, 8, '********') as organizationCode,
+			</when>
+
+			<otherwise>
+				c.organizationCode as organizationCode,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="bussLicenseCol == 'OPER_CM_PURCHASER_COL_BUSSLICENSE' or bussLicenseCol == 'MARKET_CM_PURCHASER_COL_BUSSLICENSE'">
+				null as blUrl,
+				null as ecUrl,
+			</when>
+			<otherwise>
+				c.blUrl as blUrl,
+				c.ecUrl as ecUrl,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="mobileCol == 'OPER_CM_PURCHASER_COL_MOBILE' or mobileCol == 'MARKET_CM_PURCHASER_COL_MOBILE'">
+				group_concat(INSERT (m.mobile, 4, 4, '****') separator ';') AS mobile,
+			</when>
+
+			<otherwise>
+				group_concat(m.mobile separator ';') AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="regionCol == 'OPER_CM_PURCHASER_COL_REGION' or regionCol == 'MARKET_CM_PURCHASER_COL_REGION'">
+				INSERT (CONCAT(c.provinceName,c.cityName,c.areaName), 3, 5, '*****') AS address
+			</when>
+
+			<otherwise>
+				CONCAT(c.provinceName,c.cityName,c.areaName) AS address
+			</otherwise>
+		</choose>
+		FROM b2b_company c
+			LEFT JOIN b2b_member m ON c.pk = m.companyPk where c.isDelete = 1  AND c.pk=#{pk}
+		<if test="auditStatus != null and auditStatus != ''">
+			AND c.auditStatus = #{auditStatus}
+		</if>
+		<if test="companyType != null and companyType != ''">
+			AND c.companyType = #{companyType} 
+		</if>
+		GROUP BY c.pk
+		<!--公司管理列表-是否显示子公司判断-->
+	<if test="isShowSubCompany !=1 and isShowSubCompany != 3">
+		UNION ALL
+		SELECT
+			<include refid="columnsSub" />
+		<choose>
+			<when test="contactsTelSubCol == 'OPER_CM_PURCH_MG_COL_TEL' or contactsTelSubCol == 'MARKET_CM_PURCH_MG_COL_TEL'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="contactsSubCol == 'OPER_CM_PURCH_MG_COL_CONTACTS' or contactsSubCol == 'MARKET_CM_PURCH_MG_COL_CONTACTS'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameSubCol == 'OPER_CM_PURCH_MG_COL_COMPANYNAME' or companyNameSubCol == 'MARKET_CM_PURCH_MG_COL_COMPANYNAME'">
+				INSERT (c.name, 3, 5, '*****') as name,
+			</when>
+
+			<otherwise>
+				c.name as name,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="orgCodeSubCol == 'OPER_CM_PURCH_MG_COL_ORGCODE' or orgCodeSubCol == 'MARKET_CM_PURCH_MG_COL_ORGCODE'">
+				INSERT (c.organizationCode, 1, 8, '********') as organizationCode,
+			</when>
+
+			<otherwise>
+				c.organizationCode as organizationCode,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="bussLicenseSubCol == 'OPER_CM_PURCH_MG_COL_BUSSLICENSE' or bussLicenseSubCol == 'MARKET_CM_PURCH_MG_COL_BUSSLICENSE'">
+				null as blUrl,
+				null as ecUrl,
+			</when>
+			<otherwise>
+				c.blUrl as blUrl,
+				c.ecUrl as ecUrl,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="mobileSubCol == 'OPER_CM_PURCH_MG_COL_MOBILE' or mobileSubCol == 'MARKET_CM_PURCH_MG_COL_MOBILE'">
+				group_concat(INSERT (m.mobile, 4, 4, '****') separator ';') AS mobile,
+			</when>
+			<otherwise>
+				group_concat(m.mobile separator ';') AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="regionSubCol == 'OPER_CM_PURCH_MG_COL_REGION' or regionSubCol == 'MARKET_CM_PURCH_MG_COL_REGION'">
+				INSERT (CONCAT(c.provinceName,c.cityName,c.areaName), 3, 5, '*****') AS address
+			</when>
+
+			<otherwise>
+				CONCAT(c.provinceName,c.cityName,c.areaName) AS address
+			</otherwise>
+		</choose>
+		FROM b2b_company c
+			LEFT JOIN b2b_member m ON c.pk = m.companyPk 
+			where c.isDelete = 1 AND c.parentPk = #{parentPk}
+		<if test="auditStatus != null and auditStatus != ''">
+			AND c.auditStatus = #{auditStatus}
+		</if>
+		<if test="companyType != null and companyType != ''">
+			AND c.companyType = #{companyType} 
+		</if>
+		GROUP BY c.pk
+	</if>
+		) c where pk is not null
+		<if test="orderName != null and orderName !=''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit !=''">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+	<sql id="columnsSub">
+	    <![CDATA[
+		c.pk, c.isDelete, c.auditStatus, c.auditSpStatus, c.insertTime, c.updateTime, c.parentPk, c.provinceName, c.province, c.cityName,
+ 			c.city, c.areaName, c.area, c.companyType,c.infoUpdateTime,
+			c.isVisable, c.auditTime, c.auditSpTime, c.auditPk, c.auditSpPk, c.refuseReason, c.headPortrait, c.isPerfect, c.remarks,
+	    ]]>
+	</sql>
+
+	<select id="searchPurchaserCompanyCount" resultType="int"
+		parameterType="java.util.Map">
+		SELECT COUNT(1)
+		FROM
+		(
+			SELECT
+			DISTINCT c.pk
+		FROM b2b_company c LEFT JOIN b2b_member m ON c.pk = m.companyPk where c.isDelete = 1  AND c.pk = #{pk}
+		
+		<if test="auditStatus != null and auditStatus != ''">
+			AND c.auditStatus = #{auditStatus}
+		</if>
+		<if test="companyType != null and companyType != ''">
+			AND c.companyType = #{companyType} 
+		</if>
+	<if test="isShowSubCompany !=1 and isShowSubCompany != 3">
+		UNION ALL
+		SELECT
+			DISTINCT c.pk
+		FROM b2b_company c LEFT JOIN b2b_member m ON c.pk = m.companyPk where c.isDelete = 1 AND c.parentPk = #{parentPk}
+		<if test="auditStatus != null and auditStatus != ''">
+			AND c.auditStatus = #{auditStatus}
+		</if>
+		<if test="companyType != null and companyType != ''">
+			AND c.companyType = #{companyType} 
+		</if>
+	</if>
+		) companyAllCount WHERE pk is not null
+		
+	</select>
+	
+	<select id="getCompanyDto" parameterType="java.util.Map" resultType="cn.cf.dto.B2bCompanyDto">
+		SELECT pk,name
+		FROM  b2b_company where isVisable = 1 and isDelete = 1 
+		<if test="companyType != null">
+			and companyType = #{companyType}
+		</if>
+		
+		<if test="parentPk != null">
+			and parentPk = #{parentPk}
+		</if>
+		
+	</select>
+	<select id="searchCompanyCount" parameterType="java.util.Map"
+		resultType="int">
+		
+		select count(DISTINCT c.pk) 
+		   from b2b_company c left join marketing_company mc on c.pk = mc.companyPk
+		   <if test="companyType != null ">
+				AND mc.companyType = #{companyType}
+			</if>
+		   where c.isDelete=1 AND c.auditStatus = 2 AND c.parentPk = -1
+		<if test="companyType == 2">
+			and c.auditSpStatus = 2
+		</if>   
+		<if test="insertStartTime!=null and insertStartTime!=''">
+			<![CDATA[ and str_to_date(c.insertTime, '%Y-%m-%d') >= #{insertStartTime}]]>
+		</if>
+		<if test="insertEndTime!=null and insertEndTime!=''">
+			<![CDATA[ and str_to_date(c.insertTime, '%Y-%m-%d') <= #{insertEndTime} ]]> 
+		</if>
+		<if test="distributeMemberStartTime!=null and distributeMemberStartTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') >= #{distributeMemberStartTime} ]]> 
+        </if>
+        <if test="distributeMemberEndTime!=null and distributeMemberEndTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') <= #{distributeMemberEndTime} ]]> 
+        </if>
+		<if test="name!=null and name!=''">
+			 and c.name like '%${name}%'
+		</if>
+		<if test="mobile!=null and mobile!=''">
+			 and c.contactsTel like '%${mobile}%'
+		</if>
+		<if test="accountPk !=null and accountPk !=''">
+			 and mc.accountPk = #{accountPk}
+		</if>
+		<if test="province !=null and province !=''">
+			and c.province = #{province}
+		</if>
+		<if test="city !=null and city !=''">
+			and c.city = #{city}
+		</if>
+		<if test="area !=null and area !=''">
+			and c.area = #{area}
+		</if>
+		<!-- 地推与平台交易员只能看到自己分配的采购商和供应商 -->
+		<if test="businessPk !=null and businessPk !=''">
+			 and mc.accountPk = #{businessPk} 
+		</if>
+		 <if test="regionList !=null and regionList !=''">
+        and (
+            <foreach collection="regionList" index="index" item="item"
+                open="(" separator="or" close=")">
+                if(#{item.area} is null or #{item.area} ='',
+                   concat(c.province,c.city,c.area) LIKE '${item.province}${item.city}%',
+                    concat(c.province,c.city,c.area) = concat(#{item.province},#{item.city},#{item.area})
+                 )
+            </foreach> 
+             <if test="loginPk !=null and loginPk !=''">
+             or mc.accountPk = #{loginPk} 
+       		 </if>
+            )
+            
+        </if>
+         <!-- 0全部  1已分配2未分配 -->
+        <if test="isDistribute>0">
+         and    if( #{isDistribute} >1  , mc.accountPk is  NULL, mc.accountPk is NOT  NULL)
+        </if>
+	</select>
+	<!-- 已注册的公司信息 -->
+	<select id="searchAuditCompayList" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bCompanyExtDto">
+			SELECT
+				c.pk AS pk,
+				c.auditStatus AS auditStatus,
+				c.insertTime AS insertTime,
+				if(${colCompanyName}, c. NAME, INSERT ( c. NAME, 3, 5, '*****')) as NAME,
+                if(${colContacts},  c.contacts, INSERT ( c.contacts, 1, 1, '*')) as contacts,
+                if(${colContactsTel},  c.contactsTel, INSERT ( c.contactsTel, 4, 4, '****')) as contactsTel,
+                if(${colAccountName},  ifnull(ma. NAME, ""), INSERT ( ifnull(ma. NAME, ""), 1, 1, '*')) as accountName,
+                if(${colBusinessLicense},  c.blUrl , null ) as blUrl,
+                if(${colBusinessLicense},  c.ecUrl , null) as ecUrl,
+				c.companyType AS companyType,
+				c.isVisable AS isVisable,
+				c.auditTime AS auditTime,
+				c.updateTime AS updateTime,
+				ifnull(mc.accountPk, "") AS accountPk,
+				infoUpdateTime,mc.distributeMemberTime,
+				c.province,c.city,c.area,
+				concat(c.provinceName,"-",c.cityName,"-",c.areaName) as address
+			FROM
+				b2b_company c
+			LEFT JOIN marketing_company mc ON c.pk = mc.companyPk 
+			<!-- 采购商、供应商分开来分配业务员 -->
+			<if test="companyType != null ">
+				AND mc.companyType = #{companyType}
+			</if>
+			LEFT JOIN manage_account ma ON mc.accountPk = ma.pk
+			WHERE
+				c.isDelete = 1
+			AND c.auditStatus = 2 AND c.parentPk = -1
+		<!-- 展示采购商/供应商列表 -->	
+		<if test="companyType == 2">
+			AND c.auditSpStatus = 2 
+		</if>
+		<if test="province !=null and province !=''">
+			and c.province = #{province}
+		</if>
+		<if test="city !=null and city !=''">
+			and c.city = #{city}
+		</if>
+		<if test="area !=null and area !=''">
+			and c.area = #{area}
+		</if>
+		<if test="insertStartTime!=null and insertStartTime!=''">
+			<![CDATA[ and str_to_date(c.insertTime, '%Y-%m-%d') >= #{insertStartTime}]]>
+		</if>
+		<if test="insertEndTime!=null and insertEndTime!=''">
+			<![CDATA[ and str_to_date(c.insertTime, '%Y-%m-%d') <= #{insertEndTime} ]]> 
+		</if>
+		<if test="distributeMemberStartTime!=null and distributeMemberStartTime!=''">
+			<![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') >= #{distributeMemberStartTime} ]]> 
+		</if>
+		<if test="distributeMemberEndTime!=null and distributeMemberEndTime!=''">
+			<![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') <= #{distributeMemberEndTime} ]]> 
+		</if>
+		<if test="name!=null and name!=''">
+			 and c.name like '%${name}%'
+		</if>
+		<if test="mobile!=null and mobile!=''">
+             and c.contactsTel like '%${mobile}%'
+        </if>
+		<if test="accountPk !=null and accountPk !=''">
+			 and mc.accountPk = #{accountPk}
+		</if>
+		<!-- 业务经理只能看到分配给自己的采购商和供应商 -->
+		<if test="businessPk !=null and businessPk !=''">
+			 and mc.accountPk = #{businessPk} 
+		</if>
+		
+		 <if test="regionList !=null and regionList !=''">
+        and (
+            <foreach collection="regionList" index="index" item="item"
+                open="(" separator="or" close=")">
+                if(#{item.area} is null or #{item.area} ='',
+                   concat(c.province,c.city,c.area) LIKE '${item.province}${item.city}%',
+                    concat(c.province,c.city,c.area) = concat(#{item.province},#{item.city},#{item.area})
+                 )
+            </foreach> 
+             <if test="loginPk !=null and loginPk !=''">
+             or mc.accountPk = #{loginPk} 
+       		 </if>
+            )
+            
+        </if>
+        <!-- 0全部  1已分配2未分配 -->
+        <if test="isDistribute>0">
+         and    if( #{isDistribute} >1  , mc.accountPk is  NULL, mc.accountPk is NOT  NULL)
+        </if>
+        
+		<if test="orderName != null and orderName !=''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit !=''">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	
+		<select id="searchCompayCountsByOrder" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from(
+			select
+				c.pk as pk,c.name as name,c.auditStatus as auditStatus,c.insertTime as insertTime,
+				c.contactsTel as contactsTel,c.contacts as contacts,c.companyType as companyType,
+				c.blUrl as blUrl,c.ecUrl as ecUrl,
+				c.isVisable as isVisable,c.auditTime as auditTime,c.updateTime as updateTime,ifnull(mc.accountPk,"") as accountPk,ifnull(mc.personnelPk,"") as personnelPk,mc.companyType as ctp
+				from b2b_company c 
+				left join marketing_company mc on c.pk = mc.companyPk
+				left join  b2b_order o on c.pk = o.supplierPk
+				where c.isDelete=1 AND c.auditSpStatus = 2 AND c.parentPk = -1 AND o.supplierPk is not null  
+				group by c.pk
+		<if test="companyType == 1">		
+			UNION select
+				c.pk as pk,c.name as name,c.auditStatus as auditStatus,c.insertTime as insertTime,
+				c.contactsTel as contactsTel,c.contacts as contacts,c.companyType as companyType,
+				c.blUrl as blUrl,c.ecUrl as ecUrl,
+				c.isVisable as isVisable,c.auditTime as auditTime,c.updateTime as updateTime,ifnull(mc.accountPk,"") as accountPk,ifnull(mc.personnelPk,"") as personnelPk,mc.companyType as ctp
+				from b2b_company c 
+				left join marketing_company mc on c.pk = mc.companyPk
+				left join  b2b_order o on c.pk = o.purchaserPk
+				where c.isDelete=1 AND c.auditStatus = 2 AND c.parentPk = -1 AND o.purchaserPk is not null
+				group by c.pk
+		</if>
+		) b
+		where 1 = 1
+		<if test="insertStartTime!=null and insertStartTime!=''">
+			<![CDATA[ and str_to_date(b.insertTime, '%Y-%m-%d') >= #{insertStartTime}]]>
+		</if>
+		<if test="insertEndTime!=null and insertEndTime!=''">
+			<![CDATA[ and str_to_date(b.insertTime, '%Y-%m-%d') <= #{insertEndTime} ]]> 
+		</if>
+		<if test="updateStartTime!=null and updateStartTime!=''">
+			<![CDATA[ and str_to_date(b.updateTime, '%Y-%m-%d') >= #{updateStartTime} ]]> 
+		</if>
+		<if test="updateEndTime!=null and updateEndTime!=''">
+			<![CDATA[ and str_to_date(b.updateTime, '%Y-%m-%d') <= #{updateEndTime} ]]> 
+		</if>
+		<if test="auditStartTime!=null and auditStartTime!=''">
+			<![CDATA[and str_to_date(b.auditTime, '%Y-%m-%d') >= #{auditStartTime} ]]>
+		</if>
+		<if test="auditEndTime!=null and auditEndTime!=''">
+			<![CDATA[ and str_to_date(b.auditTime, '%Y-%m-%d') <= #{auditEndTime} ]]>
+		</if>
+		<if test="name!=null and name!=''">
+			 and b.name like '%${name}%'
+		</if>
+		<!-- 地推与平台交易员只能看到自己分配的采购商和供应商 -->
+		<if test="businessPk !=null and businessPk !=''">
+			 and (b.accountPk = #{businessPk} or b.personnelPk = #{businessPk})  and b.ctp = #{companyType}
+		</if>
+	</select>
+	
+	<select id="getBtnManageAuthorityByRolePk" resultType="cn.cf.dto.ManageAuthorityDto">
+		SELECT
+			ma.*
+		FROM
+			manage_authority ma
+			LEFT JOIN manage_role_authority mra ON ma.pk = mra.authorityPk
+		WHERE
+			ma.`isBtn` = 1 
+			<if test="rolePk != null and rolePk !=''">
+				and mra.rolePk = #{rolePk}
+			</if>
+			<if test="name != null and name !=''">
+				and ma.name = #{name}
+			</if>
+		GROUP BY ma.pk
+	</select>
+	
+	<select id="marketingCompanyCountsByPk" parameterType="java.util.Map"
+		resultType="int">
+		select count(1)
+		from marketing_company where companyPk = #{companyPk} and companyType = #{companyType}
+	</select>
+	
+	<insert id="insertMarketingCompany" parameterType="cn.cf.entity.MarketingCompany">
+		insert into marketing_company (
+		pk,accountPk,companyPk
+		,companyType,
+		distributeMemberTime
+		)
+		values
+		(
+		#{pk},
+		#{accountPk},
+		#{companyPk},
+		#{companyType},
+		#{distributeMemberTime}
+		)
+	</insert>
+	
+	<update id="updateMarketingCompany" parameterType="cn.cf.entity.MarketingCompany">
+		update marketing_company
+		<set>
+			<if test="accountPk != null and accountPk !=''">
+				accountPk = #{accountPk},
+			</if>
+			
+			 <if test="distributeMemberTime != null and distributeMemberTime !=''">
+        		      distributeMemberTime = #{distributeMemberTime},
+        	</if>
+		</set>
+		where companyPk = #{companyPk} and companyType = #{companyType}
+	</update>
+	
+	<select id = "getMemberCompanyByPk"  resultType="cn.cf.dto.B2bCompanyExtDto">
+		SELECT  c.pk,m.pk AS memberPk  FROM b2b_company c 
+		LEFT JOIN b2b_member  m on m.companyPk = c.pk  
+		WHERE c.pk = #{companyPk}  AND m.registerSource !=4 ORDER BY  m.insertTime ASC 
+		LIMIT 0,1
+	</select>
+	
+	<select id = "countCheckCompany"  parameterType="java.util.Map" resultType="int">
+		
+		select count(*) FROM b2b_company WHERE 
+
+			parentPk = #{parentPk} 
+			and addMemberPk!="" 
+			and pk !=#{pk}
+		<if test="auditStatus!=null and auditStatus!=''">
+			AND auditStatus  = #{auditStatus}
+		</if>
+		<if  test="auditSpStatus!=null and auditSpStatus!=''">
+			AND  auditSpStatus = #{auditSpStatus}
+		</if>
+		
+		
+		
+	</select>
+	
+	<select id = "searchOnedayData" parameterType="java.lang.String" resultType="cn.cf.entity.MemberDataReport" >
+		SELECT f.newSupNum,g.newPurNum, a.auditPurNum ,b.passPurNum,d.auditSupNum , e.passSupNum ,
+		 h.accumPurNum ,i.accumSupNum,j.accumPassSupNum,k.accumPassPurNum,p.btCreditNum,q.dCreditNum,r.btAccumCreditNum,s.dAccumCreditNum,
+		t.btAuditNum,u.dAuditNum,str_to_date('${date}','%Y-%m-%d') as date
+		FROM 
+		(SELECT  COUNT(c.pk) AS auditPurNum  FROM b2b_company  c WHERE 
+		c.isDelete = 1   AND  c.auditStatus=1 AND str_to_date(c.insertTime,'%Y-%m-%d') &lt;=str_to_date(#{date},'%Y-%m-%d')) AS a 
+		,
+		(SELECT  COUNT(c.pk) AS passPurNum  FROM b2b_company  c WHERE 
+		c.isDelete = 1  AND  str_to_date(c.auditTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')	 AND  c.auditStatus=2) AS b
+		,
+		(SELECT  COUNT(c.pk) AS auditSupNum  FROM b2b_company  c WHERE 
+		c.isDelete = 1   AND  c.auditSpStatus=1 AND   str_to_date( c.enterTime,'%Y-%m-%d') &lt;=str_to_date(#{date},'%Y-%m-%d')) AS d
+		,
+		(SELECT  COUNT(c.pk) AS passSupNum  FROM b2b_company  c WHERE 
+		c.isDelete = 1  AND  str_to_date(c.auditSpTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d') AND  c.auditSpStatus=2) AS e
+		,
+		(SELECT   COUNT(c.pk) AS newSupNum FROM b2b_company  c  WHERE 
+		 c.isDelete = 1 AND  str_to_date(c.enterTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d') AND c.auditSpStatus>0)  AS f
+		,
+		(SELECT   COUNT(c.pk) AS newPurNum FROM b2b_company  c  WHERE 
+		 c.isDelete = 1 AND  str_to_date(c.insertTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')) AS g
+		,
+		(SELECT   COUNT(c.pk) AS accumPurNum FROM b2b_company  c  WHERE  c.isDelete = 1 
+		AND str_to_date(c.insertTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d')) AS h
+		,
+		(SELECT   COUNT(c.pk) AS accumSupNum FROM b2b_company  c  WHERE 
+		c.isDelete = 1 AND  str_to_date(c.enterTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d') AND c.auditSpStatus>0) AS i
+		,
+		(SELECT  COUNT(c.pk) AS accumPassSupNum  FROM b2b_company  c WHERE c.isDelete = 1  AND 
+	 	str_to_date(c.auditSpTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d')  AND  c.auditSpStatus=2) AS j
+		,
+		(SELECT  COUNT(c.pk) AS accumPassPurNum  FROM b2b_company  c WHERE c.isDelete = 1  AND 
+		str_to_date(c.auditTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d') AND  c.auditStatus=2) AS k 
+		,
+		(SELECT COUNT(DISTINCT e.companyPk) AS btCreditNum FROM b2b_economics_bank_company e  
+		 WHERE   str_to_date(e.creditStartTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')  AND type= 1) AS p
+		,
+		(SELECT COUNT(DISTINCT e.companyPk) AS dCreditNum FROM b2b_economics_bank_company e  
+		 WHERE   str_to_date(e.creditStartTime,'%Y-%m-%d') = str_to_date(#{date},'%Y-%m-%d')  AND type= 2) AS q
+		,
+		(SELECT COUNT(DISTINCT e.companyPk) AS btAccumCreditNum FROM b2b_economics_bank_company e  
+		 WHERE   str_to_date(e.creditStartTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d') 
+		AND str_to_date(e.creditEndTime,'%Y-%m-%d') >= str_to_date(#{date},'%Y-%m-%d')  AND type= 1) AS r
+		,
+		(SELECT COUNT(DISTINCT e.companyPk) AS dAccumCreditNum FROM b2b_economics_bank_company e  
+		 WHERE   str_to_date(e.creditStartTime,'%Y-%m-%d') &lt;= str_to_date(#{date},'%Y-%m-%d') 
+		AND str_to_date(e.creditEndTime,'%Y-%m-%d') >= str_to_date(#{date},'%Y-%m-%d')  AND type= 2) AS s
+		,
+		(SELECT count(*) AS btAuditNum   FROM
+		 (SELECT  c.* FROM	b2b_economics_customer c
+		LEFT  JOIN ( SELECT	economicsCustomerPk,	CONCAT(goodsType) AS goodsType FROM	b2b_economics_customer_goods	GROUP BY	economicsCustomerPk) g 
+		ON c.pk = g.economicsCustomerPk
+		WHERE(	auditStatus = 1	OR auditStatus = 2	)AND find_in_set('1', g.goodsType)) a ) AS t
+		,
+		(SELECT count(*) AS dAuditNum   FROM
+		 (SELECT  c.* FROM	b2b_economics_customer c
+		LEFT  JOIN ( SELECT	economicsCustomerPk,	CONCAT(goodsType) AS goodsType FROM	b2b_economics_customer_goods	GROUP BY	economicsCustomerPk) g 
+		ON c.pk = g.economicsCustomerPk
+		WHERE(	auditStatus = 1	OR auditStatus = 2	)AND find_in_set('2', g.goodsType)) a) AS u
+	</select>
+	
+	
+	   <select id="getByBlock" resultType="cn.cf.dto.B2bCompanyDto"
+        parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_company
+        where 1=1
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditStatus)">
+                AND auditStatus = #{auditStatus}
+            </if>
+            <if test="@Ognl@isNotEmpty(auditSpStatus)">
+                AND auditSpStatus = #{auditSpStatus}
+            </if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}
+            </if>
+              <if test="block !=null and block !=''">
+                AND block LIKE '%${block}%'
+                </if>
+    </select>
+    
+    <select id="searchAuditStoreList" parameterType="java.util.Map"
+        resultType="cn.cf.dto.B2bCompanyExtDto">
+            SELECT
+                s.pk AS pk,
+                if(${colCompanyName}, s. NAME, INSERT ( s. NAME, 3, 5, '*****')) as NAME,
+                if(${colContacts},  s.contacts, INSERT ( s.contacts, 1, 1, '*')) as contacts,
+                if(${colContactsTel},  s.contactsTel, INSERT ( s.contactsTel, 4, 4, '****')) as contactsTel,
+                if(${colAccountName},  ifnull(ma. NAME, ""), INSERT ( ifnull(ma. NAME, ""), 1, 1, '*')) as accountName,
+                ifnull(mc.accountPk, "") AS accountPk,
+                infoUpdateTime,mc.distributeMemberTime,
+                c.province,c.city,c.area,
+                concat(c.provinceName,"-",c.cityName,"-",c.areaName) as address
+            FROM
+                b2b_store s
+            LEFT JOIN marketing_company mc ON s.pk = mc.companyPk
+			<if test="companyType != null ">
+				AND mc.companyType = #{companyType}
+			</if>
+
+            LEFT JOIN b2b_company c ON c.pk = s.companyPk
+				<if test="block != null ">
+					AND c.block like '%${block}%'
+				</if>
+            <!-- 采购商、供应商分开来分配业务员 -->
+
+            LEFT JOIN manage_account ma ON mc.accountPk = ma.pk
+            WHERE
+                1 = 1
+        <if test="distributeMemberStartTime!=null and distributeMemberStartTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') >= #{distributeMemberStartTime} ]]> 
+        </if>
+        <if test="distributeMemberEndTime!=null and distributeMemberEndTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') <= #{distributeMemberEndTime} ]]> 
+        </if>
+        <if test="name!=null and name!=''">
+             and s.name like '%${name}%'
+        </if>
+        <if test="mobile!=null and mobile!=''">
+             and s.contactsTel like '%${mobile}%'
+        </if>
+        <if test="accountPk !=null and accountPk !=''">
+             and mc.accountPk = #{accountPk}
+        </if>
+		<if test="province !=null and province !=''">
+			and c.province = #{province}
+		</if>
+		<if test="city !=null and city !=''">
+			and c.city = #{city}
+		</if>
+		<if test="area !=null and area !=''">
+			and c.area = #{area}
+		</if>
+        <!-- 业务经理只能看到分配给自己的采购商和供应商 -->
+        <if test="businessPk !=null and businessPk !=''">
+             and mc.accountPk = #{businessPk} 
+        </if>
+        
+        <if test="regionList !=null and regionList !=''">
+        and (
+            <foreach collection="regionList" index="index" item="item"
+                open="(" separator="or" close=")">
+                if(#{item.area} is null or #{item.area} ='',
+                   concat(c.province,c.city,c.area) LIKE '${item.province}${item.city}%',
+                    concat(c.province,c.city,c.area) = concat(#{item.province},#{item.city},#{item.area})
+                 )
+            </foreach> 
+             <if test="loginPk !=null and loginPk !=''">
+             or mc.accountPk = #{loginPk} 
+       		 </if>
+            )
+            
+        </if>
+        <!-- 0全部  1已分配2未分配 -->
+        <if test="isDistribute>0">
+         and    if( #{isDistribute} >1  , mc.accountPk is  NULL, mc.accountPk is NOT  NULL)
+        </if>
+        
+        <if test="orderName != null and orderName !=''">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null and limit !=''">
+            limit #{start}, #{limit}
+        </if>
+    </select>
+    
+    
+    <select id="searchStoreCount" parameterType="java.util.Map"
+        resultType="int">
+        
+        select count(DISTINCT c.pk) 
+           from b2b_store s
+           
+           LEFT JOIN marketing_company mc on s.pk = mc.companyPk
+		<if test="companyType != null ">
+			AND mc.companyType = #{companyType}
+		</if>
+           LEFT JOIN b2b_company c ON c.PK = s.companyPk
+			<if test="block != null ">
+				AND c.block like '%${block}%'
+			</if>
+           where  1=1
+        <if test="distributeMemberStartTime!=null and distributeMemberStartTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') >= #{distributeMemberStartTime} ]]> 
+        </if>
+        <if test="distributeMemberEndTime!=null and distributeMemberEndTime!=''">
+            <![CDATA[ and str_to_date(mc.distributeMemberTime, '%Y-%m-%d') <= #{distributeMemberEndTime} ]]> 
+        </if>
+        <if test="name!=null and name!=''">
+             and s.name like '%${name}%'
+        </if>
+        <if test="mobile!=null and mobile!=''">
+             and s.contactsTel like '%${mobile}%'
+        </if>
+        <if test="accountPk !=null and accountPk !=''">
+             and mc.accountPk = #{accountPk}
+        </if>
+		<if test="province !=null and province !=''">
+			and c.province = #{province}
+		</if>
+		<if test="city !=null and city !=''">
+			and c.city = #{city}
+		</if>
+		<if test="area !=null and area !=''">
+			and c.area = #{area}
+		</if>
+        <!-- 地推与平台交易员只能看到自己分配的采购商和供应商 -->
+        <if test="businessPk !=null and businessPk !=''">
+             and mc.accountPk = #{businessPk} 
+        </if>
+         <if test="regionList !=null and regionList !=''">
+        and (
+            <foreach collection="regionList" index="index" item="item"
+                open="(" separator="or" close=")">
+                if(#{item.area} is null or #{item.area} ='',
+                   concat(c.province,c.city,c.area) LIKE '${item.province}${item.city}%',
+                    concat(c.province,c.city,c.area) = concat(#{item.province},#{item.city},#{item.area})
+                 )
+            </foreach> 
+             <if test="loginPk !=null and loginPk !=''">
+             or mc.accountPk = #{loginPk} 
+       		 </if>
+            )
+            
+        </if>
+         <!-- 0全部  1已分配2未分配 -->
+        <if test="isDistribute>0">
+         and    if( #{isDistribute} >1  , mc.accountPk is  NULL, mc.accountPk is NOT  NULL)
+        </if>
+    </select>
+    
+</mapper>
+

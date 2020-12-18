@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCustomerApplyDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,address,status,insertTime,auditTime,isDelete
+	    ]]>
+	</sql>
+
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchCountByStatus" parameterType="java.lang.String"
+		resultType="int">
+		SELECT
+		count(*)
+		FROM
+		b2b_bill_customer_apply
+		WHERE
+		1=1
+		and ( `status` = 1 OR
+		`status` = 2 )
+		<if test="companyPk!=null and companyPk!=''">
+			AND companyPk = #{companyPk}
+		</if>
+
+	</select>
+	<update id="updateCustomer">
+		UPDATE b2b_bill_customer_apply
+		<set>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				contacts = #{contacts},
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				  status = #{status},
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				  isDelete = #{isDelete},
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTime)">
+						 insertTime = #{insertTime},
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTime)">
+				  updateTime = #{updateTime},
+				  assidirPk = "",
+				  assidirName = "",
+				  processInstanceId = "",
+				  staticTime=null,
+				  approvalTime=null
+			</if>
+						
+		</set>
+    where  pk=#{pk}
+	</update>
+
+
+</mapper>
+

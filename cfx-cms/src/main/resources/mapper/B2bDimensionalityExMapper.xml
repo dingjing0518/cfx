@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityExDao">
+
+
+	
+		<select id="getByType" resultType="cn.cf.dto.B2bDimensionalityDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_dimensionality where isDelete=1 and type =#{type} and isVisable=1
+		</select>
+		
+		
+</mapper>
+

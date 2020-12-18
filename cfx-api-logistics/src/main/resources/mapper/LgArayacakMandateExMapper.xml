@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgArayacakMandateDaoEx">
+
+	<!--根据userPk，companyPk查询一览页面自提委托书   -->
+	<select id="queryMandateByLimit"  resultType="cn.cf.dto.LgArayacakMandateDto" parameterType="Map">
+	    SELECT *
+	    FROM lg_arayacak_mandate 
+	    WHERE (lg_arayacak_mandate.`userPk` =#{userPk} 
+	    		OR lg_arayacak_mandate.`companyPk`=#{companyPk} )
+		AND lg_arayacak_mandate.`delStatus`=1
+		order by lg_arayacak_mandate.updateTime desc
+        limit ${start}, ${limit}
+    </select>
+    
+    <!-- 根据userPk，companyPk查询一览页面自提委托书的总数量 -->
+    <select id="selectMandateCount" resultType="Integer" parameterType="Map">
+        select count(*)
+        FROM lg_arayacak_mandate 
+	    WHERE (lg_arayacak_mandate.`userPk` =#{userPk} 
+	    		OR lg_arayacak_mandate.`companyPk`=#{companyPk} )
+		AND lg_arayacak_mandate.`delStatus`=1
+    </select>
+	
+	
+	<!-- 根据pk检查自提委托书的删除状态  -->
+    <select id="checkDelStatusByPk" resultType="Integer" >
+        select lg_arayacak_mandate.delStatus
+        FROM lg_arayacak_mandate 
+	    WHERE lg_arayacak_mandate.pk=#{mandatePk}
+    </select>
+	
+	<!--  删除自提委托书 -->
+ 	<update id="deleteLgArayacakMandate" parameterType="String">
+      update lg_arayacak_mandate
+      set lg_arayacak_mandate.delStatus =2
+      where lg_arayacak_mandate.pk = #{mandatePk,jdbcType=VARCHAR}
+  	</update>
+	
+	<!--  根据Pk查询自提委托书URL -->
+	<select id="getMandateUrlByPK" resultType="java.lang.String">
+        select lg_arayacak_mandate.mandateUrl from  lg_arayacak_mandate 
+        where lg_arayacak_mandate.pk=#{mandatePk,jdbcType=VARCHAR}  limit 1
+    </select>
+	
+	<!-- 根据pk查询自提委托书 -->
+<!-- 	<select id="getMandateByPK" resultType="cn.cf.dto.LgArayacakMandateDto">
+        select lg_arayacak_mandate.pk,lg_arayacak_mandate.companyPk,
+        lg_arayacak_mandate.mandateUrl,lg_arayacak_mandate.mandateName
+        from  lg_arayacak_mandate 
+        where lg_arayacak_mandate.pk=#{mandatePk,jdbcType=VARCHAR}  limit 1
+    </select> -->
+    
+    <!--修改自提委托书  -->
+    <update id="updateMandate" parameterType="cn.cf.dto.LgArayacakMandateDto">
+      update lg_arayacak_mandate
+      set lg_arayacak_mandate.mandateName = #{mandateName,jdbcType=VARCHAR},
+      lg_arayacak_mandate.mandateUrl = #{mandateUrl,jdbcType=VARCHAR},
+      lg_arayacak_mandate.updateTime = #{updateTime,jdbcType=TIMESTAMP}
+      where lg_arayacak_mandate.pk = #{pk,jdbcType=VARCHAR}
+  	</update>
+    
+    
+<!--     <select id="searchEntity" 	 parameterType="cn.cf.dto.LgArayacakMandateDto" resultType="int">
+        select count(1) from   lg_arayacak_mandate where 1=1
+        <if test="@Ognl@isNotEmpty(pk)">
+            AND pk != #{pk}			
+        </if>
+        <if test="@Ognl@isNotEmpty(companyPk)">
+            AND companyPk = #{companyPk}
+        </if>
+        <if test="@Ognl@isNotEmpty(mandateName)">
+            AND mandateName = #{mandateName}
+        </if>
+        AND delStatus =1
+    </select> -->
+    
+    
+</mapper>
+

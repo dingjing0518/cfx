@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsCustomerExtDao">
+
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,insertTime,updateTime,auditStatus,source,assidirPk,assidirName,processInstanceId,score,staticTime,approvalTime,goodsName,creditUrl,improvingdataInfo
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND str_to_date(updateTime,'%Y-%m-%d')  >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(assidirPk)">
+				AND assidirPk = #{assidirPk}			</if>
+			<if test="@Ognl@isNotEmpty(assidirName)">
+				AND assidirName = #{assidirName}			</if>
+			<if test="@Ognl@isNotEmpty(processInstanceId)">
+				AND processInstanceId = #{processInstanceId}			</if>
+		</where>
+	</sql>
+	
+	<insert id="insertEconomicsCustomer" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_customer (
+           pk, companyPk, companyName, contacts, contactsTel, insertTime, updateTime, 
+           auditStatus, source, assidirPk, assidirName, processInstanceId, score, 
+           staticTime, approvalTime, goodsName,improvingdataInfo
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName}, #{contacts}, #{contactsTel}, #{insertTime}, #{updateTime},
+          #{auditStatus}, #{source}, #{assidirPk}, #{assidirName}, 
+          #{processInstanceId}, #{score},#{staticTime},#{approvalTime} ,#{goodsName} ,#{improvingdataInfo}
+        )
+    ]]>
+	</insert>
+	
+	
+	<update id="updateEconomicsCustomer" parameterType="cn.cf.dto.B2bEconomicsCustomerExtDto">
+		
+		UPDATE b2b_economics_customer
+		<set>
+			<if test="companyPk != null and companyPk != ''">
+			companyPk = #{companyPk},
+			</if>
+			<if test="companyName != null and companyName != ''">
+			companyName = #{companyName},
+			</if>
+			<if test="contacts != null and contacts != ''">
+			contacts = #{contacts},
+			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+			contactsTel = #{contactsTel},
+			</if>
+			<if test="goodsName != null and goodsName != ''">
+			goodsName = #{goodsName},
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+			auditStatus = #{auditStatus},
+			</if>
+			<if test="source != null and source != ''">
+			source = #{source},
+			</if>
+			<if test="assidirPk != null and assidirPk != ''">
+			assidirPk = #{assidirPk},
+			</if>
+			<if test="assidirName != null and assidirName != ''">
+			assidirName = #{assidirName},
+			</if>
+			<if test="processInstanceId != null">
+			processInstanceId = #{processInstanceId},
+			</if>
+			<if test="approvalTime != null and approvalTime != ''">
+			approvalTime = #{approvalTime},
+			</if>
+			<if test="staticTime != null and staticTime != ''">
+			staticTime = #{staticTime},
+			</if>
+			<if test="insertTime != null and insertTime != ''">
+			insertTime = #{insertTime},
+			</if>
+			<if test="improvingdataInfo != null and improvingdataInfo != ''">
+				improvingdataInfo = #{improvingdataInfo},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE pk = #{pk} 
+	</update>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_economics_customer
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bEconomicsCustomerExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		      pk,companyPk,
+		      if(${colCompanyName},companyName, INSERT (companyName, 3, 5, '*****')) as companyName,
+              if(${colContacts}, contacts, INSERT (contacts,  1, 1, '*')) as contacts,
+              if(${colContactsTel},contactsTel, INSERT (contactsTel, 4, 4, '****')) as contactsTel,
+		      insertTime,updateTime,auditStatus,source,assidirPk,assidirName,
+		      processInstanceId,score,staticTime,approvalTime,goodsName,creditUrl
+		FROM b2b_economics_customer
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType} 
+		</if>
+		
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	<select id="getByMap" parameterType="java.util.Map" resultType="cn.cf.dto.B2bEconomicsCustomerExtDto">
+		SELECT *  FROM b2b_economics_customer
+		where 1=1
+		<if test="pk != null and pk != ''">
+		and  pk = #{pk} 
+	 	</if>
+	 	<if test="auditStatus != null and auditStatus != ''">
+		and	auditStatus = #{auditStatus}
+		</if>
+		<if test="processInstanceId != null and processInstanceId != ''">
+		and 	processInstanceId = #{processInstanceId}
+		</if>
+	</select>
+	
+	
+     <select id="getByCompanyPkEx" resultType="cn.cf.dto.B2bEconomicsCustomerExtDto" parameterType="java.util.Map">
+		SELECT *  FROM b2b_economics_customer
+		where 1=1 and auditStatus=3
+		<if test="companyPk != null and companyPk != ''">
+		and  companyPk = #{companyPk} 
+	 	</if>
+	</select> 
+		
+	<select id="ecoCustApplyYesterdayCounts" resultType="int" parameterType="java.util.Map">
+		 	SELECT
+				count(DISTINCT ec.companyPk)
+			FROM
+				(
+					SELECT
+						pk,
+						companyPk
+					FROM
+						b2b_economics_customer
+					WHERE
+						1 = 1
+					AND staticTime IS NOT NULL
+					<if test="staticTime != null and staticTime != ''">
+						and str_to_date(staticTime,'%Y-%m-%d') = #{staticTime} 
+				 	</if>
+					<if test="source != null and source != ''">
+					and source = #{source} 
+				 	</if>
+				) ec
+		INNER JOIN
+
+		(SELECT * FROM
+			(SELECT
+			economicsCustomerPk,
+			GROUP_CONCAT(DISTINCT(goodsType)) AS type
+			FROM
+			b2b_economics_customer_goods
+			WHERE 1=1
+
+			GROUP BY economicsCustomerPk
+
+			) egoods WHERE
+		<if test="goodsType != null and goodsType != ''">
+			type = #{goodsType}
+		</if>
+		) ecg ON ecg.economicsCustomerPk = ec.pk
+	</select>
+	
+	<select id="ecoCustApplyLastWeekCounts" resultType="int" parameterType="java.util.Map">
+			SELECT
+				count(DISTINCT ec.companyPk)
+			FROM
+				(
+					SELECT
+						pk,
+						companyPk
+					FROM
+						b2b_economics_customer
+					WHERE
+						1 = 1
+					AND staticTime IS NOT NULL
+					<if test="startWeekTime != null and startWeekTime != ''">
+						AND str_to_date(staticTime,'%Y-%m-%d') >= #{startWeekTime}			
+					</if>
+					<if test="endWeekTime != null and endWeekTime != ''">
+						AND str_to_date(staticTime,'%Y-%m-%d') &lt;= #{endWeekTime}			
+					</if>
+					<if test="source != null and source != ''">
+					and source = #{source} 
+				 	</if>
+				) ec
+		INNER JOIN
+
+		(SELECT * FROM
+			(SELECT
+			economicsCustomerPk,
+			GROUP_CONCAT(DISTINCT(goodsType)) AS type
+			FROM
+			b2b_economics_customer_goods
+			WHERE 1=1
+
+			GROUP BY economicsCustomerPk
+
+			) egoods WHERE
+			<if test="goodsType != null and goodsType != ''">
+				 type = #{goodsType}
+			</if>
+		) ecg ON ecg.economicsCustomerPk = ec.pk
+	</select>
+	
+	
+	
+		<select id = "isProcess" parameterType="java.lang.String" resultType="int">
+		SELECT count(*) FROM b2b_economics_customer where 
+		companyPk = #{companyPk} 
+		AND auditStatus IN (1, 2)
+	</select>
+	
+	<select id="getExtImpInfoByEconomCustPk" resultType="cn.cf.dto.B2bEconomicsCustomerExtDto"
+		parameterType="java.util.Map">
+		SELECT 
+		c.companyPk,
+		 <choose>
+			<when test="colCompanyName == 'EM_CUST_APPLY_COL_COM_NAME' ">
+				INSERT(c.companyName, 3, 5, '*****') AS companyName,
+			</when>
+			<otherwise>
+				c.companyName ,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="colContacts == 'EM_CUST_APPLY_COL_CONTACTS'">
+				INSERT (c.contactsTel, 4, 4, '****') as contactsTel,
+			</when>
+			<otherwise>
+				c.contactsTel as contactsTel,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="colContactsTel == 'EM_CUST_APPLY_COL_CONTACTSTEL'">
+				INSERT (c.contacts, 1, 1, '*') as contacts,
+			</when>
+			<otherwise>
+				c.contacts as contacts,
+			</otherwise>
+		</choose>
+		c.improvingdataInfo
+		FROM b2b_economics_customer c 
+		where  1=1 
+		<if test="@Ognl@isNotEmpty(econCustmerPk)">
+			AND	c.pk = #{econCustmerPk}	
+		</if>
+		<if test="@Ognl@isNotEmpty(companyName)">
+			AND	c.companyName   LIKE '%${companyName}%'	
+		</if>
+		<if test="@Ognl@isNotEmpty(assidirPk)">
+			AND c. assidirPk = #{assidirPk}			
+		</if>
+		<if test="@Ognl@isNotEmpty(updateStartTime)">
+			AND  str_to_date(c.updateTime,'%Y-%m-%d')   >= #{updateStartTime}	
+		</if>
+		<if test="@Ognl@isNotEmpty(updateEndTime)">
+			AND  str_to_date(c.updateTime,'%Y-%m-%d')  &lt;= #{updateEndTime}	
+		</if>
+		<if test="@Ognl@isNotEmpty(insertStartTime)">
+			AND   str_to_date( c.insertTime,'%Y-%m-%d')  >= #{insertStartTime}	
+		</if>
+		
+		<if test="@Ognl@isNotEmpty(insertEndTime)">
+			AND str_to_date( c.insertTime,'%Y-%m-%d')  &lt;= #{insertEndTime}	
+		</if>
+		<if test="@Ognl@isNotEmpty(contactsTel)">
+			AND c.contactsTel   LIKE '%${contactsTel}%'	
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+</mapper>
+

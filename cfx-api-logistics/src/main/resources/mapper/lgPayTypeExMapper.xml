@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgPayTypeDaoEx">
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,payTypeName,isUsable,delStatus
+	    ]]>
+    </sql>
+	
+	<!-- 查询启用的支付方式 -->
+    <select id="getPayTypes" resultType="cn.cf.dto.LgPayTypeDto">
+        select lg_pay_type.pk,lg_pay_type.payTypeName from  lg_pay_type 
+        where lg_pay_type.isUsable =1 and lg_pay_type.delStatus=1 ORDER BY lg_pay_type.payTypeName DESC
+    </select>
+    
+    <!--根据pk查询支付方式名    -->
+    <select id="getPayTypeNameByPK" resultType="java.lang.String">
+        select lg_pay_type.payTypeName from  lg_pay_type 
+        where lg_pay_type.pk=#{paymentPk} and lg_pay_type.isUsable =1 and lg_pay_type.delStatus=1 limit 1
+    </select>
+    
+</mapper>
+

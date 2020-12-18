@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bContractGoodsDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		childOrderNumber,contractNo,detailNumber,goodsPk,goodsType,brandName,boxes,weight,basicPrice,freight,contractPrice,discount,carrierPk,carrier,isDelete,insertTime,updateTime,weightShipped,boxesShipped,contractStatus,logisticsPk,logisticsStepInfoPk,goodsInfo,block
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="childOrderNumber">
+    <![CDATA[
+        INSERT INTO b2b_contract_goods (
+         childOrderNumber, contractNo, detailNumber, goodsPk, goodsType, brandName, boxes, weight, basicPrice, freight, contractPrice, discount, carrierPk, carrier, isDelete, insertTime, updateTime, weightShipped, boxesShipped, contractStatus, logisticsPk, logisticsStepInfoPk, goodsInfo,block
+        ) VALUES (
+         #{childOrderNumber}, #{contractNo}, #{detailNumber}, #{goodsPk}, #{goodsType}, #{brandName}, #{boxes}, #{weight}, #{basicPrice}, #{freight}, #{contractPrice}, #{discount}, #{carrierPk}, #{carrier}, #{isDelete}, #{insertTime}, #{updateTime}, #{weightShipped}, #{boxesShipped}, #{contractStatus}, #{logisticsPk}, #{logisticsStepInfoPk}, #{goodsInfo},#{block}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bContractGoods">
+    <![CDATA[
+        UPDATE b2b_contract_goods SET
+	        contractNo = #{contractNo} , detailNumber = #{detailNumber} , goodsPk = #{goodsPk} , goodsType = #{goodsType} , brandName = #{brandName} , boxes = #{boxes} , weight = #{weight} , basicPrice = #{basicPrice} , freight = #{freight} , contractPrice = #{contractPrice} , discount = #{discount} , carrierPk = #{carrierPk} , carrier = #{carrier} , isDelete = #{isDelete} , insertTime = #{insertTime} , updateTime = #{updateTime} , weightShipped = #{weightShipped} , boxesShipped = #{boxesShipped} , contractStatus = #{contractStatus} , logisticsPk = #{logisticsPk} , logisticsStepInfoPk = #{logisticsStepInfoPk} , goodsInfo = #{goodsInfo}  
+        WHERE 
+        	childOrderNumber = #{childOrderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bContractGoods">
+    <![CDATA[
+        DELETE FROM b2b_contract_goods WHERE
+        childOrderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(childOrderNumber)">
+				AND childOrderNumber = #{childOrderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractNo)">
+				AND contractNo = #{contractNo}			</if>
+			<if test="@Ognl@isNotEmpty(detailNumber)">
+				AND detailNumber = #{detailNumber}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsType)">
+				AND goodsType = #{goodsType}			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(boxes)">
+				AND boxes = #{boxes}			</if>
+			<if test="@Ognl@isNotEmpty(weight)">
+				AND weight = #{weight}			</if>
+			<if test="@Ognl@isNotEmpty(basicPrice)">
+				AND basicPrice = #{basicPrice}			</if>
+			<if test="@Ognl@isNotEmpty(freight)">
+				AND freight = #{freight}			</if>
+			<if test="@Ognl@isNotEmpty(contractPrice)">
+				AND contractPrice = #{contractPrice}			</if>
+			<if test="@Ognl@isNotEmpty(discount)">
+				AND discount = #{discount}			</if>
+			<if test="@Ognl@isNotEmpty(carrierPk)">
+				AND carrierPk = #{carrierPk}			</if>
+			<if test="@Ognl@isNotEmpty(carrier)">
+				AND carrier = #{carrier}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(weightShipped)">
+				AND weightShipped = #{weightShipped}			</if>
+			<if test="@Ognl@isNotEmpty(boxesShipped)">
+				AND boxesShipped = #{boxesShipped}			</if>
+			<if test="@Ognl@isNotEmpty(contractStatus)">
+				AND contractStatus = #{contractStatus}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsPk)">
+				AND logisticsPk = #{logisticsPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsStepInfoPk)">
+				AND logisticsStepInfoPk = #{logisticsStepInfoPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsInfo)">
+				AND goodsInfo = #{goodsInfo}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_contract_goods
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByChildOrderNumber" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where childOrderNumber = #{childOrderNumber}	</select>
+	<select id="getByContractNo" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where contractNo = #{contractNo}	</select>
+	<select id="getByGoodsPk" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where goodsPk = #{goodsPk}	</select>
+	<select id="getByGoodsType" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where goodsType = #{goodsType}	</select>
+	<select id="getByBrandName" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where brandName = #{brandName}	</select>
+	<select id="getByCarrierPk" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where carrierPk = #{carrierPk}	</select>
+	<select id="getByCarrier" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where carrier = #{carrier}	</select>
+	<select id="getByLogisticsPk" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where logisticsPk = #{logisticsPk}	</select>
+	<select id="getByLogisticsStepInfoPk" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where logisticsStepInfoPk = #{logisticsStepInfoPk}	</select>
+	<select id="getByGoodsInfo" resultType="cn.cf.dto.B2bContractGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract_goods where goodsInfo = #{goodsInfo}	</select>
+</mapper>
+

@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAuctionOfferDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,auctionPk,auctionPrice,thanStartingPrice,boxes,weight,provideBoxes,provideWeight,companyPk,companyName,contacts,contactsTel,
+		memberPk, employeeName,employeeNumber,saleManPk,saleManContacts,saleManContactsTel,insertTime,bidTime,
+		orderTime,overDateTime,bidStatus,isFinished,type
+	    ]]>
+	</sql>
+
+
+	<update id="updateOffer">
+		update b2b_auction_offer
+		<set>
+			<if test="boxes != null">
+				boxes = #{boxes},
+			</if>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="provideBoxes != null">
+				provideBoxes = #{provideBoxes},
+			</if>
+			<if test="provideWeight != null">
+				provideWeight = #{provideWeight},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="bidTime != null">
+				bidTime = #{bidTime},
+			</if>
+			<if test="orderTime != null">
+				orderTime = #{orderTime},
+			</if>
+			<if test="bidStatus != null">
+				bidStatus = #{bidStatus},
+			</if>
+			<if test="isFinished != null">
+				isFinished = #{isFinished},
+			</if>
+		</set>
+		where pk = #{pk}
+	</update>
+
+
+	<!-- 中标记录 -->
+	<select id="bidRecords" resultType="cn.cf.dto.B2bAuctionOfferDtoEx">
+		SELECT
+		bao.pk,bao.auctionPk,bao.auctionPrice,bao.thanStartingPrice,bao.boxes,bao.weight,bao.provideBoxes,
+		bao.provideWeight,bao.companyPk,bao.companyName,bao.contacts,bao.contactsTel,bao.memberPk,bao.employeeName,
+		bao.employeeNumber,bao.saleManPk,bao.saleManContacts,bao.saleManContactsTel,bao.insertTime,bao.bidTime,
+		bao.orderTime,bao.overDateTime,
+		IF( ( bao.isFinished=-1),3,IF((bao.bidStatus=1 AND bao.isFinished!=-1),2,1 ) ) AS bidStatus,
+		bao.isFinished,bao.type,
+		bg.pk AS goodsPk,
+		bg.tareWeight,
+		bg.totalBoxes,
+		bg.totalWeight,
+		REPLACE (REPLACE (REPLACE (goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'') AS goodsInfo,
+		bg.block,
+		bag.activityTime,
+		bag.startTime,
+		bag.endTime,
+		bag.companyName as supplierName,
+		bag.startingPrice,
+		bag.maximumPrice
+		FROM b2b_auction_offer bao
+		LEFT JOIN b2b_auction_goods bag ON
+		bao.auctionPk = bag.pk
+		LEFT JOIN b2b_goods bg ON bag.goodsPk = bg.pk
+		<include refid="searchB2bAuctionOfferGoodWhereBidRecords" />
+		order by bidStatus, bao.insertTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="countBidRecords" resultType="int">
+		SELECT count(1)
+		FROM b2b_auction_offer bao LEFT JOIN b2b_auction_goods bag ON bao.auctionPk = bag.pk
+		LEFT JOIN b2b_goods bg ON bag.goodsPk = bg.pk
+		<include refid="searchB2bAuctionOfferGoodWhereBidRecords" />
+	</select>
+
+	<sql id="searchB2bAuctionOfferGoodWhereBidRecords">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(auctionPk)">
+				AND bao.auctionPk = #{auctionPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(saleManPk)">
+				AND bao.saleManPk = #{saleManPk}
+			</if>
+			<if test="productPk !=null and productPk !=''">
+				and FIND_IN_SET('"productPk":"${productPk}"',goodsInfo)
+			</if>
+		 	<if test="seriesPk !=null and seriesPk !=''">
+				and FIND_IN_SET('"seriesPk":"${seriesPk}"',goodsInfo)
+			</if>
+			<if test="varietiesPk !=null and varietiesPk !=''">
+				and FIND_IN_SET('"varietiesPk":"${varietiesPk}"',goodsInfo)
+			</if>
+			<if test="seedvarietyPk !=null and seedvarietyPk !=''">
+				and FIND_IN_SET('"seedvarietyPk":"${seedvarietyPk}"',goodsInfo)
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="storePk != null ">
+				AND bg.storePk = #{storePk}
+			</if>
+			<if test="searchKey != null and searchKey !=''">
+			and bg.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+			<if test="companyInfo != null and companyInfo !=''">
+				AND bao.companyName like '%${companyInfo}%'
+			</if>
+			<if test="bidStatus != null ">
+				<choose>
+					<!-- 全部 -->
+					<when test="bidStatus == 0">
+						and bao.bidStatus in (1,2)
+					</when>
+					<!-- 未中标 -->
+					<when test="bidStatus == 1">
+						AND bao.bidStatus = 2 and bao.isFinished!=-1
+					</when>
+					<!-- 已中标 -->
+					<when test="bidStatus == 2">
+						AND bao.bidStatus = 1 and bao.isFinished!=-1
+					</when>
+					<!-- 已过期 -->
+					<when test="bidStatus == 3">
+						AND bao.isFinished = -1
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 订单记录 -->
+	<select id="orderRecords" resultType="cn.cf.dto.B2bAuctionOfferDtoEx">
+		SELECT
+		bao.*,
+		IF(bao.isFinished=2,1,IF(bao.isFinished=1,2,3) ) AS
+		orderStatus,
+		bg.pk AS goodsPk,
+		bg.tareWeight,
+		bg.totalBoxes,
+		bg.totalWeight,
+		bg.block,
+		REPLACE (
+		REPLACE (
+		REPLACE (goodsInfo, ',', ','),
+		CHAR (13),
+		''
+		),
+		CHAR (10),
+		''
+		) AS goodsInfo,
+		bag.activityTime,
+		bag.startTime,
+		bag.endTime,
+		bag.companyName as supplierName,
+		bag.startingPrice,
+		bag.maximumPrice
+		FROM b2b_auction_offer bao
+		LEFT JOIN b2b_auction_goods bag ON	bao.auctionPk = bag.pk
+		LEFT JOIN b2b_goods bg ON bag.goodsPk = bg.pk
+		<include refid="searchB2bAuctionOfferGoodWhereOrderRecords" />
+		order by orderStatus, bao.insertTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="countOrderRecords" resultType="int">
+		SELECT
+		count(1)
+		FROM b2b_auction_offer bao
+		LEFT JOIN b2b_auction_goods
+		bag ON bao.auctionPk = bag.pk
+		LEFT JOIN b2b_goods bg ON bag.goodsPk =
+		bg.pk
+		<include refid="searchB2bAuctionOfferGoodWhereOrderRecords" />
+	</select>
+
+	<sql id="searchB2bAuctionOfferGoodWhereOrderRecords">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			bao.bidStatus = 1
+			<if test="@Ognl@isNotEmpty(auctionPk)">
+				AND bao.auctionPk = #{auctionPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(saleManPk)">
+				AND bao.saleManPk = #{saleManPk}
+			</if>
+			<if test="productPk !=null and productPk !=''">
+				and FIND_IN_SET('"productPk":"${productPk}"',goodsInfo)
+			</if>
+		 	<if test="seriesPk !=null and seriesPk !=''">
+				and FIND_IN_SET('"seriesPk":"${seriesPk}"',goodsInfo)
+			</if>
+			<if test="varietiesPk !=null and varietiesPk !=''">
+				and FIND_IN_SET('"varietiesPk":"${varietiesPk}"',goodsInfo)
+			</if>
+			<if test="seedvarietyPk !=null and seedvarietyPk !=''">
+				and FIND_IN_SET('"seedvarietyPk":"${seedvarietyPk}"',goodsInfo)
+			</if>
+			<if test="gradePk !=null and gradePk !=''">
+				and FIND_IN_SET('"gradePk":"${gradePk}"',goodsInfo)
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and FIND_IN_SET('"specifications":"${specifications}"',goodsInfo)
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and FIND_IN_SET('"batchNumber":"${batchNumber}"',goodsInfo)
+			</if>
+			<if test="searchKey != null and searchKey !=''">
+				and bg.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+			<if test="companyInfo != null and companyInfo !=''">
+				AND bao.companyName like '%${companyInfo}%'
+			</if>
+			<if test="storePk != null ">
+				AND bg.storePk = #{storePk}
+			</if>
+			<if test="orderStatus != null ">
+				<choose>
+					<!-- 全部 -->
+					<when test="orderStatus == 0">
+
+					</when>
+					<!-- 未提交 -->
+					<when test="orderStatus == 1">
+						AND bao.isFinished = 2
+					</when>
+					<!-- 已提交 -->
+					<when test="orderStatus == 2">
+						AND bao.isFinished = 1
+					</when>
+					<!-- 已过期 -->
+					<when test="orderStatus == 3">
+						AND bao.isFinished = -1
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+
+	<!-- 竞拍中商品-订单管理 -->
+	<select id="orderManagement" resultType="cn.cf.dto.B2bAuctionOfferDtoEx">
+		SELECT
+		b2b_auction_offer.*,
+		CASE isFinished
+		WHEN 1 THEN
+		'已提交'
+		WHEN 2 THEN
+		'未提交'
+		WHEN -1 THEN
+		'已过期'
+		ELSE
+		'状态异常'
+		END AS statusName,
+		b2b_goods.block
+		FROM
+		b2b_auction_offer
+		INNER JOIN b2b_auction_goods  ON b2b_auction_offer.auctionPk =b2b_auction_goods.pk
+		INNER JOIN b2b_goods  ON b2b_auction_goods.goodsPk = b2b_goods.pk
+		<include refid="orderManagementWhere" />
+		order by b2b_auction_offer.insertTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="countOrderManagement" resultType="int">
+		SELECT
+		count(1)
+		FROM b2b_auction_offer
+		INNER JOIN b2b_auction_goods  ON b2b_auction_offer.auctionPk =b2b_auction_goods.pk
+		INNER JOIN b2b_goods  ON b2b_auction_goods.goodsPk = b2b_goods.pk
+		<include refid="orderManagementWhere" />
+	</select>
+
+	<sql id="orderManagementWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			b2b_auction_offer.bidStatus = 1
+			<if test="auctionPk != null and auctionPk !=''">
+				AND b2b_auction_offer.auctionPk = #{auctionPk}
+			</if>
+			<if test="searchKey != null and searchKey !=''">
+				AND b2b_auction_offer.companyName like '%${searchKey}%'
+			</if>
+			<if test="submitStatus != null ">
+				<choose>
+					<!-- 全部 -->
+					<when test="submitStatus == 0">
+						AND b2b_auction_offer.isFinished in (1,2)
+					</when>
+					<!-- 未提交 -->
+					<when test="submitStatus == 1">
+						AND b2b_auction_offer.isFinished = 2
+					</when>
+					<!-- 已提交 -->
+					<when test="submitStatus == 2">
+						AND b2b_auction_offer.isFinished = 1
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 定时器，00：00， 未中标，已中标未提交记录设置成已过期 -->
+	<update id="updateAuctionIsFinishedAt24">
+		UPDATE b2b_auction_offer
+		SET isFinished = - 1,
+		overDateTime=now()
+		WHERE ( isFinished is null OR isFinished = 2 )
+	</update>
+
+
+	<delete id="deleteAuctionOffer" parameterType="java.util.Map">
+		DELETE FROM b2b_auction_offer
+		WHERE
+		auctionPk = #{auctionPk} and memberPk=#{memberPk} and companyPk=#{companyPk}
+	</delete>
+
+	<select id="getMaxBidByAuctionPk" resultType="cn.cf.dto.B2bAuctionOfferDto">
+		SELECT *
+		FROM
+		b2b_auction_offer
+		where b2b_auction_offer.auctionPk=#{auctionPk}
+		and
+		b2b_auction_offer.bidStatus=1
+		order by b2b_auction_offer.auctionPrice
+		desc limit 1
+	</select>
+	
+	<select id="findGoodsStockByAuctionPk" resultType="int">
+		SELECT
+		IFNULL( bg.totalBoxes,0)
+		FROM
+		b2b_auction_offer ao
+		LEFT JOIN b2b_auction_goods ag ON ao.auctionPk = ag.pk
+		LEFT JOIN b2b_goods bg ON ag.goodsPk = bg.pk
+		WHERE
+		ao.pk = #{pk}
+	</select>
+
+	<!-- 出价记录 -->
+	<select id="offerRecords" resultType="cn.cf.dto.B2bAuctionOfferDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		a.*,
+		c.brandName,   
+		c.totalWeight,
+		c.totalBoxes,
+		c.tonPrice,
+		c.tareWeight,
+		REPLACE (
+		REPLACE (
+		REPLACE (c.goodsInfo, ',', ','),
+		CHAR (13),
+		''
+		),
+		CHAR (10),
+		''
+		) AS goodsInfo,
+		b.goodsPk as goodsPk,
+		b.activityTime as activityTime,
+		b.startingPrice as startingPrice,
+		ifnull(b.maximumPrice,b.startingPrice) as dealPrice,
+		b.startTime as
+		startTime,
+		b.endTime as endTime,
+		CASE
+		WHEN (b.activityTime =
+		date_format(now(), '%y-%m-%d') AND b.startTime >=
+		date_format(now(),'%H:%i')) OR (b.activityTime > date_format(now(),
+		'%y-%m-%d'))
+		THEN -1
+		WHEN b.activityTime = date_format(now(), '%y-%m-%d') AND
+		b.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(),
+		'%H:%i') &lt;=b.endTime
+		THEN 1
+		WHEN (b.activityTime = date_format(now(), '%y-%m-%d') and
+		date_format(now(), '%H:%i')>b.endTime)
+		THEN 2
+		WHEN (b.activityTime &lt;
+		date_format(now(), '%y-%m-%d'))
+		THEN 3
+		END as acStatus,
+		CASE
+		WHEN
+		(b.activityTime = date_format(now(), '%y-%m-%d') AND b.startTime >=
+		date_format(now(),'%H:%i')) OR (b.activityTime > date_format(now(),
+		'%y-%m-%d'))
+		THEN '未开始'
+		WHEN b.activityTime = date_format(now(), '%y-%m-%d') AND
+		b.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(),
+		'%H:%i') &lt;=b.endTime
+		THEN '进行中'
+		WHEN (b.activityTime = date_format(now(), '%y-%m-%d') and
+		date_format(now(), '%H:%i')>b.endTime)
+		THEN '已结束'
+		WHEN (b.activityTime
+		&lt; date_format(now(), '%y-%m-%d'))
+		THEN '已过期'
+		END as acStatusName,
+		c.block
+		FROM
+		b2b_auction_offer a
+		INNER JOIN b2b_auction_goods b ON a.auctionPk =
+		b.pk
+		INNER JOIN b2b_goods c ON b.goodsPk = c.pk
+		<include refid="searchAuctionGoodsGridWhere" />
+		order by a.insertTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<!-- 出价记录数量 -->
+	<select id="countOfferRecords" resultType="int" parameterType="java.util.Map">
+		SELECT count(1)
+		FROM
+		b2b_auction_offer a
+		INNER JOIN b2b_auction_goods b
+		ON a.auctionPk = b.pk
+		INNER JOIN b2b_goods c ON b.goodsPk = c.pk
+		<include refid="searchAuctionGoodsGridWhere" />
+	</select>
+
+
+	<sql id="searchAuctionGoodsGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			1=1
+			<if test="@Ognl@isNotEmpty(saleManPk)">
+				AND a.saleManPk = #{saleManPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(auctionPk)">
+				AND a.auctionPk = #{auctionPk}
+			</if>
+			<if test="productPk !=null and productPk !=''">
+				and FIND_IN_SET('"productPk":"${productPk}"',goodsInfo)
+			</if>
+		 	<if test="seriesPk !=null and seriesPk !=''">
+				and FIND_IN_SET('"seriesPk":"${seriesPk}"',goodsInfo)
+			</if>
+			<if test="varietiesPk !=null and varietiesPk !=''">
+				and FIND_IN_SET('"varietiesPk":"${varietiesPk}"',goodsInfo)
+			</if>
+			<if test="seedvarietyPk !=null and seedvarietyPk !=''">
+				and FIND_IN_SET('"seedvarietyPk":"${seedvarietyPk}"',goodsInfo)
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				and goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+			<if test="companyName != null and companyName != ''">
+				and a.companyName  LIKE  '%${companyName}%' 
+			</if>
+			<if test="storePk != null ">
+				AND c.storePk = #{storePk}
+			</if>
+			<if test="acStatus != null and acStatus !=''">
+				<choose>
+					<!-- 全部 -->
+					<when test="acStatus == 0">
+
+					</when>
+					<!-- 进行中 -->
+					<when test="acStatus == 1">
+						and b.activityTime = date_format(now(), '%y-%m-%d')
+						AND b.startTime &lt;= date_format(now(), '%H:%i') and
+						date_format(now(), '%H:%i') &lt;=b.endTime
+					</when>
+					<!-- 已结束 -->
+					<when test="acStatus == 2">
+						and b.activityTime = date_format(now(), '%y-%m-%d') and
+						date_format(now(), '%H:%i')>b.endTime
+					</when>
+					<!--已过期 -->
+					<when test="acStatus ==3">
+						and b.activityTime &lt; date_format(now(), '%y-%m-%d')
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchMaxPrice" resultType="cn.cf.dto.B2bAuctionOfferDto">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer
+		where auctionPk = #{auctionPk}
+		<if test="companyPk != null and companyPk !=''">
+			AND companyPk = #{companyPk}
+		</if>
+		order by auctionPrice desc,weight desc,insertTime desc
+		limit 0,1
+	</select>
+
+
+	<!-- 某个场次某家公司的最新出价 -->
+	<select id="getLatestAuctionPriceForCompany" resultType="cn.cf.dto.B2bAuctionOfferDto">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer
+		where
+		auctionPk = #{auctionPk}
+		and companyPk=#{companyPk}
+		order by insertTime desc
+		limit 0,1
+	</select>
+
+	<select id="searchAuctionOfferRecordsByMember" resultType="cn.cf.dto.B2bAuctionOfferDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		c.brandName,
+		c.tareWeight,
+		c.totalBoxes,
+		c.totalWeight,
+		REPLACE (
+		REPLACE (
+			REPLACE (c.goodsInfo, ',', ','),
+			CHAR (13),
+			''
+		),
+		CHAR (10),
+		''
+	) AS goodsInfo,
+		a.*,
+		b.maximumPrice,
+		b.startingPrice,
+		c.block
+		FROM
+		b2b_auction_offer a
+		INNER JOIN
+		b2b_auction_goods b ON a.auctionPk=b.pk
+		INNER JOIN b2b_goods c ON
+		b.goodsPk = c.pk
+		WHERE
+		a.auctionPk=#{auctionPk}
+		and a.companyPk=#{companyPk}
+		<if test="offerTimeStart !=null and offerTimeStart !=''">
+			AND a.insertTime &gt;= CONCAT(#{offerTimeStart},':00')
+		</if>
+		<if test="offerTimeEnd !=null and offerTimeEnd !=''">
+			AND a.insertTime &lt;= CONCAT(#{offerTimeEnd},':00')
+		</if>
+		<if test="saleManPk != null">
+			AND saleManPk = #{saleManPk}
+		</if>
+		ORDER BY a.`insertTime` DESC
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="countAuctionOfferRecordsByMember" resultType="int"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM
+		b2b_auction_offer a
+		INNER JOIN b2b_auction_goods b ON
+		a.auctionPk=b.pk
+		INNER JOIN b2b_goods c ON b.goodsPk = c.pk
+		WHERE
+		a.auctionPk=#{auctionPk}
+		and a.companyPk=#{companyPk}
+		<if test="@Ognl@isNotEmpty(offerTimeStart)">
+			AND a.insertTime >= #{offerTimeStart}
+		</if>
+		<if test="@Ognl@isNotEmpty(offerTimeEnd)">
+			AND a.insertTime &lt;= #{offerTimeEnd}
+		</if>
+		<if test="saleManPk != null">
+			AND saleManPk = #{saleManPk}
+		</if>
+	</select>
+
+	<!-- 出价管理 -->
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bAuctionOfferDtoEx"
+		parameterType="java.util.Map">
+		SELECT b2b_auction_offer.*
+		FROM b2b_auction_offer
+		WHERE b2b_auction_offer.`auctionPk`=#{pk}
+		AND
+		b2b_auction_offer.`companyName` LIKE '%${searchKey}%'
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="searchGridCountEx" resultType="int" parameterType="java.util.Map">
+		SELECT count(1)
+		FROM b2b_auction_offer
+		WHERE b2b_auction_offer.`auctionPk`=#{pk}
+		AND
+		b2b_auction_offer.`companyName` LIKE '%${searchKey}%'
+	</select>
+
+
+	<!-- 中标管理 -->
+	<select id="searchGridEx2" resultType="cn.cf.dto.B2bAuctionOfferDtoEx"
+		parameterType="java.util.Map">
+		SELECT b2b_auction_offer.*,
+		CASE b2b_auction_offer.bidStatus
+		WHEN 0 THEN
+		'待确认'
+		WHEN 1 THEN
+		'已中标'
+		WHEN 2 THEN
+		'未中标'
+		WHEN -1 THEN
+		'已结束'
+		ELSE
+		'待确认'
+		END AS bidStatusName,
+		b2b_goods.block
+		FROM
+		b2b_auction_offer
+		INNER JOIN b2b_auction_goods  ON b2b_auction_offer.auctionPk =b2b_auction_goods.pk
+		INNER JOIN b2b_goods  ON b2b_auction_goods.goodsPk = b2b_goods.pk
+		WHERE b2b_auction_offer.`auctionPk`=#{pk}
+		AND
+		b2b_auction_offer.`companyName` LIKE '%${searchKey}%'
+		<if test="@Ognl@isNotEmpty(bidStatus)">
+			<choose>
+				<!-- 全部 (已中标 未中标) -->
+				<when test="bidStatus == 0">
+					and b2b_auction_offer.bidStatus in (1,2)
+				</when>
+				<!-- 已中标 -->
+				<when test="bidStatus == 1">
+					and b2b_auction_offer.bidStatus = 1
+				</when>
+				<!-- 未中标 -->
+				<when test="bidStatus == 2">
+					and b2b_auction_offer.bidStatus = 2
+				</when>
+			</choose>
+		</if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="searchGridCountEx2" resultType="int" parameterType="java.util.Map">
+		SELECT count(1)
+		FROM b2b_auction_offer
+		INNER JOIN b2b_auction_goods  ON b2b_auction_offer.auctionPk =b2b_auction_goods.pk
+		INNER JOIN b2b_goods  ON b2b_auction_goods.goodsPk = b2b_goods.pk
+		WHERE b2b_auction_offer.`auctionPk`=#{pk}
+		AND
+		b2b_auction_offer.`companyName` LIKE '%${searchKey}%'
+		<if test="@Ognl@isNotEmpty(bidStatus)">
+			<choose>
+				<!-- 全部 (已中标 未中标) -->
+				<when test="bidStatus == 0">
+					and b2b_auction_offer.bidStatus in (1,2)
+				</when>
+				<!-- 已中标 -->
+				<when test="bidStatus == 1">
+					and b2b_auction_offer.bidStatus = 1
+				</when>
+				<!-- 未中标 -->
+				<when test="bidStatus == 2">
+					and b2b_auction_offer.bidStatus = 2
+				</when>
+			</choose>
+		</if>
+	</select>
+
+
+	<select id="findAuctionOfferBoxes" resultType="int">
+		SELECT
+		IFNULL( SUM(provideBoxes),0)
+		FROM
+		b2b_auction_offer
+		WHERE
+		auctionPk = (
+		SELECT
+		o.auctionPk
+		FROM
+		b2b_auction_offer o
+		WHERE
+		o.pk =#{pk}
+		)
+		AND bidStatus = 1
+		AND isFinished = 2
+	</select>
+	
+	<select id="findGoodByAuctionPk" resultType="cn.cf.dto.B2bGoodsDto">
+		SELECT bg.* FROM
+		b2b_auction_offer ao
+		LEFT JOIN b2b_auction_goods ag ON ao.auctionPk = ag.pk
+		LEFT JOIN b2b_goods bg ON ag.goodsPk = bg.pk
+		WHERE
+		ao.pk = #{pk}
+	</select>
+
+	<update id="setOfferOverDate">
+		update b2b_auction_offer set isFinished=-1,
+		overDateTime=now()
+		where auctionPk = #{auctionPk} and bidStatus=2
+	</update>
+
+</mapper>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCartDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,goodsPk,boxes,insertTime,memberPk,purchaserName,purchaserPk,supplierName,supplierPk,cartType
+	    ]]>
+	</sql>
+
+
+	<select id="searchCompanyList" resultType="cn.cf.dto.B2bCartDtoEx">
+		SELECT
+		b.bindName,
+		ca.bindPk,
+		ca.supplierPk,
+		ca.purchaserPk,
+		ca.supplierName,
+		ca.purchaserName,
+		ca.cartType,
+		ca.memberPk
+		FROM
+		b2b_cart
+		ca LEFT JOIN b2b_bind b on ca.bindPk=b.pk
+		LEFT JOIN b2b_goods g ON
+		ca.goodsPk = g.pk
+		where memberPk = #{memberPk}
+		AND g.pk IS NOT NULL
+		and
+		cartType = #{cartType}
+		<if test="block!=null and block!=''">
+			and g.block = #{block}
+		</if>
+		<if test="cartType == 1">
+			group by ca.supplierPk
+		</if>
+		<if test="cartType == 2">
+			group by ca.purchaserPk , ca.bindPk
+		</if>
+	</select>
+
+	<select id="searchGoodsList" resultType="cn.cf.dto.B2bCartDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		IFNULL(g.tareWeight, 0)tareWeight ,
+		IFNULL(c.weight, 0) AS totalWeight,
+		IFNULL(c.boxes, 0) AS boxes,
+		IFNULL(g.saleprice, 0) AS saleprice,
+		c.bindPk,
+		c.pk,
+		c.goodsPk,
+		c.boxes,
+		c.weight,
+		c.insertTime,
+		c.memberPk,
+		c.purchaserName,
+		c.purchaserPk,
+		c.supplierName,
+		c.supplierPk,
+		c.cartType,
+		c.weight AS totalWeight,
+		REPLACE (
+		REPLACE (
+		REPLACE (g.goodsInfo, ',', ','),
+		CHAR (13),
+		''
+		),
+		CHAR (10),
+		''
+		) AS goodsInfo,
+		g.*,
+		s.isOpen,
+		g.type as goodsType,
+		s.startTime,
+		s.endTime,
+		s.isOpen,
+		s.showPricebfOpen
+		FROM
+		b2b_cart c
+		LEFT JOIN b2b_goods g ON c.goodsPk = g.pk
+		LEFT JOIN b2b_store
+		s ON g.storePk = s.pk
+		WHERE
+		1 = 1
+		AND g.pk IS NOT NULL
+		<if test="cartType != null and cartType !=''">
+			and c.cartType =#{cartType}
+		</if>
+		<if test="memberPk != null and memberPk !=''">
+			and c.memberPk = #{memberPk}
+		</if>
+		<if test="purchaserPk != null and purchaserPk !=''">
+			and c.purchaserPk = #{purchaserPk}
+		</if>
+		<if test="bindPk==null or bindPk=='' ">
+			and c.bindPk is null
+		</if>
+		<if test="bindPk!=null and bindPk!=''">
+			and c.bindPk = #{bindPk}
+		</if>
+
+		<if test="supplierPk != null and supplierPk !=''">
+			and c.supplierPk = #{supplierPk}
+		</if>
+		order by c.insertTime desc
+	</select>
+
+	<select id="searchCounts" parameterType="java.util.Map"
+		resultType="Integer">
+		SELECT
+		ifnull(sum(c.boxes), 0)
+		FROM
+		b2b_cart c
+		LEFT JOIN
+		b2b_goods g ON
+		c.goodsPk = g.PK
+		WHERE
+		c.memberPk =#{memberPk}
+		<if test="block!=null and block!=''">
+			and g.block = #{block}
+		</if>
+		AND g.pk IS
+		NOT NULL
+		AND c.cartType =#{cartType}
+	</select>
+
+	<delete id="deleteBatch" parameterType="java.util.List">
+		DELETE FROM b2b_cart WHERE
+		pk in
+		<foreach item="empnoItem" collection="list" open="("
+			separator="," close=")">
+			#{empnoItem}
+		</foreach>
+
+	</delete>
+
+	<delete id="deleteByBindPk" parameterType="cn.cf.dto.B2bCartDtoEx">
+    <![CDATA[
+        DELETE FROM b2b_cart WHERE  bindPk=#{bindPk}
+    ]]>
+	</delete>
+
+
+
+
+
+	<select id="searchFirmOrder" resultType="cn.cf.entity.FirmOrder"
+		parameterType="java.util.Map">
+		select
+		g.pk AS goodsPk,
+		g.block,
+		REPLACE (REPLACE (REPLACE ( g.goodsInfo, ',', ','),CHAR (13),''),CHAR
+		(10),'') as goodsInfo,
+		if(isnull(c.bindPk),g.salePrice,b.bindProductPrice) as price,
+		g.*,
+		c.pk as cartPk,
+		c.boxes AS boxes,
+		c.weight AS weight,
+		c.price AS
+		increasePrice,
+		c.bindPk ,
+		g.tareWeight,
+		<!-- g.salePrice as price, -->
+		c.supplierName,
+		c.supplierPk
+		FROM
+		b2b_cart c
+		LEFT
+		JOIN b2b_goods g ON g.PK
+		= c.goodsPk
+		LEFT JOIN b2b_bind b on c.bindPk =b.pk
+		WHERE
+		c.pk in
+		<foreach item="item" index="index" collection="pk" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+
+	</select>
+
+
+	<delete id="delByGoodsPk">
+		DELETE FROM b2b_cart WHERE goodsPk = #{goodsPk}
+	</delete>
+
+
+</mapper>
+

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgCompanyExtDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,name,isDelete,isVisable
+	    ]]>
+    </sql>
+
+    <select id="searchList" resultType="cn.cf.dto.LgCompanyDto" parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM lg_company
+        <include refid="searchGridWhere" />
+    </select>
+
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}			</if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}		</if>
+        </where>
+    </sql>
+
+
+
+
+    <select id="getCompanyByPk" parameterType = "String" resultType = "cn.cf.dto.LgCompanyExtDto">
+        SELECT
+        pk,
+        name,
+        contactsTel AS mobile
+        FROM lg_company
+        WHERE  pk = #{pk}
+    </select>
+
+
+    <!-- 服务器上多一个LgCompany.xml文件，里面包含的方法LgCompanyMapper.xml文件里都有，所以删除LgCompany.xml文件 -->
+
+
+    <select id="searchVaildMobile" resultType="int">
+        select count(1) from lg_member
+        where 1 = 1
+        <if test="pk != null and pk !=''">
+            and companyPk != #{pk}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and mobile = #{mobile}
+        </if>
+    </select>
+
+
+    <update id="updateContacts" parameterType="cn.cf.model.LgCompanyEx">
+        UPDATE lg_member
+        <set>
+            <if test="mobile != null and mobile !=''">
+                mobile = #{mobile},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime},
+            </if>
+        </set>
+        WHERE
+        companyPk = #{pk} and parantPk='-1'
+    </update>
+
+
+    <insert id="insertContacts" useGeneratedKeys="true" keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_member (
+         pk,password,companyPk,companyName,isDelete,insertTime,updateTime,mobile,parantPk,isVisable
+        ) VALUES (
+         #{memberPk},#{password},#{pk},#{name},#{isDelete},#{insertTime},#{updateTime},#{mobile},#{parantPk},#{isVisable}
+        )
+    ]]>
+    </insert>
+
+    <!-- 根据pk查询物流承运商  -->
+    <select id="getLgCompanyByPk" resultType="cn.cf.dto.LgCompanyExtDto">
+        select lg_company.pk,lg_company.name,lg_company.city,lg_company.cityName,
+        lg_company.area,lg_company.areaName,lg_company.insertTime,lg_company.auditTime,
+        lg_company.updateTime,lg_company.isDelete,lg_company.auditStatus,lg_company.isVisable,
+        lg_company.province,lg_company.provinceName,lg_company.contacts,lg_company.contactsTel,
+        lg_company.businessLicense,lg_company.blUrl,lg_company.headPortrait
+        from lg_company
+        where lg_company.pk=#{pk,jdbcType=VARCHAR}
+    </select>
+
+
+
+    <select id="searchPkByName" parameterType = "String" resultType = "cn.cf.dto.LgCompanyExtDto">
+        SELECT *
+        FROM lg_company
+        WHERE  name = #{companyName}
+    </select>
+
+
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(DISTINCT c.`pk`)
+        FROM `lg_company` c
+        LEFT JOIN `lg_member` mb
+        ON c.`pk`=mb.`companyPk`
+        where 1=1 and mb.parantPk='-1'
+        <if test="pk!=null and pk!=''">
+            AND c.pk = #{pk}
+        </if>
+        <if test="name !=null and name !='' ">
+            AND c.name like '%${name}%'
+        </if>
+        <if test="isDelete !=null and isDelete !=''">
+            AND c.isDelete = #{isDelete}
+        </if>
+        <if test="isVisable !=null and isVisable !=''">
+            AND c.isVisable = #{isVisable}
+        </if>
+        <if test="updateStartTime !=null and updateStartTime !=''">
+            AND str_to_date(c.updateTime, '%Y-%m-%d') >= #{updateStartTime}
+        </if>
+        <if test="updateEndTime !=null and updateEndTime !=''">
+            AND str_to_date(c.updateTime, '%Y-%m-%d') &lt;= #{updateEndTime}
+        </if>
+        <if test="mobile !=null and mobile !=''">
+            AND mb.mobile like '%${mobile}%'
+        </if>
+        <if test="isVisable !=null and isVisable !=''">
+            AND c.isVisable = #{isVisable}
+        </if>
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGrid" resultType="cn.cf.dto.LgCompanyExtDto"
+            parameterType="java.util.Map">
+        SELECT
+         c.`pk`,
+          if(${colCompanyName},c.`name`, INSERT (c.`name`, 3, 5, '*****')) as name,
+          if(${colContacts}, c.`contacts`, INSERT (c.`contacts`,  1, 1, '*')) as contacts,
+          if(${colContactsTel},mb.`mobile`, INSERT (mb.`mobile`, 4, 4, '****')) as mobile,
+          if(${colBlurl}, c.`blUrl`,null) as blUrl,
+         c.`updateTime`,
+         c.`isVisable`
+        FROM `lg_company` c
+        LEFT JOIN `lg_member` mb
+        ON c.`pk`=mb.`companyPk`
+        where 1=1 and mb.parantPk='-1'
+        <if test="pk!=null and pk!=''">
+            AND c.pk = #{pk}
+        </if>
+        <if test="name !=null and name !='' ">
+            AND c.name like '%${name}%'
+        </if>
+        <if test="isDelete !=null and isDelete !=''">
+            AND c.isDelete = #{isDelete}
+        </if>
+        <if test="isVisable !=null and isVisable !=''">
+            AND c.isVisable = #{isVisable}
+        </if>
+        <if test="updateStartTime !=null and updateStartTime !=''">
+            AND str_to_date(c.updateTime, '%Y-%m-%d') >= #{updateStartTime}
+        </if>
+        <if test="updateEndTime !=null and updateEndTime !=''">
+            AND str_to_date(c.updateTime, '%Y-%m-%d') &lt;= #{updateEndTime}
+        </if>
+        <if test="mobile !=null and mobile !=''">
+            AND mb.mobile like '%${mobile}%'
+        </if>
+        group by c.pk
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="searchVaildName" resultType="int">
+        select count(1) from lg_company
+        where 1 = 1
+        <if test="pk != null and pk !=''">
+            and pk != #{pk}
+        </if>
+        <if test="name != null and name != ''">
+            and name = #{name}
+        </if>
+    </select>
+
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+        <![CDATA[
+        INSERT INTO lg_company (
+         pk, name, isDelete,  insertTime, updateTime,   contacts, contactsTel, blUrl,  isVisable
+        ) VALUES (
+         #{pk}, #{name}, #{isDelete},  #{insertTime}, #{updateTime}, #{contacts}, #{mobile}, #{blUrl},  #{isVisable}
+        )
+    ]]>
+    </insert>
+    
+    
+    <update id="updateEx" parameterType="cn.cf.model.LgCompanyEx">
+		UPDATE lg_company
+		<set>
+			<if test="name != null and name !=''">
+				name = #{name},
+			</if>
+			<if test="isDelete != null and isDelete !=''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="contacts != null and contacts !=''">
+				contacts = #{contacts},
+			</if>
+			<if test="mobile != null and mobile !=''">
+				contactsTel = #{mobile},
+			</if>
+			<if test="blUrl != null and blUrl !=''">
+				blUrl = #{blUrl},
+			</if>
+			<if test="isVisable != null and isVisable !=''">
+				isVisable = #{isVisable},
+			</if>
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+    
+    
+
+
+</mapper>
+

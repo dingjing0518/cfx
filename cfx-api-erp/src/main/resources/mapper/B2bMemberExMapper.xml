@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,mobile,password,companyPk,companyName,insertTime,isDelete,auditStatus,isVisable,rolePk,auditTime,auditPk,updateTime,registerSource,headPortrait,employeeName,employeeNumber,parentPk,invitationCode
+	    ]]>
+	</sql>
+
+	 <select id="getByEmployeeInfo" resultType="cn.cf.dto.B2bMemberDto">
+ 
+ select 
+ 
+  <include refid="columns" />
+  from 
+  b2b_member
+  
+  where 1=1 and 
+  
+  employeeNumber=#{employeeNumber} and employeeName=#{employeeName}
+ <if test="companyPk != null">
+ 	and companyPk = #{companyPk}
+ </if>
+ </select>
+ 
+ 	 <select id="getByEmployeeByCompany" resultType="cn.cf.dto.B2bMemberDto">
+ 
+ select 
+ 
+  m.*
+  from 
+  b2b_member  m left join
+  b2b_company c on m.companyPk = c.pk
+  
+  where  
+  
+  m.employeeNumber=#{employeeNumber} and m.employeeName=#{employeeName}
+  and (c.pk = #{companyPk} or c.parentPk = #{companyPk})	
+ </select>
+</mapper>
+

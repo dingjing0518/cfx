@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditGoodsExtDao">
+
+	<sql id="columns">
+	    <![CDATA[
+		pk,creditPk,companyPk,companyName,economicsGoodsPk,economicsGoodsName,goodsType,creditStartTime,creditEndTime,creditInsertTime,creditAuditTime,platformAmount,suggestAmount,pledgeAmount,pledgeUsedAmount,status,totalRate,bankRate,term,sevenRate,bankPk,bank,bankAccountNumber,isVisable
+	    ]]>
+	</sql>
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+            SELECT count(*) FROM `b2b_credit_goods`   JOIN  `b2b_credit`
+            ON `b2b_credit_goods`.`creditPk`=`b2b_credit`.`pk`
+        <where>
+            <if test="bankAccountNumber!=null and bankAccountNumber!=''">
+                AND b2b_credit.bankAccountNumber = #{bankAccountNumber}			</if>
+            <if test="companyName !=null and companyName !='' ">
+                AND b2b_credit.companyName like '%${companyName}%'		</if>
+            <if test="companyPk !=null and companyPk !=''">
+                AND b2b_credit.companyPk = #{companyPk}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+      
+            <if test="status !=null and status !=''">
+                AND b2b_credit_goods.status = #{status}			</if>
+                  <if test="creditPk !=null and creditPk !=''">
+                AND b2b_credit_goods.creditPk = #{creditPk}			</if>
+        </where>
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGrid" resultType="cn.cf.dto.B2bCreditGoodsExtDto"
+            parameterType="java.util.Map">
+	    SELECT
+			`b2b_credit_goods`.`pk`,
+			`b2b_credit`.companyPk,
+			`b2b_credit`.companyName,
+			`b2b_credit`.`creditContacts`,
+			`b2b_credit`.`financeContacts`,
+			`b2b_credit_goods`.`economicsGoodsName`,
+			`b2b_credit_goods`.`suggestAmount`,
+			`b2b_credit_goods`.`platformAmount`,
+			`b2b_credit_goods`.`pledgeUsedAmount`,
+			`b2b_credit_goods`.`pledgeAmount`,
+			`b2b_credit_goods`.`status`,
+			`b2b_credit_goods`.goodsType,
+			`b2b_credit_goods`.totalRate,
+			`b2b_credit_goods`.bankRate,
+			`b2b_credit_goods`.term,
+			`b2b_credit_goods`.sevenRate,
+			b2b_credit_goods.bank,
+			b2b_credit_goods.isVisable,
+			DATE_FORMAT(`b2b_credit_goods`.`creditStartTime`,'%Y-%m-%d') as creditStartTime,
+			DATE_FORMAT(`b2b_credit_goods`.`creditEndTime`,'%Y-%m-%d')as creditEndTime,
+			DATE_FORMAT(b2b_economics_bank_company.creditEndTime,'%Y-%m-%d') AS bankCreditEndTime,
+			DATE_FORMAT(b2b_economics_bank_company.creditStartTime,'%Y-%m-%d') AS bankCreditStartTime,
+			b2b_economics_bank_company.contractAmount  as bankContractAmount,
+			b2b_economics_bank_company.availableAmount as bankAvailableAmount,
+			b2b_economics_bank_company.pk as economicsBankCompanyPk
+		FROM 
+			`b2b_credit_goods`
+	left	JOIN `b2b_credit` ON `b2b_credit_goods`.`creditPk` = `b2b_credit`.`pk`
+	left	JOIN b2b_economics_bank_company  ON
+		( b2b_economics_bank_company.companyPk = b2b_credit_goods.companyPk 
+		AND  b2b_economics_bank_company.type = b2b_credit_goods.goodsType
+		AND b2b_economics_bank_company.bankPk = `b2b_credit_goods`.bankPk)
+
+        <where>
+            <if test="bankAccountNumber!=null and bankAccountNumber!=''">
+                AND b2b_credit.bankAccountNumber = #{bankAccountNumber}			</if>
+            <if test="companyName !=null and companyName !='' ">
+                AND b2b_credit.companyName like '%${name}%'		</if>
+            <if test="companyPk !=null and companyPk !=''">
+                AND b2b_credit.companyPk = #{companyPk}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+            <if test="status !=null and status !=''">
+                AND b2b_credit_goods.status = #{status}			</if>
+              <if test="creditPk !=null and creditPk !=''">
+                AND b2b_credit_goods.creditPk = #{creditPk}			</if>
+        </where>
+
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchList" resultType="cn.cf.dto.B2bCreditGoodsExtDto"
+            parameterType="java.util.Map">
+        SELECT `b2b_credit_goods`.`pk`,`b2b_credit`.companyPk, `b2b_credit`.companyName,`b2b_credit`.`creditContacts`,`b2b_credit`.`creditContactsTel`,`b2b_credit`.`bankAccountNumber`,
+        `b2b_credit`.`financeContacts`,`b2b_credit_goods`.`economicsGoodsName`,`b2b_credit_goods`.`suggestAmount`,`b2b_credit_goods`.`platformAmount`,`b2b_credit_goods`.`pledgeUsedAmount`,`b2b_credit_goods`.`pledgeAmount`,`b2b_credit_goods`.`status`,
+       `b2b_credit_goods`.`creditStartTime`,  `b2b_credit_goods`.`creditEndTime`
+        FROM `b2b_credit_goods`   JOIN  `b2b_credit`
+        ON `b2b_credit_goods`.`creditPk`=`b2b_credit`.`pk`
+        <where>
+            <if test="bankAccountNumber!=null and bankAccountNumber!=''">
+                AND b2b_credit.bankAccountNumber = #{bankAccountNumber}			</if>
+            <if test="companyName !=null and companyName !='' ">
+                AND b2b_credit.companyName like '%${name}%'		</if>
+            <if test="companyPk !=null and companyPk !='' ">
+                AND b2b_credit.companyPk = #{companyPk}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+            <if test="financeContacts !=null and financeContacts !=''">
+                AND b2b_credit.financeContacts = #{financeContacts}			</if>
+            <if test="status !=null and status !=''">
+                AND b2b_credit_goods.status = #{status}			</if>
+        </where>
+    </select>
+
+    <update id="updatePlatformAmount" parameterType="cn.cf.dto.B2bCreditGoodsExtDto">
+        UPDATE b2b_credit_goods
+        <set>
+                platformAmount = #{platformAmount} ,
+                creditEndTime = #{creditEndTime} ,
+                creditStartTime = #{creditStartTime} ,
+                totalRate = #{totalRate},
+                bankRate = #{bankRate},
+                term = #{term},
+                sevenRate = #{sevenRate}
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+
+
+
+<delete id="deleteByCompanyPk">
+    delete from b2b_credit_goods where companyPk=#{companyPk}
+</delete>
+
+
+
+<delete id="deleteByPk">
+    delete from b2b_credit_goods where pk=#{pk}
+</delete>
+
+
+ 	<select id="searchCreditGoodsCount" parameterType="java.util.Map"
+            resultType="int">
+		<!--  select count(*) from (
+		select a.companyPk,a.companyName,a.applyTime,a.assidirName,a.bankName,GROUP_CONCAT(b.`name`)as productNames,a.`status`,a.contactsTel,a.contacts from b2b_credit_goods  a JOIN
+		b2b_economics_goods b
+		on a.economicsGoodsPk=b.pk
+		group by companyPk)t
+		where  status=#{status} -->
+		
+		
+		
+		select count(*) from (
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					a.companyPk,
+					a.companyName,
+					GROUP_CONCAT(b.`name`) AS productNames,
+					a.creditInsertTime,
+					a.`status`
+				FROM
+					b2b_credit_goods a
+				JOIN b2b_economics_goods b ON a.economicsGoodsPk = b.pk
+				GROUP BY
+					companyPk
+			) t
+		WHERE
+			STATUS = #{status})m ,b2b_credit n
+		where m.companyPk=n.companyPk
+
+    </select>
+    
+    
+     <select id="searchCreditGoodsGridExt" parameterType="java.util.Map"
+            resultType="cn.cf.dto.B2bCreditGoodsDtoExt">
+         
+		<!-- select * from (
+		select a.companyPk,a.companyName,a.applyTime,a.assidirName,a.bankName,GROUP_CONCAT(b.`name`)as productNames,a.`status`,a.contactsTel,a.contacts,a.creditInsertTime,a.processInstanceId from b2b_credit_goods  a JOIN
+		b2b_economics_goods b
+		on a.economicsGoodsPk=b.pk
+		group by companyPk)t
+		where status=#{status} -->
+		
+		select m.companyPk,m.productNames,m.creditInsertTime,m.status,DATE_FORMAT(n.creditAuditTime,'%Y-%m-%d %T') as creditAuditTime,n.`companyName` ,n.bank as bankName,n.processInstanceId as processInstanceId,n.creditContacts as contacts,
+		
+		n.creditContactsTel
+		as contactsTel,n.financeContacts as assidirName,DATE_FORMAT(n.creditInsertTime,'%Y-%m-%d %T') as applyTime from (
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					a.companyPk,
+					a.companyName,
+					GROUP_CONCAT(b.`name`) AS productNames,
+		      DATE_FORMAT(a.creditInsertTime,'%Y-%m-%d %T')as creditInsertTime,
+					a.`status`
+				FROM
+					b2b_credit_goods a
+				JOIN b2b_economics_goods b ON a.economicsGoodsPk = b.pk
+				GROUP BY
+					companyPk
+			) t
+		WHERE
+			STATUS = #{status})m ,b2b_credit n
+		where m.companyPk=n.companyPk
+		
+		<if test="orderName != null">
+					order by ${orderName} ${orderType} 
+				</if>
+		<if test="limit != null">
+					limit  #{start}, #{limit}
+		</if>
+    </select>
+    
+    
+        
+     <select id="getByCondition" parameterType="java.util.Map"
+            resultType="cn.cf.model.B2bCreditGoods">
+         
+           select * from b2b_credit_goods
+           
+           where 1=1 
+           
+           <if test="companyPk != null and companyPk!=''">
+			   and companyPk=#{companyPk}
+		    </if>
+		    
+		     <if test="economicsGoodsPk != null and economicsGoodsPk!=''">
+			   and economicsGoodsPk=#{economicsGoodsPk}
+		    </if>
+          limit 0,1
+    </select>
+
+
+	<update id="updateB2bCreditGoods" parameterType="cn.cf.model.B2bCreditGoods">
+	UPDATE b2b_credit_goods SET
+		suggestAmount= #{suggestAmount}
+		WHERE
+		pk = #{pk}  	    
+	</update>
+
+	<update id = "updateCreditGoodsStatus"  parameterType="java.util.Map">
+		UPDATE b2b_credit_goods SET
+				status = #{creditStatus}
+			WHERE
+			companyPk = #{companyPk}  	
+	</update>
+
+ 	<select id="searchListByCreditPk" parameterType="java.util.Map"
+            resultType="cn.cf.dto.B2bCreditGoodsDto">
+         
+           select * from b2b_credit_goods
+           where creditStartTime is not null
+           <if test="creditPk != null and creditPk != ''">
+            and creditPk = #{creditPk}
+           </if>
+           <if test="creditStartTime != null and creditStartTime != ''">
+				AND str_to_date(creditStartTime,'%Y-%m-%d') &lt; #{creditStartTime}			
+			</if>
+    </select>
+
+
+	<select id = "searchCreditGoodsByCreditPk"   parameterType="java.util.Map"  resultType="cn.cf.dto.B2bCreditGoodsDto">
+		SELECT
+			bankPk,
+			bank,
+			GROUP_CONCAT(economicsGoodsName," ") AS economicsGoodsName,
+			bankAccountNumber
+		FROM
+			b2b_credit_goods
+		WHERE
+			creditPk = #{creditPk}
+		GROUP BY bankPk
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_credit_goods (
+         pk, creditPk, companyPk, companyName, economicsGoodsPk, economicsGoodsName, 
+         goodsType, creditStartTime, creditEndTime, creditInsertTime, creditAuditTime,
+          platformAmount, suggestAmount, pledgeAmount, pledgeUsedAmount, 
+          status, totalRate, bankRate, term, sevenRate, bankPk, bank, bankAccountNumber,isVisable
+        ) VALUES (
+         #{pk}, #{creditPk}, #{companyPk}, #{companyName}, #{economicsGoodsPk}, #{economicsGoodsName},
+         #{goodsType}, #{creditStartTime}, #{creditEndTime}, #{creditInsertTime}, #{creditAuditTime},
+        #{platformAmount}, #{suggestAmount}, #{pledgeAmount}, #{pledgeUsedAmount},
+         #{status}, #{totalRate}, #{bankRate}, #{term}, #{sevenRate}, #{bankPk}, #{bank}, #{bankAccountNumber} ,1     
+        )
+    ]]>
+	</insert>
+	
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bCreditGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		  *
+		FROM b2b_credit_goods where companyPk = #{companyPk}	
+	</select>
+	
+		<update id = "updateCreditIsVisable"  parameterType="cn.cf.dto.B2bCreditGoodsDto">
+		UPDATE b2b_credit_goods SET
+		<if test="isVisable != null" >
+				isVisable = #{isVisable}
+		</if>
+			WHERE
+			pk = #{pk}  	
+	</update>
+	
+	<select id="getByPk" resultType="cn.cf.dto.B2bCreditGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_goods where pk = #{pk}	</select>
+		
+		
+		<select id="getByMap" parameterType="java.util.Map"
+            resultType="cn.cf.dto.B2bCreditGoodsDto">
+           select * from b2b_credit_goods
+           where  1=1
+           <if test="creditPk != null and creditPk != ''">
+            	and creditPk = #{creditPk}
+           </if>
+           <if test="economicsGoodsPk != null and economicsGoodsPk != ''">
+				AND economicsGoodsPk = #{economicsGoodsPk}			
+			</if>
+			 <if test="bankPk != null and bankPk != ''">
+				AND bankPk = #{bankPk}			
+			</if>
+			
+    </select>
+	
+</mapper>
+

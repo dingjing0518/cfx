@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderGoodsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,weight,boxes,originalPrice,presentPrice,originalFreight,presentFreight,originalTotalFreight,presentTotalFreight,weightShipped,boxesShipped,orderStatus,childOrderNumber,logisticsPk,logisticsStepInfoPk,afterBoxes,afterWeight,logisticsCarrierPk,logisticsCarrierName,goodsType,goodsInfo,childContractNo
+	    ]]>
+	</sql>
+
+	<select id="getByOrderNumberEx" resultType="cn.cf.dto.B2bOrderGoodsDtoEx"
+		parameterType="java.lang.String">
+		SELECT og.*,g.tareWeight,g.isNewProduct,g.type as goodsType,
+		<![CDATA[ if(og.originalPrice - og.presentPrice<0,0,og.originalPrice - og.presentPrice) as discountPrice ]]> 
+		FROM b2b_order_goods og left join b2b_goods g on og.goodsPk = g.pk
+		where orderNumber = #{orderNumber}
+	</select>
+
+	<update id="updateOrderGoods" parameterType="cn.cf.model.B2bOrderGoods">
+		UPDATE b2b_order_goods
+		<set>
+			<if test="orderStatus != null">
+				orderStatus=#{orderStatus},
+			</if>
+			<if test="presentPrice != null">
+				presentPrice =#{presentPrice},
+			</if>
+			<if test="presentFreight != null">
+				presentFreight = #{presentFreight},
+			</if>
+			<if test="presentTotalFreight != null">
+				presentTotalFreight = #{presentTotalFreight},
+			</if>
+			<if test="afterBoxes != null">
+				afterBoxes =#{afterBoxes},
+			</if>
+			<if test="afterWeight != null">
+				afterWeight =#{afterWeight},
+			</if>
+			<if test="boxesShipped !=null">
+				boxesShipped =#{boxesShipped},
+			</if>
+			<if test="weightShipped !=null">
+				weightShipped =#{weightShipped},
+			</if>
+			<if test="goodsInfo !=null">
+				goodsInfo =#{goodsInfo},
+			</if>
+			<if test="otherDiscount !=null">
+				otherDiscount =#{otherDiscount},
+			</if>
+		</set>
+		WHERE childOrderNumber = #{childOrderNumber}
+	</update>
+	
+			
+	<select id="getByGoodsOrderNumber" resultType="cn.cf.dto.B2bOrderGoodsDtoEx"
+		parameterType="java.lang.String">
+		SELECT *
+		from b2b_order_goods 
+		where orderStatus != -1 and orderNumber = #{orderNumber}
+	</select>
+	
+	
+</mapper>
+

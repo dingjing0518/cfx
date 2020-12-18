@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.MarketingOrderMemberDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderPk,type,storePk,purchaserPk,purProvince,purCity,purArea,purAddress,stProvince,stCity,stArea,stAddress
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderPk">
+    <![CDATA[
+        INSERT INTO marketing_order_member (
+         orderPk, type, storePk, purchaserPk, purProvince, purCity, purArea, purAddress, stProvince, stCity, stArea, stAddress
+        ) VALUES (
+         #{orderPk}, #{type}, #{storePk}, #{purchaserPk}, #{purProvince}, #{purCity}, #{purArea}, #{purAddress}, #{stProvince}, #{stCity}, #{stArea}, #{stAddress}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.MarketingOrderMember">
+    <![CDATA[
+        UPDATE marketing_order_member SET
+	        type = #{type} , storePk = #{storePk} , purchaserPk = #{purchaserPk} , purProvince = #{purProvince} , purCity = #{purCity} , purArea = #{purArea} , purAddress = #{purAddress} , stProvince = #{stProvince} , stCity = #{stCity} , stArea = #{stArea} , stAddress = #{stAddress}  
+        WHERE 
+        	orderPk = #{orderPk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.MarketingOrderMember">
+    <![CDATA[
+        DELETE FROM marketing_order_member WHERE
+        orderPk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderPk)">
+				AND orderPk = #{orderPk}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purProvince)">
+				AND purProvince = #{purProvince}			</if>
+			<if test="@Ognl@isNotEmpty(purCity)">
+				AND purCity = #{purCity}			</if>
+			<if test="@Ognl@isNotEmpty(purArea)">
+				AND purArea = #{purArea}			</if>
+			<if test="@Ognl@isNotEmpty(purAddress)">
+				AND purAddress = #{purAddress}			</if>
+			<if test="@Ognl@isNotEmpty(stProvince)">
+				AND stProvince = #{stProvince}			</if>
+			<if test="@Ognl@isNotEmpty(stCity)">
+				AND stCity = #{stCity}			</if>
+			<if test="@Ognl@isNotEmpty(stArea)">
+				AND stArea = #{stArea}			</if>
+			<if test="@Ognl@isNotEmpty(stAddress)">
+				AND stAddress = #{stAddress}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM marketing_order_member
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderPk" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where orderPk = #{orderPk}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where storePk = #{storePk}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurProvince" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where purProvince = #{purProvince}	</select>
+	<select id="getByPurCity" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where purCity = #{purCity}	</select>
+	<select id="getByPurArea" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where purArea = #{purArea}	</select>
+	<select id="getByPurAddress" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where purAddress = #{purAddress}	</select>
+	<select id="getByStProvince" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where stProvince = #{stProvince}	</select>
+	<select id="getByStCity" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where stCity = #{stCity}	</select>
+	<select id="getByStArea" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where stArea = #{stArea}	</select>
+	<select id="getByStAddress" resultType="cn.cf.dto.MarketingOrderMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM marketing_order_member where stAddress = #{stAddress}	</select>
+</mapper>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgLinePriceDaoEx">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,linePk,fromWeight,toWeight,basisPrice,salePrice,isDelete,insertTime,updateTime
+	    ]]>
+    </sql>
+
+     <select id="selectPricesByLinePk" resultType="cn.cf.dto.LgLinePriceDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM lg_line_price
+        where lg_line_price.linePk=#{linePk} and lg_line_price.isDelete=1
+    </select>
+    
+    
+    
+</mapper>
+

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillInventoryDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,orderNumber,billNumber,status,payStatus,transfer,billCode,amount,startDate,endDate,drawer,drawerCode,payee,payeeCode,acceptor,acceptorCode,acceptorAccount,acceptorBankNo,discountRate,discountInterest,discountAmount
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_bill_inventory (
+         pk, orderNumber, billNumber, status, payStatus, transfer, billCode, amount, startDate, endDate, drawer, drawerCode, payee, payeeCode, acceptor, acceptorCode, acceptorAccount, acceptorBankNo, discountRate, discountInterest, discountAmount
+        ) VALUES (
+         #{pk}, #{orderNumber}, #{billNumber}, #{status}, #{payStatus}, #{transfer}, #{billCode}, #{amount}, #{startDate}, #{endDate}, #{drawer}, #{drawerCode}, #{payee}, #{payeeCode}, #{acceptor}, #{acceptorCode}, #{acceptorAccount}, #{acceptorBankNo}, #{discountRate}, #{discountInterest}, #{discountAmount}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bBillInventory">
+    <![CDATA[
+        UPDATE b2b_bill_inventory SET
+	        orderNumber = #{orderNumber} , billNumber = #{billNumber} , status = #{status} , payStatus = #{payStatus} , transfer = #{transfer} , billCode = #{billCode} , amount = #{amount} , startDate = #{startDate} , endDate = #{endDate} , drawer = #{drawer} , drawerCode = #{drawerCode} , payee = #{payee} , payeeCode = #{payeeCode} , acceptor = #{acceptor} , acceptorCode = #{acceptorCode} , acceptorAccount = #{acceptorAccount} , acceptorBankNo = #{acceptorBankNo} , discountRate = #{discountRate} , discountInterest = #{discountInterest} , discountAmount = #{discountAmount}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bBillInventory">
+    <![CDATA[
+        DELETE FROM b2b_bill_inventory WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(billNumber)">
+				AND billNumber = #{billNumber}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(payStatus)">
+				AND payStatus = #{payStatus}			</if>
+			<if test="@Ognl@isNotEmpty(transfer)">
+				AND transfer = #{transfer}			</if>
+			<if test="@Ognl@isNotEmpty(billCode)">
+				AND billCode = #{billCode}			</if>
+			<if test="@Ognl@isNotEmpty(amount)">
+				AND amount = #{amount}			</if>
+			<if test="@Ognl@isNotEmpty(startDateBegin)">
+				AND startDate >= #{startDateBegin}			</if>
+			<if test="@Ognl@isNotEmpty(startDateEnd)">
+				AND startDate &lt;= #{startDateEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endDateBegin)">
+				AND endDate >= #{endDateBegin}			</if>
+			<if test="@Ognl@isNotEmpty(endDateEnd)">
+				AND endDate &lt;= #{endDateEnd}			</if>
+			<if test="@Ognl@isNotEmpty(drawer)">
+				AND drawer = #{drawer}			</if>
+			<if test="@Ognl@isNotEmpty(drawerCode)">
+				AND drawerCode = #{drawerCode}			</if>
+			<if test="@Ognl@isNotEmpty(payee)">
+				AND payee = #{payee}			</if>
+			<if test="@Ognl@isNotEmpty(payeeCode)">
+				AND payeeCode = #{payeeCode}			</if>
+			<if test="@Ognl@isNotEmpty(acceptor)">
+				AND acceptor = #{acceptor}			</if>
+			<if test="@Ognl@isNotEmpty(acceptorCode)">
+				AND acceptorCode = #{acceptorCode}			</if>
+			<if test="@Ognl@isNotEmpty(acceptorAccount)">
+				AND acceptorAccount = #{acceptorAccount}			</if>
+			<if test="@Ognl@isNotEmpty(acceptorBankNo)">
+				AND acceptorBankNo = #{acceptorBankNo}			</if>
+			<if test="@Ognl@isNotEmpty(discountRate)">
+				AND discountRate = #{discountRate}			</if>
+			<if test="@Ognl@isNotEmpty(discountInterest)">
+				AND discountInterest = #{discountInterest}			</if>
+			<if test="@Ognl@isNotEmpty(discountAmount)">
+				AND discountAmount = #{discountAmount}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_bill_inventory
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where pk = #{pk}	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where orderNumber = #{orderNumber}	</select>
+	<select id="getByBillNumber" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where billNumber = #{billNumber}	</select>
+	<select id="getByBillCode" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where billCode = #{billCode}	</select>
+	<select id="getByDrawer" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where drawer = #{drawer}	</select>
+	<select id="getByDrawerCode" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where drawerCode = #{drawerCode}	</select>
+	<select id="getByPayee" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where payee = #{payee}	</select>
+	<select id="getByPayeeCode" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where payeeCode = #{payeeCode}	</select>
+	<select id="getByAcceptor" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where acceptor = #{acceptor}	</select>
+	<select id="getByAcceptorCode" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where acceptorCode = #{acceptorCode}	</select>
+	<select id="getByAcceptorAccount" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where acceptorAccount = #{acceptorAccount}	</select>
+	<select id="getByAcceptorBankNo" resultType="cn.cf.dto.B2bBillInventoryDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_inventory where acceptorBankNo = #{acceptorBankNo}	</select>
+</mapper>
+

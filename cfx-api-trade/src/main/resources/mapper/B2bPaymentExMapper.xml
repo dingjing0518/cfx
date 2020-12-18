@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bPaymentDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isVisable,type,iouNumber
+	    ]]>
+	</sql>
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(iouNumber)">
+				AND iouNumber = #{iouNumber}			</if>
+		</where>
+	</sql>
+	
+	<select id="searchPayment" resultType="cn.cf.dto.B2bPaymentDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+			pk,
+			NAME,
+			isVisable,
+			type
+		FROM b2b_payment
+		<include refid="searchGridWhere" />
+	</select>
+
+</mapper>
+

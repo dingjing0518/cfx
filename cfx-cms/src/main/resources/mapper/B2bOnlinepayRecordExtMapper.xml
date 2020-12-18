@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOnlinepayRecordExtDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,status,serialNumber,purchaserPk,purchaserName,supplierName,supplierPk,orderAmount,insertTime,
+		receivablesAccount,receivablesAccountName,onlinePayGoodsPk,onlinePayGoodsName,shotName
+	    ]]>
+	</sql>
+
+
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber like '%${orderNumber}%'			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND serialNumber = #{serialNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName  like '%${purchaserName}%'			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName  like '%${supplierName}%'		</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND orderAmount = #{orderAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccount)">
+				AND receivablesAccount  like '%${receivablesAccount}%'		</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccountName)">
+				AND receivablesAccountName  like '%${receivablesAccountName}%'			</if>
+			<if test="@Ognl@isNotEmpty(onlinePayGoodsPk)">
+				AND onlinePayGoodsPk = #{onlinePayGoodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(onlinePayGoodsName)">
+				AND onlinePayGoodsName = #{onlinePayGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(shotName)">
+				AND shotName like '%${shotName}%'		</if>
+		</where>
+	</sql>
+
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_onlinepay_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	
+	<select id="searchExtList" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+	</select>
+
+</mapper>
+

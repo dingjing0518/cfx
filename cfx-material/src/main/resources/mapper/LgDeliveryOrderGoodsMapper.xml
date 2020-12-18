@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderGoodsDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,deliveryPk,goodsPk,productName,productPk,varietiesName,seedvarietyName,specName,seriesName,gradeName,gradePk,batchNumber,weight,boxes,orderNumber,tareWeight,originalFreight,presentFreight,goodsName,goodsOriginalFreight,goodsPresentFreight,unit
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_delivery_order_goods (
+         pk, deliveryPk, goodsPk, productName, productPk, varietiesName, seedvarietyName, specName, seriesName, gradeName, gradePk, batchNumber, weight, boxes, orderNumber, tareWeight, originalFreight, presentFreight, goodsName, goodsOriginalFreight, goodsPresentFreight, unit
+        ) VALUES (
+         #{pk}, #{deliveryPk}, #{goodsPk}, #{productName}, #{productPk}, #{varietiesName}, #{seedvarietyName}, #{specName}, #{seriesName}, #{gradeName}, #{gradePk}, #{batchNumber}, #{weight}, #{boxes}, #{orderNumber}, #{tareWeight}, #{originalFreight}, #{presentFreight}, #{goodsName}, #{goodsOriginalFreight}, #{goodsPresentFreight}, #{unit}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgDeliveryOrderGoods">
+    <![CDATA[
+        UPDATE lg_delivery_order_goods SET
+	        deliveryPk = #{deliveryPk} , goodsPk = #{goodsPk} , productName = #{productName} , productPk = #{productPk} , varietiesName = #{varietiesName} , seedvarietyName = #{seedvarietyName} , specName = #{specName} , seriesName = #{seriesName} , gradeName = #{gradeName} , gradePk = #{gradePk} , batchNumber = #{batchNumber} , weight = #{weight} , boxes = #{boxes} , orderNumber = #{orderNumber} , tareWeight = #{tareWeight} , originalFreight = #{originalFreight} , presentFreight = #{presentFreight} , goodsName = #{goodsName} , goodsOriginalFreight = #{goodsOriginalFreight} , goodsPresentFreight = #{goodsPresentFreight} , unit = #{unit}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgDeliveryOrderGoods">
+    <![CDATA[
+        DELETE FROM lg_delivery_order_goods WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(deliveryPk)">
+				AND deliveryPk = #{deliveryPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND varietiesName = #{varietiesName}			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				AND seedvarietyName = #{seedvarietyName}			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND specName = #{specName}			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				AND seriesName = #{seriesName}			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName = #{gradeName}			</if>
+			<if test="@Ognl@isNotEmpty(gradePk)">
+				AND gradePk = #{gradePk}			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				AND batchNumber = #{batchNumber}			</if>
+			<if test="@Ognl@isNotEmpty(weight)">
+				AND weight = #{weight}			</if>
+			<if test="@Ognl@isNotEmpty(boxes)">
+				AND boxes = #{boxes}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(tareWeight)">
+				AND tareWeight = #{tareWeight}			</if>
+			<if test="@Ognl@isNotEmpty(originalFreight)">
+				AND originalFreight = #{originalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(presentFreight)">
+				AND presentFreight = #{presentFreight}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsOriginalFreight)">
+				AND goodsOriginalFreight = #{goodsOriginalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPresentFreight)">
+				AND goodsPresentFreight = #{goodsPresentFreight}			</if>
+			<if test="@Ognl@isNotEmpty(unit)">
+				AND unit = #{unit}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_delivery_order_goods
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where pk = #{pk}	</select>
+	<select id="getByDeliveryPk" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where deliveryPk = #{deliveryPk}	</select>
+	<select id="getByGoodsPk" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where goodsPk = #{goodsPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where productName = #{productName}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where productPk = #{productPk}	</select>
+	<select id="getByVarietiesName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where varietiesName = #{varietiesName}	</select>
+	<select id="getBySeedvarietyName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where seedvarietyName = #{seedvarietyName}	</select>
+	<select id="getBySpecName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where specName = #{specName}	</select>
+	<select id="getBySeriesName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where seriesName = #{seriesName}	</select>
+	<select id="getByGradeName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where gradeName = #{gradeName}	</select>
+	<select id="getByGradePk" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where gradePk = #{gradePk}	</select>
+	<select id="getByBatchNumber" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where batchNumber = #{batchNumber}	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where orderNumber = #{orderNumber}	</select>
+	<select id="getByGoodsName" resultType="cn.cf.dto.LgDeliveryOrderGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order_goods where goodsName = #{goodsName}	</select>
+</mapper>
+

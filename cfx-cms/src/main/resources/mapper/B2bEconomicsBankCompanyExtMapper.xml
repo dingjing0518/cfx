@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsBankCompanyExtDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,companyPk,bankPk,bankName,creditPk,creditAmount,creditStartTime,creditEndTime,customerNumber,contractNumber,contractAmount,availableAmount,amountType
+	    ]]>
+    </sql>
+
+
+    <select id="getBankCompanyByCompanyPk" resultType="cn.cf.model.B2bEconomicsBankCompany"
+            parameterType="java.lang.String">
+        SELECT
+        	<include refid="columns" />
+        FROM b2b_b2b_economics_bank_company where companyPk = #{companyPk}
+    </select>
+
+    <select id="getByCompanyPk" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_economics_bank_company where companyPk = #{companyPk}
+    </select>
+    
+	<delete id="deleteByCompanyPk">
+	    delete from b2b_economics_bank_company where companyPk=#{companyPk}
+	</delete>
+
+    <select id="getEconomicsBankCompanyByMap" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+            parameterType="java.util.Map">
+        SELECT
+        pk,companyPk
+        FROM b2b_economics_bank_company where 1=1
+        <if test="companyPk != null and companyPk != ''">
+            AND companyPk != #{companyPk}
+        </if>
+        <if test="bankPk != null and bankPk != ''">
+            AND bankPk = #{bankPk}
+        </if>
+        <if test="customerNumber != null and customerNumber != ''">
+            AND customerNumber = #{customerNumber}
+        </if>
+    </select>
+
+    <select id="getByCreditPk" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_economics_bank_company where creditPk = #{creditPk}
+    </select>
+
+
+
+    <update id="update" parameterType="cn.cf.model.B2bEconomicsBankCompany">
+        <![CDATA[
+        UPDATE b2b_economics_bank_company SET
+        companyPk = #{companyPk}, bankPk = #{bankPk},bankName = #{bankName}, creditPk = #{creditPk},creditAmount = #{creditAmount},creditStartTime = #{creditStartTime},
+        creditEndTime = #{creditEndTime},customerNumber = #{customerNumber}, contractNumber = #{contractNumber},contractAmount = #{contractAmount},availableAmount = #{availableAmount}
+        WHERE
+        	pk = #{pk}
+    ]]>
+    </update>
+    
+    
+   <insert id="insertEx" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_bank_company (
+         pk, companyPk, bankPk,bankName, creditPk,customerNumber
+        ) VALUES (
+         #{pk}, #{companyPk}, #{bankPk},#{bankName}, #{creditPk},#{customerNumber} )
+    ]]>
+	</insert>
+    
+        <select id="isExist" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+            parameterType="java.util.Map">
+        SELECT *
+        FROM b2b_economics_bank_company where bankPk = #{bankPk} and companyPk=#{companyPk} limit 0,1
+    </select>
+    <update id="updateCustomer">
+    	update b2b_economics_bank_company set customerNumber = #{customerNumber}
+    	where companyPk=#{companyPk}
+    </update>
+    
+    <select id="searchBankApproveAmount" resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		e.pk,e.companyPk,e.bankName,e.bankPk,
+		e.creditAmount,e.creditEndTime,e.creditStartTime,
+		e.customerNumber,ifnull(e.contractAmount,0) as contractAmount,e.availableAmount,e.amountType,e.type
+		,e.contractNumber, c.source
+		FROM
+		b2b_economics_bank_company e
+		LEFT JOIN
+		b2b_credit c ON c.companyPk = e.companyPk and c.isDelete = 1 
+		and c.creditStatus=2
+		WHERE
+		str_to_date(e.creditStartTime,'%Y-%m-%d') = str_to_date(#{creditStartTime},'%Y-%m-%d') 
+		 order by e.bankPk
+	</select>
+
+
+	<select id="countTotalAmount" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto">
+		SELECT
+		sum(ifnull(e.contractAmount,0)) as total, c.source
+		FROM
+		b2b_economics_bank_company e
+		LEFT JOIN b2b_credit c ON c.companyPk = e.companyPk  and c.isDelete = 1 and c.creditStatus=2
+		WHERE
+		e.type = #{type} and e.bankPk = #{bankPk}
+		and str_to_date(#{creditTime},'%Y-%m-%d') between
+		str_to_date(e.creditStartTime,'%Y-%m-%d') and
+		str_to_date(e.creditEndTime,'%Y-%m-%d')
+		and c.source in (1,2,3,4,5)
+		group by source
+	</select>
+	
+
+	<select id="countTotalAmountMonth" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto">
+		SELECT
+		ifnull(sum(e.contractAmount),0) as total, c.source
+		FROM
+		b2b_economics_bank_company e
+		LEFT JOIN b2b_credit c ON c.companyPk =
+		e.companyPk  and c.isDelete = 1 and c.creditStatus=2
+		WHERE
+		e.type = #{type} and e.bankPk = #{bankPk}
+		and str_to_date(e.creditEndTime,'%Y-%m-%d') >=  str_to_date(#{startTime},'%Y-%m-%d')
+		and str_to_date(e.creditStartTime,'%Y-%m-%d') &lt;=  str_to_date(#{endTime},'%Y-%m-%d')
+		and c.source in (1,2,3,4,5)
+		group by source
+	</select>
+	
+	<select id="searchAmountByMonth" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto">
+		SELECT
+		e.pk,e.companyPk,e.bankName,e.bankPk,
+		e.creditAmount,e.creditEndTime,e.creditStartTime,
+		e.customerNumber,ifnull(e.contractAmount,0) as contractAmount,e.availableAmount,e.amountType,e.type
+		,e.contractNumber, c.source
+		FROM
+		b2b_economics_bank_company e
+		LEFT JOIN b2b_credit c ON  c.companyPk = e.companyPk   
+		and c.isDelete = 1 and c.creditStatus = 2
+		WHERE str_to_date(e.creditStartTime,'%Y-%m-%d')
+		between str_to_date( #{startTime},'%Y-%m-%d') and str_to_date(#{endTime},'%Y-%m-%d') order by e.bankPk
+	</select>
+
+	<select id = "getBank"  resultType="cn.cf.dto.B2bEconomicsBankCompanyDto">
+		SELECT
+		e.bankPk 
+		FROM
+		b2b_economics_bank_company e 
+		group by e.bankPk 
+	</select>
+
+
+	<select id="countAvailableAmount" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto">
+		SELECT
+		ifnull(sum(e.availableAmount),0) as total, c.source
+		FROM
+		b2b_economics_bank_company e
+		LEFT JOIN b2b_credit c ON c.companyPk = e.companyPk  and c.isDelete = 1
+		WHERE
+		e.type = #{type} and e.bankPk = #{bankPk}
+			and str_to_date(#{creditTime},'%Y-%m-%d') between
+		str_to_date(e.creditStartTime,'%Y-%m-%d') and
+		str_to_date(e.creditEndTime,'%Y-%m-%d')
+		and c.source in (1,2,3,4,5)
+		group by source
+	</select>
+    
+    <select id="searchListByCreditTime" parameterType="java.util.Map" resultType="cn.cf.dto.B2bEconomicsBankCompanyExtDto">
+    
+    SELECT * FROM b2b_economics_bank_company where 1=1
+    <if test="bankPk != null and bankPk !=''">
+     AND bankPk = #{bankPk} 
+    </if>
+    
+    <if test="companyPk != null and companyPk !=''">
+      AND companyPk = #{companyPk} 
+    </if>
+    <if test="creditStartTime != null and creditStartTime !=''">
+      AND str_to_date(creditStartTime,'%Y-%m-%d') &lt;#{creditStartTime}
+    </if>
+    </select>
+    
+    
+      <select id="updateCreditTime" parameterType="java.util.Map" >
+  		UPDATE b2b_economics_bank_company SET
+       	 	creditStartTime = #{creditStartTime},
+        	creditEndTime = #{creditEndTime},
+			creditAmount = #{creditAmount}
+        WHERE
+        	pk = #{pk}
+   	</select>
+</mapper>

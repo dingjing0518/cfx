@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bPlantDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,storePk,insertTime,isDelete,address,province,provinceName,city,cityName,area,areaName,town,townName,plantCode,storeName,contactsTel,contacts,landline
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_plant (
+         pk, name, storePk, insertTime, isDelete,province,provinceName,city,
+         cityName,area,areaName,town,townName,address, plantCode, storeName,
+         contactsTel,contacts,landline
+        ) VALUES (
+         REPLACE(UUID(),'-',''), #{name}, #{storePk}, now(),1,#{province},#{provinceName},
+         #{city},#{cityName},#{area},#{areaName},#{town},#{townName},
+         #{address}, #{plantCode}, #{storeName},#{contactsTel},#{contacts},#{landline}
+        )
+    ]]>
+	</insert>
+
+	<update id="update">
+	
+	   UPDATE b2b_plant
+	   <set>
+	   <if test="name!=null and name!=''">
+	   name = #{name} , 
+	   </if>
+	   <if test="isDelete>0">
+	       isDelete = #{isDelete} ,
+	   </if>
+	   <if test="address!=null and address!=''">
+	   address = #{address} , 
+	   </if>
+	   <if test="plantCode !=null and plantCode!=''">
+	   plantCode = #{plantCode} ,
+	   </if>
+	   <if test="province !=null and province !=''">
+	   province = #{province} ,
+	   </if>
+	   <if test="provinceName !=null and provinceName !=''">
+	   provinceName = #{provinceName} ,
+	   </if>
+	   <if test="city !=null and city !=''">
+	   city = #{city} ,
+	   </if>
+	   <if test="cityName !=null and cityName !=''">
+	   cityName = #{cityName} ,
+	   </if>
+	   <if test="area !=null">
+	   area = #{area} ,
+	   </if>
+	   <if test="areaName !=null">
+	   areaName = #{areaName} ,
+	   </if>
+	   <if test="town !=null">
+	   town = #{town} ,
+	   </if>
+	   <if test="townName !=null">
+	   townName = #{townName} ,
+	   </if>
+	   <if test="contactsTel !=null">
+	     contactsTel=#{contactsTel},
+	   </if>
+	    <if test="contacts !=null">
+	    contacts=#{contacts},
+	    </if>
+	     <if test="landline !=null">
+	     landline=#{landline}
+	     </if>
+	
+	   </set>
+	  WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bPlant">
+    <![CDATA[
+        DELETE FROM b2b_plant WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="storePk != null">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(plantCode)">
+				AND plantCode = #{plantCode}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(landline)">
+				AND landline = #{landline}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_plant
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where pk = #{pk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where name = #{name}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where storePk = #{storePk}	</select>
+	<select id="getByAddress" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where address = #{address}	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where province = #{province}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where provinceName = #{provinceName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where city = #{city}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where cityName = #{cityName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where area = #{area}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where areaName = #{areaName}	</select>
+	<select id="getByTown" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where town = #{town}	</select>
+	<select id="getByTownName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where townName = #{townName}	</select>
+	<select id="getByPlantCode" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where plantCode = #{plantCode}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where storeName = #{storeName}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where contactsTel = #{contactsTel}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where contacts = #{contacts}	</select>
+	<select id="getByLandline" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where landline = #{landline}	</select>
+</mapper>
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgTrackDetailDaoEx">
+
+	<!-- 根据deliveryPk查询物流轨迹 -->
+	<select id="selectTrackDetailBydeliveryPk" parameterType="Map"
+		resultType="cn.cf.dto.LgTrackDetailDto">
+		select * from lg_track_detail where deliveryPk=#{deliveryPk} order by
+		finishedTime
+	</select>
+
+
+
+<!-- 	<insert id="insert" parameterType="cn.cf.dto.LgTrackDetailDto">
+		insert into lg_lg_track_detail (pk, deliveryPk, orderStatus,
+		stepDetail, finishedTime, insertTime,
+		updateTime)
+		values (#{pk,jdbcType=VARCHAR}, #{deliveryPk,jdbcType=VARCHAR},
+		#{orderStatus,jdbcType=TINYINT},
+		#{stepDetail,jdbcType=VARCHAR}, #{finishedTime,jdbcType=TIMESTAMP}, #{insertTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP})
+	</insert>
+
+
+
+	ERP根据 "订单编号或发货单号"来查询订单物流记录
+	<select id="selectTrackDetailForErp" parameterType="cn.cf.dto.OrderNumber2Dto"
+		resultType="cn.cf.dto.LgTrackDetailDtoForErp">
+		SELECT
+		lg_lg_track_detail.pk,lg_delivery_order.`orderPk`,lg_delivery_order.`deliveryNumber`,
+		lg_delivery_order.`orderNumber2`,
+		lg_lg_track_detail.`stepDetail`,lg_lg_track_detail.`finishedTime`
+		FROM lg_delivery_order
+		INNER JOIN lg_lg_track_detail ON
+		lg_lg_track_detail.`deliveryPk`=lg_delivery_order.`pk`
+		WHERE (lg_delivery_order.`orderPk` LIKE '%${orderPK}%'
+		OR lg_delivery_order.`deliveryNumber` LIKE '%${orderPK}%'
+		OR lg_delivery_order.orderNumber2 LIKE '%${orderPK}%')
+		ORDER BY lg_lg_track_detail.`finishedTime`
+	</select> -->
+
+    
+</mapper>
+

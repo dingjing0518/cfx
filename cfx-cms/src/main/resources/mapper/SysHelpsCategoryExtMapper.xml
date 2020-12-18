@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysHelpsCategoryExtDao">
+
+
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,isDelete,isVisable,sort,showType
+	    ]]>
+	</sql>
+
+	<update id="deleteHelpsCategory" parameterType="java.lang.String">
+
+		UPDATE sys_helps_category
+		<set>
+			isDelete = 2
+		</set>
+		where pk = #{pk}
+	</update>
+
+	<select id="getByMaxPk" resultType="int">
+		select MAX(CAST(pk AS SIGNED)) from sys_helps_category
+	</select>
+	
+	<select id="getAll" resultType="cn.cf.dto.SysHelpsCategoryDto">
+		SELECT
+		<include refid="columns" />
+		FROM sys_helps_category where isDelete = 1 and isVisable = 1
+	</select>
+	
+	<select id="isExistCategoryName" resultType="cn.cf.dto.SysHelpsCategoryDto" parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_helps_category where isDelete = 1 and pk != #{pk} and name = #{name}
+	</select>
+</mapper>
+

@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsGoodsExDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,url,insertTime,updateTime,status,isDelete,goodsType,proportion,qualityValue,storeInfo
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsType)">
+				AND pk = #{goodsType}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name LIKE '%${name}%'		</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(upStartTime)">
+				AND updateTime >= #{upStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(upEndTime)">
+				AND updateTime &lt;= #{upEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+	<select id="countEcGoodsGrid" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_economics_goods
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchEcGoodsGrid" resultType="cn.cf.dto.B2bEconomicsGoodsExDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_goods
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="isRepeat" resultType="int"
+		parameterType="cn.cf.dto.B2bEconomicsGoodsExDto">
+		SELECT
+		count(1)
+		FROM b2b_economics_goods
+		where  	 name = #{name}	and isDelete = 1 
+		<if test="@Ognl@isNotEmpty(pk)" >
+			and pk!=#{pk}
+		</if>
+		
+	</select>
+	
+		<insert id="insertEx" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_goods (
+			pk,name,url,insertTime,updateTime,status,isDelete,goodsType,proportion,qualityValue,storeInfo
+        ) VALUES (
+         #{pk}, #{name}, #{url}, now(),now(), 1, 1 ,#{goodsType},#{proportion} ,#{qualityValue},#{storeInfo}
+        )
+    ]]>
+	</insert>
+
+	<update id="updateEx" parameterType="cn.cf.dto.B2bEconomicsGoodsExDto">
+        UPDATE b2b_economics_goods SET
+        	<if test="@Ognl@isNotEmpty(name)">
+	       		 name = #{name} , 
+	        </if>
+         	 <if test="@Ognl@isNotEmpty(url)">
+          		url = #{url} , 
+          	</if>
+          	 <if test="@Ognl@isNotEmpty(status)">
+          		status = #{status} , 
+          	</if>
+          	 <if test="@Ognl@isNotEmpty(isDelete)">
+          		isDelete = #{isDelete},  
+          	</if>
+          	<if test="@Ognl@isNotEmpty(goodsType)">
+          	goodsType = #{goodsType},
+          	</if>
+          	<if test="@Ognl@isNotEmpty(proportion)">
+          	proportion = #{proportion},
+          	</if>
+          	<if test="storeInfo != null">
+          	storeInfo = #{storeInfo},
+          	</if>
+          	updateTime = now()
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+		
+	<select id = "getGoodsType"  resultType="cn.cf.dto.B2bEconomicsGoodsDto"   parameterType="java.util.List">
+	SELECT goodsType FROM b2b_economics_goods
+	 WHERE
+	 <foreach collection="list" separator="or" item="i" index="index">
+			pk = #{i.pk}
+		</foreach>
+	  GROUP BY goodsType
+	</select>
+
+	<select id="getEconomicsGoodsByPk" resultType="cn.cf.dto.B2bEconomicsGoodsDto"   parameterType="java.util.Map">
+	SELECT
+		<include refid="columns" />
+		FROM b2b_economics_goods
+		where 1=1
+		<if test="economicsGoodsType != null and economicsGoodsType != '' ">
+			AND goodsType = #{economicsGoodsType}
+		</if>
+		<if test="economicsGoodsName != null and economicsGoodsName != '' ">
+			AND `name` = #{economicsGoodsName}			</if>
+	</select>
+
+	<select id="countPurchaserSalesAmount" resultType="double" parameterType="java.lang.String">
+		SELECT
+		IFNULL(SUM(amount),0)/10000 AS allAmount
+		FROM
+		(
+		SELECT
+		SUM(actualAmount) AS amount
+		FROM
+		b2b_order
+		WHERE
+		DATE_FORMAT(receivablesTime, '%Y-%m') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 12 MONTH),'%Y-%m')
+		AND
+		DATE_FORMAT(receivablesTime, '%Y-%m') &lt;= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y-%m')
+		AND
+		orderStatus > 2
+		AND orderClassify != 2
+		AND
+		purchaserPk = #{purchaserPk}
+		UNION ALL
+		SELECT
+		SUM(totalAmount) AS amount
+		FROM
+		b2b_contract
+		WHERE
+		DATE_FORMAT(receivablesTime, '%Y-%m') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 12 MONTH),'%Y-%m')
+		AND
+		DATE_FORMAT(receivablesTime, '%Y-%m') &lt;= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y-%m')
+		AND
+		contractStatus> 2
+		AND
+		purchaserPk = #{purchaserPk}
+		) tab;
+	</select>
+	<select id="rawPurchaseIncrePerList" resultType="double" parameterType="java.lang.String">
+		SELECT
+		   ROUND(IFNULL(SUM(actualAmount),0),2)/10000 as amount
+		FROM b2b_order
+		WHERE
+		  DATE_FORMAT(receivablesTime, '%Y') = DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 2 YEAR),'%Y')
+		  AND
+		orderStatus > 2
+			AND purchaserPk = #{purchaserPk}
+		UNION ALL
+		SELECT ROUND(IFNULL(SUM(actualAmount),0),2) AS amount
+		FROM b2b_order
+		WHERE
+		  DATE_FORMAT(receivablesTime, '%Y') = DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 YEAR),'%Y')
+		  AND
+		orderStatus > 2
+		AND purchaserPk = #{purchaserPk}
+	</select>
+
+	<select id="addUpOnlineSalesNumbers" resultType="int" parameterType="java.util.Map">
+		SELECT
+	count(pk) AS pk
+	FROM
+	(
+		SELECT
+			orderNumber AS pk
+		FROM
+			b2b_order
+		WHERE
+			DATE_FORMAT(receivablesTime, '%Y-%m') = DATE_FORMAT(
+				DATE_SUB(NOW(), INTERVAL #{month} MONTH),
+				'%Y-%m'
+			)
+		AND orderStatus IN (3, 4, 5, 6)
+		AND orderClassify != 2
+		AND purchaserPk = #{purchaserPk}
+		UNION ALL
+			SELECT
+				contractNo AS pk
+			FROM
+				b2b_contract
+			WHERE
+				DATE_FORMAT(receivablesTime, '%Y-%m') = DATE_FORMAT(
+					DATE_SUB(NOW(), INTERVAL #{month} MONTH),
+					'%Y-%m'
+				)
+			AND contractStatus IN (3, 4, 5, 6)
+			AND purchaserPk = #{purchaserPk}
+	) tab;
+
+	</select>
+
+	<select id="countStoreSalesNumbers" resultType="int" parameterType="java.lang.String">
+		SELECT
+		COUNT(DISTINCT storePk)
+		FROM
+		(
+		SELECT
+		DISTINCT storePk
+		FROM
+		b2b_order
+		WHERE
+		DATE_FORMAT(receivablesTime, '%Y-%m') &lt;= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 1 MONTH),
+		'%Y-%m'
+		)
+		and DATE_FORMAT(receivablesTime, '%Y-%m') >= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 12 MONTH),
+		'%Y-%m'
+		)
+		AND orderClassify != 2
+		AND orderStatus IN (3, 4, 5, 6)
+		AND purchaserPk = #{purchaserPk}
+		GROUP BY storePk
+		UNION ALL
+		SELECT
+		DISTINCT storePk
+		FROM
+		b2b_contract
+		WHERE
+		DATE_FORMAT(receivablesTime, '%Y-%m') &lt;= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 1 MONTH),
+		'%Y-%m'
+		)
+		and DATE_FORMAT(receivablesTime, '%Y-%m') >= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 12 MONTH),
+		'%Y-%m'
+		)
+		AND contractStatus IN (3, 4, 5, 6)
+		AND purchaserPk = #{purchaserPk}
+		GROUP BY storePk
+		) tab
+
+	</select>
+
+
+	<select id="addUpEconSalesNumbers" resultType="int" parameterType="java.util.Map">
+
+		SELECT
+			count(orderNumber)
+		FROM
+			b2b_loan_number
+		WHERE
+			DATE_FORMAT(loanStartTime, '%Y-%m') = DATE_FORMAT(
+				DATE_SUB(NOW(), INTERVAL #{month} MONTH),
+				'%Y-%m'
+			)
+		AND loanStatus IN (3, 5, 6)
+		AND purchaserPk = #{purchaserPk}
+
+	</select>
+
+
+	<select id="countPlatformAmount" resultType="double" >
+
+		SELECT
+			ROUND(IFNULL(sum(repaidSerCharge),0)/10000,2)
+		FROM
+			b2b_loan_number
+		WHERE
+		DATE_FORMAT(repaymentTime, '%Y-%m') &lt;= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 1 MONTH),
+		'%Y-%m'
+		)
+		and DATE_FORMAT(repaymentTime, '%Y-%m') >= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 12 MONTH),
+		'%Y-%m'
+		)
+		AND loanStatus IN (3, 5, 6)
+		AND purchaserPk = #{purchaserPk}
+	</select>
+
+
+	<select id="countCreditAmount" resultType="double" >
+
+		SELECT
+		ROUND(IFNULL(sum(platformAmount),0)/10000,2)
+		FROM
+		b2b_credit_goods
+		WHERE
+		status = 2
+		AND isVisable = 1
+		AND companyPk = #{purchaserPk}
+	</select>
+
+
+	<select id="countEconSalesAmount" resultType="double" parameterType="java.lang.String">
+		SELECT
+		ROUND(IFNULL(SUM(loanAmount),0),2) as amount
+		FROM
+		b2b_loan_number
+		WHERE
+		DATE_FORMAT(insertTime, '%Y-%m') >= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 12 MONTH),
+		'%Y-%m'
+		)
+		AND DATE_FORMAT(insertTime, '%Y-%m') &lt;= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 1 MONTH),
+		'%Y-%m'
+		)
+		AND loanStatus IN (3, 5, 6)
+		AND purchaserPk = #{purchaserPk}
+	</select>
+	<select id="countEconGoodsIsOver" resultType="int" parameterType="java.lang.String">
+		SELECT
+		COUNT(orderNumber) AS count
+		FROM
+		b2b_loan_number
+		WHERE
+		DATE_FORMAT(insertTime, '%Y-%m') >= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 12 MONTH),
+		'%Y-%m'
+		)
+		AND DATE_FORMAT(insertTime, '%Y-%m') &lt;= DATE_FORMAT(
+		DATE_SUB(NOW(), INTERVAL 1 MONTH),
+		'%Y-%m'
+		)
+		AND isOverdue = 2
+		AND purchaserPk = #{purchaserPk}
+	</select>
+
+</mapper>
+

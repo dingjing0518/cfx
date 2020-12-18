@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bInvitationRecordDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,member,mname,mphone,mcompanyPk,mcompanyName,beInvitedCode,tname,tphone,tcompanyPk,tcompanyName,insertTime,applyStatus,invitationStatus,awardStatus,address,provinceName,province,cityName,city,areaName,area,town,townName,addressPk,contacts,contactsTel,activityPk,awardName,grantType,note
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_invitation_record (
+         pk, member, mname, mphone, mcompanyPk, mcompanyName, beInvitedCode, tname, tphone, tcompanyPk, tcompanyName, insertTime, applyStatus, invitationStatus, awardStatus, address, provinceName, province, cityName, city, areaName, area, town, townName, addressPk, contacts, contactsTel, activityPk, awardName, grantType, note
+        ) VALUES (
+         #{pk}, #{member}, #{mname}, #{mphone}, #{mcompanyPk}, #{mcompanyName}, #{beInvitedCode}, #{tname}, #{tphone}, #{tcompanyPk}, #{tcompanyName}, #{insertTime}, #{applyStatus}, #{invitationStatus}, #{awardStatus}, #{address}, #{provinceName}, #{province}, #{cityName}, #{city}, #{areaName}, #{area}, #{town}, #{townName}, #{addressPk}, #{contacts}, #{contactsTel}, #{activityPk}, #{awardName}, #{grantType}, #{note}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bInvitationRecord">
+    <![CDATA[
+        UPDATE b2b_invitation_record SET
+	        member = #{member} , mname = #{mname} , mphone = #{mphone} , mcompanyPk = #{mcompanyPk} , mcompanyName = #{mcompanyName} , beInvitedCode = #{beInvitedCode} , tname = #{tname} , tphone = #{tphone} , tcompanyPk = #{tcompanyPk} , tcompanyName = #{tcompanyName} , insertTime = #{insertTime} , applyStatus = #{applyStatus} , invitationStatus = #{invitationStatus} , awardStatus = #{awardStatus} , address = #{address} , provinceName = #{provinceName} , province = #{province} , cityName = #{cityName} , city = #{city} , areaName = #{areaName} , area = #{area} , town = #{town} , townName = #{townName} , addressPk = #{addressPk} , contacts = #{contacts} , contactsTel = #{contactsTel} , activityPk = #{activityPk} , awardName = #{awardName} , grantType = #{grantType} , note = #{note}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bInvitationRecord">
+    <![CDATA[
+        DELETE FROM b2b_invitation_record WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}			</if>
+			<if test="@Ognl@isNotEmpty(mname)">
+				AND mname = #{mname}			</if>
+			<if test="@Ognl@isNotEmpty(mphone)">
+				AND mphone = #{mphone}			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyPk)">
+				AND mcompanyPk = #{mcompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyName)">
+				AND mcompanyName = #{mcompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}			</if>
+			<if test="@Ognl@isNotEmpty(tname)">
+				AND tname = #{tname}			</if>
+			<if test="@Ognl@isNotEmpty(tphone)">
+				AND tphone = #{tphone}			</if>
+			<if test="@Ognl@isNotEmpty(tcompanyPk)">
+				AND tcompanyPk = #{tcompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(tcompanyName)">
+				AND tcompanyName = #{tcompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(applyStatus)">
+				AND applyStatus = #{applyStatus}			</if>
+			<if test="@Ognl@isNotEmpty(invitationStatus)">
+				AND invitationStatus = #{invitationStatus}			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(addressPk)">
+				AND addressPk = #{addressPk}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(grantType)">
+				AND grantType = #{grantType}			</if>
+			<if test="@Ognl@isNotEmpty(note)">
+				AND note = #{note}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where pk = #{pk}	</select>
+	<select id="getByMember" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where member = #{member}	</select>
+	<select id="getByMname" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where mname = #{mname}	</select>
+	<select id="getByMphone" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where mphone = #{mphone}	</select>
+	<select id="getByMcompanyPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where mcompanyPk = #{mcompanyPk}	</select>
+	<select id="getByMcompanyName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where mcompanyName = #{mcompanyName}	</select>
+	<select id="getByBeInvitedCode" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where beInvitedCode = #{beInvitedCode}	</select>
+	<select id="getByTname" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where tname = #{tname}	</select>
+	<select id="getByTphone" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where tphone = #{tphone}	</select>
+	<select id="getByTcompanyPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where tcompanyPk = #{tcompanyPk}	</select>
+	<select id="getByTcompanyName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where tcompanyName = #{tcompanyName}	</select>
+	<select id="getByAddress" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where address = #{address}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where provinceName = #{provinceName}	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where province = #{province}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where cityName = #{cityName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where city = #{city}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where areaName = #{areaName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where area = #{area}	</select>
+	<select id="getByTown" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where town = #{town}	</select>
+	<select id="getByTownName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where townName = #{townName}	</select>
+	<select id="getByAddressPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where addressPk = #{addressPk}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where contactsTel = #{contactsTel}	</select>
+	<select id="getByActivityPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where activityPk = #{activityPk}	</select>
+	<select id="getByAwardName" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where awardName = #{awardName}	</select>
+	<select id="getByNote" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where note = #{note}	</select>
+</mapper>
+

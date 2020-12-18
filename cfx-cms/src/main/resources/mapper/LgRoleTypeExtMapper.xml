@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgRoleTypeExDao">
+    
+    
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,isDelete,isVisable,sort,companyType
+	    ]]>
+	</sql>
+    
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_roleType
+		<include refid="searchGridWhere" />
+	</select>
+
+	<select id="searchGridEx" resultType="cn.cf.dto.LgRoleTypeDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_roleType
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="companyType != null ">
+				AND companyType = #{companyType}</if>
+		</where>
+	</sql>
+	
+	 <update id="updateEx" parameterType="cn.cf.model.LgRoleType">
+        UPDATE lg_roleType
+        <set>
+            <if test="name != null and name !=''">
+                name = #{name} ,
+            </if>
+            <if test="isDelete != null and isDelete !=''">
+                isDelete = #{isDelete} ,
+            </if>
+            <if test="isVisable != null  and isVisable !=''">
+                isVisable = #{isVisable} ,
+            </if>
+            <if test="sort != null  and sort !=''">
+                sort = #{sort} ,
+            </if>
+            <if test="companyType != null  and  companyType!=''">
+                companyType = #{companyType}
+            </if>
+        </set>
+        WHERE pk = #{pk}
+    </update>
+	
+</mapper>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgRoleDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,province,provinceName,city,cityName,area,areaName,
+		town,townName,isDelete,insertTime,updateTime,isVisable,companyPk
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_role (
+         pk,name,province,provinceName,city,cityName,area,areaName,
+		town,townName,isDelete,insertTime,updateTime,isVisable,companyPk
+        ) VALUES (
+         #{pk},#{name}, #{province},#{provinceName},#{city},#{cityName},#{area},
+         #{areaName},#{town},#{townName},1,now(),now(),1,#{companyPk}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgRole">
+		UPDATE lg_role
+		<set>
+			<if test="@Ognl@isNotEmpty(name)">
+				name = #{name},
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				province = #{province},
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				provinceName = #{provinceName},
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				city = #{city},
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				cityName = #{cityName},
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				area = #{area},
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				areaName = #{areaName},
+			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				town = #{town},
+			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				townName = #{townName},
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				companyPk = #{companyPk},
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				isDelete = #{isDelete},
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				isVisable = #{isVisable},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				and pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				and name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				and province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				and provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				and city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				and cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				and area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				and areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				and town = #{town}
+			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				and townName = #{townName}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				isDelete = #{isDelete},
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				isVisable = #{isVisable},
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				companyPk = #{companyPk},
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) 
+		FROM lg_role
+		where 1=1
+		<if test="@Ognl@isNotEmpty(name)">
+			and name like #{name}
+		</if>
+		<if test="@Ognl@isNotEmpty(province)">
+		AND	province = #{province}
+		</if>
+		<if test="@Ognl@isNotEmpty(city)">
+		AND	city = #{city}
+		</if>
+		<if test="@Ognl@isNotEmpty(area)">
+		AND	area = #{area}
+		</if>
+		<if test="@Ognl@isNotEmpty(town)">
+		AND	town = #{town}
+		</if>
+		<if test="@Ognl@isNotEmpty(isDelete)">
+		AND	isDelete = #{isDelete}
+		</if>
+		<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+			AND DATE_FORMAT(updateTime,'%Y-%m-%d')  >= #{updateTimeBegin}
+		</if>
+		<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+			AND DATE_FORMAT(updateTime,'%Y-%m-%d')  &lt;= #{updateTimeEnd}
+		</if>
+		<if test="@Ognl@isNotEmpty(companyPk)">
+			AND	companyPk = #{companyPk}
+		</if>
+	</select>
+
+
+	<select id="searchList" resultType="cn.cf.dto.LgRoleDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_role
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgRoleDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_role where pk = #{pk}
+	</select>
+	<select id="getByName" resultType="cn.cf.dto.LgRoleDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_role where name = #{name}
+	</select>
+	
+	
+	
+	
+</mapper>

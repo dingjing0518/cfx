@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.C2bMarrieddealBidDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,marrieddealPk,memberPk,memberName,meno,insertTime,updateTime,bidPrice,supplierPk,supplierName,contacts,contactsTel,packNumber,batchNumber,type,bidStatus,goodsPk,goodsName,storePk,storeName,isFinished,bidBoxes,bidCount
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO c2b_marrieddeal_bid (
+         pk, marrieddealPk, memberPk, memberName, meno, insertTime, updateTime, bidPrice, supplierPk, supplierName, contacts, contactsTel, packNumber, batchNumber, type, bidStatus, goodsPk, goodsName, storePk, storeName, isFinished, bidBoxes, bidCount
+        ) VALUES (
+         #{pk}, #{marrieddealPk}, #{memberPk}, #{memberName}, #{meno}, #{insertTime}, #{updateTime}, #{bidPrice}, #{supplierPk}, #{supplierName}, #{contacts}, #{contactsTel}, #{packNumber}, #{batchNumber}, #{type}, #{bidStatus}, #{goodsPk}, #{goodsName}, #{storePk}, #{storeName}, #{isFinished}, #{bidBoxes}, #{bidCount}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.C2bMarrieddealBid">
+    <![CDATA[
+        UPDATE c2b_marrieddeal_bid SET
+	        marrieddealPk = #{marrieddealPk} , memberPk = #{memberPk} , memberName = #{memberName} , meno = #{meno} , insertTime = #{insertTime} , updateTime = #{updateTime} , bidPrice = #{bidPrice} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , contacts = #{contacts} , contactsTel = #{contactsTel} , packNumber = #{packNumber} , batchNumber = #{batchNumber} , type = #{type} , bidStatus = #{bidStatus} , goodsPk = #{goodsPk} , goodsName = #{goodsName} , storePk = #{storePk} , storeName = #{storeName} , isFinished = #{isFinished} , bidBoxes = #{bidBoxes} , bidCount = #{bidCount}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.C2bMarrieddealBid">
+    <![CDATA[
+        DELETE FROM c2b_marrieddeal_bid WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(marrieddealPk)">
+				AND marrieddealPk = #{marrieddealPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				AND meno = #{meno}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(bidPrice)">
+				AND bidPrice = #{bidPrice}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND packNumber = #{packNumber}			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				AND batchNumber = #{batchNumber}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(bidStatus)">
+				AND bidStatus = #{bidStatus}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(isFinished)">
+				AND isFinished = #{isFinished}			</if>
+			<if test="@Ognl@isNotEmpty(bidBoxes)">
+				AND bidBoxes = #{bidBoxes}			</if>
+			<if test="@Ognl@isNotEmpty(bidCount)">
+				AND bidCount = #{bidCount}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM c2b_marrieddeal_bid
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where pk = #{pk}	</select>
+	<select id="getByMarrieddealPk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where marrieddealPk = #{marrieddealPk}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where memberName = #{memberName}	</select>
+	<select id="getByMeno" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where meno = #{meno}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where supplierName = #{supplierName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where contactsTel = #{contactsTel}	</select>
+	<select id="getByPackNumber" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where packNumber = #{packNumber}	</select>
+	<select id="getByBatchNumber" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where batchNumber = #{batchNumber}	</select>
+	<select id="getByGoodsPk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where goodsPk = #{goodsPk}	</select>
+	<select id="getByGoodsName" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where goodsName = #{goodsName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where storePk = #{storePk}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.C2bMarrieddealBidDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal_bid where storeName = #{storeName}	</select>
+</mapper>
+

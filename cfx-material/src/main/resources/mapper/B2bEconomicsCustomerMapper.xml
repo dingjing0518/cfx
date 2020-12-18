@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsCustomerDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,insertTime,updateTime,auditStatus,source,assidirPk,assidirName,processInstanceId,score,staticTime,approvalTime,goodsName,creditUrl,improvingdataInfo
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_customer (
+         pk, companyPk, companyName, contacts, contactsTel, insertTime, updateTime, auditStatus, source, assidirPk, assidirName, processInstanceId, score, staticTime, approvalTime, goodsName,creditUrl,improvingdataInfo
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName}, #{contacts}, #{contactsTel}, #{insertTime}, #{updateTime}, #{auditStatus}, #{source}, #{assidirPk}, #{assidirName}, #{processInstanceId}, #{score}, #{staticTime}, #{approvalTime}, #{goodsName}, #{creditUrl} , #{improvingdataInfo}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bEconomicsCustomer">
+    <![CDATA[
+        UPDATE b2b_economics_customer SET
+	        companyPk = #{companyPk} , companyName = #{companyName} , contacts = #{contacts} , contactsTel = #{contactsTel} , insertTime = #{insertTime} , updateTime = #{updateTime} , auditStatus = #{auditStatus} , source = #{source} , assidirPk = #{assidirPk} , assidirName = #{assidirName} , processInstanceId = #{processInstanceId} , score = #{score} , staticTime = #{staticTime} , approvalTime = #{approvalTime} , goodsName = #{goodsName}  ,creditUrl = #{creditUrl},improvingdataInfo = #{improvingdataInfo}
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bEconomicsCustomer">
+    <![CDATA[
+        DELETE FROM b2b_economics_customer WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(assidirPk)">
+				AND assidirPk = #{assidirPk}			</if>
+			<if test="@Ognl@isNotEmpty(assidirName)">
+				AND assidirName = #{assidirName}			</if>
+			<if test="@Ognl@isNotEmpty(processInstanceId)">
+				AND processInstanceId = #{processInstanceId}			</if>
+			<if test="@Ognl@isNotEmpty(score)">
+				AND score = #{score}			</if>
+			<if test="@Ognl@isNotEmpty(staticTimeBegin)">
+				AND staticTime >= #{staticTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(staticTimeEnd)">
+				AND staticTime &lt;= #{staticTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(approvalTimeBegin)">
+				AND approvalTime >= #{approvalTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(approvalTimeEnd)">
+				AND approvalTime &lt;= #{approvalTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(improvingdataInfo)">
+				AND improvingdataInfo = #{improvingdataInfo}			</if>
+
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_economics_customer
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where companyName = #{companyName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where contactsTel = #{contactsTel}	</select>
+	<select id="getByAssidirPk" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where assidirPk = #{assidirPk}	</select>
+	<select id="getByAssidirName" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where assidirName = #{assidirName}	</select>
+	<select id="getByProcessInstanceId" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where processInstanceId = #{processInstanceId}	</select>
+	<select id="getByGoodsName" resultType="cn.cf.dto.B2bEconomicsCustomerDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer where goodsName = #{goodsName}	</select>
+</mapper>
+

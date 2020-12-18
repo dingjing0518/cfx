@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsCustomerGoodsDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,economicsGoodsPk,economicsGoodsName,goodsType,suggestAmount,bankPk,bankName,effectStartTime,effectEndTime,economicsCustomerPk,sevenRate,totalRate,bankRate,term
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_customer_goods (
+         pk, economicsGoodsPk, economicsGoodsName, goodsType, suggestAmount, bankPk, bankName, effectStartTime, effectEndTime, economicsCustomerPk,sevenRate,totalRate,bankRate,term
+        ) VALUES (
+         #{pk}, #{economicsGoodsPk}, #{economicsGoodsName}, #{goodsType}, #{suggestAmount}, #{bankPk}, #{bankName}, #{effectStartTime}, #{effectEndTime}, #{economicsCustomerPk},#{sevenRate},#{totalRate},#{bankRate} ,#{term} 
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bEconomicsCustomerGoods">
+    <![CDATA[
+        UPDATE b2b_economics_customer_goods SET
+	        economicsGoodsPk = #{economicsGoodsPk} , economicsGoodsName = #{economicsGoodsName} , goodsType = #{goodsType} , suggestAmount = #{suggestAmount} , bankPk = #{bankPk} , bankName = #{bankName} , effectStartTime = #{effectStartTime} , effectEndTime = #{effectEndTime} , economicsCustomerPk = #{economicsCustomerPk},sevenRate = #{sevenRate},totalRate = #{totalRate},bankRate = #{bankRate} ,term=#{term}      
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bEconomicsCustomerGoods">
+    <![CDATA[
+        DELETE FROM b2b_economics_customer_goods WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsPk)">
+				AND economicsGoodsPk = #{economicsGoodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsType)">
+				AND goodsType = #{goodsType}			</if>
+			<if test="@Ognl@isNotEmpty(suggestAmount)">
+				AND suggestAmount = #{suggestAmount}			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(effectStartTimeBegin)">
+				AND effectStartTime >= #{effectStartTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(effectStartTimeEnd)">
+				AND effectStartTime &lt;= #{effectStartTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(effectEndTimeBegin)">
+				AND effectEndTime >= #{effectEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(effectEndTimeEnd)">
+				AND effectEndTime &lt;= #{effectEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(economicsCustomerPk)">
+				AND economicsCustomerPk = #{economicsCustomerPk}			</if>
+					<if test="@Ognl@isNotEmpty(totalRate)">
+				AND totalRate = #{totalRate}			</if>
+			<if test="@Ognl@isNotEmpty(bankRate)">
+				AND bankRate = #{bankRate}			</if>
+			<if test="@Ognl@isNotEmpty(term)">
+				AND term = #{term}			</if>
+			<if test="@Ognl@isNotEmpty(sevenRate)">
+				AND sevenRate = #{sevenRate}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_economics_customer_goods
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where pk = #{pk}	</select>
+	<select id="getByEconomicsGoodsPk" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where economicsGoodsPk = #{economicsGoodsPk}	</select>
+	<select id="getByEconomicsGoodsName" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where economicsGoodsName = #{economicsGoodsName}	</select>
+	<select id="getByBankPk" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where bankPk = #{bankPk}	</select>
+	<select id="getByBankName" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where bankName = #{bankName}	</select>
+	<select id="getByEconomicsCustomerPk" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_customer_goods where economicsCustomerPk = #{economicsCustomerPk}	</select>
+</mapper>
+

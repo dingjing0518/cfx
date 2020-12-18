@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecHotDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,firstLevelPk,firstLevelName,secondLevelPk,secondLevelName,thirdLevelPk,thirdLevelName,linkUrl,status,sort,insertTime,updateTime,isDelete,block,fourthLevelPk,fourthLevelName
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_spec_hot (
+         pk, firstLevelPk, firstLevelName, secondLevelPk, secondLevelName, thirdLevelPk, thirdLevelName, linkUrl, status, sort, insertTime, updateTime, isDelete, block, fourthLevelPk, fourthLevelName
+        ) VALUES (
+         #{pk}, #{firstLevelPk}, #{firstLevelName}, #{secondLevelPk}, #{secondLevelName}, #{thirdLevelPk}, #{thirdLevelName}, #{linkUrl}, #{status}, #{sort}, #{insertTime}, #{updateTime}, #{isDelete}, #{block}, #{fourthLevelPk}, #{fourthLevelName}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bSpecHot">
+    <![CDATA[
+        UPDATE b2b_spec_hot SET
+	        firstLevelPk = #{firstLevelPk} , firstLevelName = #{firstLevelName} , secondLevelPk = #{secondLevelPk} , secondLevelName = #{secondLevelName} , thirdLevelPk = #{thirdLevelPk} , thirdLevelName = #{thirdLevelName} , linkUrl = #{linkUrl} , status = #{status} , sort = #{sort} , insertTime = #{insertTime} , updateTime = #{updateTime} , isDelete = #{isDelete} , block = #{block} , fourthLevelPk = #{fourthLevelPk} , fourthLevelName = #{fourthLevelName}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bSpecHot">
+    <![CDATA[
+        DELETE FROM b2b_spec_hot WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(firstLevelPk)">
+				AND firstLevelPk = #{firstLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(firstLevelName)">
+				AND firstLevelName = #{firstLevelName}			</if>
+			<if test="@Ognl@isNotEmpty(secondLevelPk)">
+				AND secondLevelPk = #{secondLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(secondLevelName)">
+				AND secondLevelName = #{secondLevelName}			</if>
+			<if test="@Ognl@isNotEmpty(thirdLevelPk)">
+				AND thirdLevelPk = #{thirdLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(thirdLevelName)">
+				AND thirdLevelName = #{thirdLevelName}			</if>
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+			<if test="@Ognl@isNotEmpty(fourthLevelPk)">
+				AND fourthLevelPk = #{fourthLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(fourthLevelName)">
+				AND fourthLevelName = #{fourthLevelName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_spec_hot
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where pk = #{pk}	</select>
+	<select id="getByFirstLevelPk" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where firstLevelPk = #{firstLevelPk}	</select>
+	<select id="getByFirstLevelName" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where firstLevelName = #{firstLevelName}	</select>
+	<select id="getBySecondLevelPk" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where secondLevelPk = #{secondLevelPk}	</select>
+	<select id="getBySecondLevelName" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where secondLevelName = #{secondLevelName}	</select>
+	<select id="getByThirdLevelPk" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where thirdLevelPk = #{thirdLevelPk}	</select>
+	<select id="getByThirdLevelName" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where thirdLevelName = #{thirdLevelName}	</select>
+	<select id="getByLinkUrl" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where linkUrl = #{linkUrl}	</select>
+	<select id="getByBlock" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where block = #{block}	</select>
+	<select id="getByFourthLevelPk" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where fourthLevelPk = #{fourthLevelPk}	</select>
+	<select id="getByFourthLevelName" resultType="cn.cf.dto.B2bSpecHotDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot where fourthLevelName = #{fourthLevelName}	</select>
+</mapper>
+

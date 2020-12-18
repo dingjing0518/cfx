@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysPropertyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,productPk,productName,productShotName,content,type
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_property (
+         pk, productPk, productName, productShotName, content, type
+        ) VALUES (
+         #{pk}, #{productPk}, #{productName}, #{productShotName}, #{content}, #{type}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysProperty">
+    <![CDATA[
+        UPDATE sys_property SET
+	        productPk = #{productPk} , productName = #{productName} , productShotName = #{productShotName} , content = #{content} , type = #{type}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.SysProperty">
+    <![CDATA[
+        DELETE FROM sys_property WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(productShotName)">
+				AND productShotName = #{productShotName}			</if>
+			<if test="@Ognl@isNotEmpty(content)">
+				AND content = #{content}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_property
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property where pk = #{pk}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property where productPk = #{productPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property where productName = #{productName}	</select>
+	<select id="getByProductShotName" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property where productShotName = #{productShotName}	</select>
+	<select id="getByContent" resultType="cn.cf.dto.SysPropertyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_property where content = #{content}	</select>
+</mapper>
+

@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryRecordExDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,activityPk,awardPk,status,name,awardName,awardStatus,awardType,insertTime,provinceName,province,cityName,city,areaName,area,town,townName,contacts,contactsTel,grantType,note,memberPk,memberName,address,companyPk,companyName,mobile
+	    ]]>
+	</sql>
+
+	<update id="updateByLotteryRecordDto" parameterType="cn.cf.dto.B2bLotteryRecordExDto">
+		UPDATE b2b_lottery_record
+		<set>
+			<if test="activityPk != null and activityPk != ''">
+				 activityPk = #{activityPk},
+			</if>
+			<if test="awardPk != null and awardPk != ''">
+				awardPk = #{awardPk},
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="awardName != null and awardName != ''">
+				awardName = #{awardName},
+			</if>
+			<if test="awardStatus != null and awardStatus != ''">
+				awardStatus = #{awardStatus},
+			</if>
+			<if test="awardType != null and awardType != ''">
+				awardType = #{awardType},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="provinceName != null">
+				provinceName = #{provinceName},
+			</if>
+			<if test="province != null">
+				province = #{province},
+			</if>
+			<if test="cityName != null">
+				cityName = #{cityName},
+			</if>
+			<if test="city != null">
+				city = #{city},
+			</if>
+			<if test="areaName != null">
+				areaName = #{areaName},
+			</if>
+			<if test="area != null">
+				area = #{area},
+			</if>
+			<if test="town != null">
+				town = #{town},
+			</if>
+			<if test="townName != null">
+				townName = #{townName},
+			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts},
+			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="grantType != null and grantType != ''">
+				grantType = #{grantType},
+			</if>
+			<if test="note != null">
+				note = #{note},
+			</if>
+			<if test="memberPk != null and memberPk != ''">
+				memberPk = #{memberPk},
+			</if>
+			<if test="memberName != null and memberName != ''">
+				memberName = #{memberName},
+			</if>
+			<if test="address != null and address != ''">
+				address = #{address},
+			</if>
+			<if test="companyPk != null and companyPk != ''">
+				companyPk = #{companyPk},
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName = #{companyName},
+			</if>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="addressPk != null and addressPk != ''">
+				addressPk = #{addressPk},
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(awardPk)">
+				AND awardPk = #{awardPk}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}			</if>
+			<if test="@Ognl@isNotEmpty(awardType)">
+				AND awardType = #{awardType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(grantType)">
+				AND grantType = #{grantType}			</if>
+			<if test="@Ognl@isNotEmpty(note)">
+				AND note = #{note}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND compayPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND compayName = #{compayName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+	
+	
+	<!-- 中奖名单列表START -->
+	<select id="searchLotteryAwardRosterCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(distinct (re.pk))
+		FROM b2b_lottery_record re
+		LEFT JOIN b2b_lottery_award aw ON re.awardPk = aw.pk
+		LEFT JOIN b2b_lottery_activity ac ON re.activityPk = ac.pk
+		LEFT JOIN
+		( SELECT  m.pk, m.companyPk ,   m.mobile  FROM b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN b2b_role r ON  mr.rolePk = r.pk
+		WHERE   r.companyType = 0  limit 0,1 ) c ON c.companyPk =  re.companyPk
+		where 1=1 
+		<choose>  
+             <when test="isHistory == null ">AND re.status = 2</when>  
+             <when test="isHistory == ''">AND re.status = 2</when>  
+          </choose>
+         <if test="name != null and name != ''">
+				AND re.name = #{name}
+		 </if>
+		<if test="insertTimeStart != null and insertTimeStart !=''">
+				AND str_to_date(re.insertTime,'%Y-%m-%d') >= #{insertTimeStart}
+		</if>
+		<if test="insertTimeEnd != null and insertTimeEnd !=''">
+				AND str_to_date(re.insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}
+		</if>
+		<if test="insertTime != null and insertTime !=''">
+			AND re.insertTime &lt;= #{insertTime}
+		</if>
+		<if test="status != null and status != '' ">
+				AND re.status = #{status}
+		</if>
+		<if test="awardStatus != null and awardStatus != ''">
+				AND re.awardStatus = #{awardStatus}
+		</if>
+		<if test="awardType != null and awardType != ''">
+				AND re.awardType = #{awardType}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			AND  IF ( (re.mobile !=NULL OR re.mobile !='') ,re.mobile LIKE '%${mobile}%', c.mobile LIKE '%${mobile}%')
+		</if>
+		<if test="memberName != null and memberName != ''">
+			AND  IF ( (re.memberName !=NULL OR re.memberName !='') ,re.memberName LIKE '%${memberName}%', c.mobile LIKE '%${memberName}%')
+		</if>
+		<if test="activityType != null and activityType != ''">
+				AND ac.activityType = #{activityType}			</if>
+
+    </select>
+	
+	
+	<select id="searchLotteryAwardRosterList" resultType="cn.cf.dto.B2bLotteryRecordExDto"
+		parameterType="java.util.Map">
+		SELECT
+		re.pk AS pk,
+		re.activityPk AS activityPk,
+		re.awardPk AS awardPk,
+		re.status AS status,
+		re.name AS name,
+		re.awardName AS awardName,
+		re.awardStatus AS awardStatus,
+		(CASE re.awardStatus
+		WHEN 1 THEN '未发放'
+		WHEN 2 THEN '已发放'
+		WHEN 3 THEN '无'
+		END) AS awardStatusName,
+		re.awardType AS awardType,
+		re.insertTime AS insertTime,
+		re.provinceName AS provinceName,
+		re.province AS province,
+		re.cityName AS cityName,
+		re.city AS city,
+		re.areaName AS areaName,
+		re.area AS area,
+		re.town AS town,
+		re.townName AS townName,
+		re.contacts AS contacts,
+		re.contactsTel AS contactsTel,
+		<choose>
+			<when test="mobileCol == 'OPER_ACTIVITY_AWARD_COL_MOBILE'">
+				INSERT (IF ( (re.mobile !=NULL OR re.mobile !='') ,re.mobile, c.mobile),4,4,'****') AS mobile,
+			</when>
+			<when test="mobileCol == 'OPER_ACTIVITY_HIS_COL_MOBILE'">
+				INSERT (IF ( (re.mobile !=NULL OR re.mobile !='') ,re.mobile, c.mobile),4,4,'****') AS mobile,
+			</when>
+			<otherwise>
+				IF ( (re.mobile !=NULL OR re.mobile !='') ,re.mobile, c.mobile)  AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="memberNameCol == 'OPER_ACTIVITY_AWARD_COL_MEMBERNAME'">
+				(
+				CASE
+				WHEN re.memberName IS NULL THEN INSERT(c.mobile, 4, 4, '****')
+				WHEN re.memberName = '' THEN INSERT(c.mobile, 4, 4, '****')
+				WHEN (re.memberName REGEXP '[^0-9.]') = 0 THEN INSERT(re.memberName, 4, 4, '****')
+				ELSE INSERT(re.memberName, 1, 1, '*')
+				END
+				) AS memberName,
+			</when>
+			<when test="memberNameCol == 'OPER_ACTIVITY_HIS_COL_MEMBERNAME'">
+				(
+				CASE
+				WHEN re.memberName IS NULL THEN INSERT(c.mobile, 4, 4, '****')
+				WHEN re.memberName = '' THEN INSERT(c.mobile, 4, 4, '****')
+				WHEN (re.memberName REGEXP '[^0-9.]') = 0 THEN INSERT(re.memberName, 4, 4, '****')
+				ELSE INSERT(re.memberName, 1, 1, '*')
+				END
+				) AS memberName,
+			</when>
+			<otherwise>
+				IF ((re.memberName !=NULL OR re.memberName !='') ,re.memberName, c.mobile)  AS memberName,
+			</otherwise>
+		</choose>
+		re.grantType AS grantType,
+		(CASE re.grantType
+		WHEN 1 THEN '业务员代送'
+		WHEN 2 THEN '邮寄'
+		ELSE '无'
+		END) AS grantTypeName,
+		re.note AS note,
+		IF ((re.memberPk !=NULL OR re.memberPk !='') ,re.memberPk, c.pk)  AS memberPk,
+
+		re.address AS address,
+		re.companyPk AS companyPk,
+		<choose>
+			<when test="companyNameCol == 'OPER_ACTIVITY_AWARD_COL_COMPANYNAME'">
+				INSERT (re.companyName,3,5,'*****') AS companyName,
+			</when>
+			<when test="companyNameCol == 'OPER_ACTIVITY_HIS_COMPANYNAME'">
+				INSERT (re.companyName,3,5,'*****') AS companyName,
+			</when>
+			<otherwise>
+				re.companyName AS companyName,
+			</otherwise>
+		</choose>
+		aw.awardVariety AS awardVariety,
+		ac.activityType,
+		(CASE aw.awardVariety
+		WHEN 1 THEN '免息券'
+		WHEN 2 THEN '实物'
+		ELSE '无'
+		END) AS awardVarietyName,
+		(CASE ac.activityType
+		WHEN 1 THEN '抽奖'
+		WHEN 2 THEN '白条新客户见面礼'
+		WHEN 3 THEN '白条老客户尊享礼'
+		END) AS activityTypeName
+		FROM
+		b2b_lottery_record re
+		LEFT JOIN b2b_lottery_award aw ON re.awardPk = aw.pk
+		LEFT JOIN b2b_lottery_activity ac ON re.activityPk = ac.pk
+		LEFT JOIN
+		  ( SELECT  m.pk, m.companyPk ,   m.mobile  FROM b2b_member m
+			LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+			LEFT JOIN b2b_role r ON  mr.rolePk = r.pk
+			WHERE   r.companyType = 0 ) c ON c.companyPk =  re.companyPk
+		where 1=1
+		<choose>
+			<when test="isHistory == null ">AND re.status = 2</when>
+			<when test="isHistory == ''">AND re.status = 2</when>
+		</choose>
+		<if test="name != null and name != ''">
+			AND re.name = #{name}
+		</if>
+		<if test="insertTimeStart != null and insertTimeStart !=''">
+			AND str_to_date(re.insertTime,'%Y-%m-%d') >= #{insertTimeStart}
+		</if>
+		<if test="insertTimeEnd != null and insertTimeEnd !=''">
+			AND str_to_date(re.insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}
+		</if>
+		<if test="insertTime != null and insertTime !=''">
+			AND re.insertTime &lt;= #{insertTime}
+		</if>
+
+		<if test="status != null and status != ''">
+			AND re.status = #{status}
+		</if>
+		<if test="awardStatus != null and awardStatus != ''">
+			AND re.awardStatus = #{awardStatus}
+		</if>
+		<if test="awardType != null and awardType != ''">
+			AND re.awardType = #{awardType}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			AND  IF ( (re.mobile !=NULL OR re.mobile !='') ,re.mobile LIKE '%${mobile}%', c.mobile LIKE '%${mobile}%')
+		</if>
+		<if test="memberName != null and memberName != ''">
+			AND  IF ( (re.memberName !=NULL OR re.memberName !='') ,re.memberName LIKE '%${memberName}%', c.mobile LIKE '%${memberName}%')
+		</if>
+		<if test="activityType != null and activityType != ''">
+			AND ac.activityType = #{activityType}
+		</if>
+        GROUP BY re.pk
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<!-- 中奖名单列表END -->
+	
+	
+	<select id="searchList" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="getExDtoByPk" resultType="cn.cf.dto.B2bLotteryRecordExDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where pk = #{pk}	
+	</select>
+		
+	
+	
+</mapper>
+

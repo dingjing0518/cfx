@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,mobile,password,companyPk,companyName,insertTime,
+		auditStatus,isVisable,rolePk,auditTime,auditPk,updateTime,registerSource,
+		invitationCode,beInvitedCode,loginTime,headPortrait,refuseReason,employeeNumber,employeeName,
+		parentPk,level,experience,shell,addMembers,addPk,feedTime,levelName
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_member (
+         pk, mobile, password, companyPk, companyName, insertTime, 
+         auditStatus, isVisable, rolePk, auditTime, auditPk, 
+         updateTime, registerSource, invitationCode,
+         beInvitedCode, loginTime, headPortrait, refuseReason, employeeNumber,
+         employeeName, parentPk,level,experience,shell,addMembers,addPk,feedTime,levelName
+        ) VALUES (
+         #{pk}, #{mobile}, #{password}, #{companyPk}, #{companyName}, now(),
+         2, 1, #{rolePk}, now(), #{auditPk},
+         now(), #{registerSource}, #{invitationCode},
+         #{beInvitedCode}, #{loginTime}, #{headPortrait}, #{refuseReason}, 
+         #{employeeNumber}, #{employeeName}, #{parentPk}, #{level}, #{experience}, #{shell}
+         ,0,#{addPk},#{feedTime},#{levelName}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bMember">
+		UPDATE b2b_member
+		<set>
+			<if test="employeeNumber != null">
+				employeeNumber = #{employeeNumber},
+			</if>
+			<if test="employeeName!=null">
+				employeeName=#{employeeName},
+			</if>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="companyPk != null ">
+				companyPk = #{companyPk},
+			</if>
+			<if test="companyName != null ">
+				companyName = #{companyName},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				auditStatus = #{auditStatus},
+				auditPk = #{auditPk},
+				auditTime =now(),
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="registerSource != null and registerSource != ''">
+				registerSource = #{registerSource},
+			</if>
+			<if test="invitationCode != null and invitationCode != ''">
+				invitationCode = #{invitationCode},
+			</if>
+			<if test="beInvitedCode != null and beInvitedCode != ''">
+				beInvitedCode = #{beInvitedCode},
+			</if>
+			<if test="headPortrait != null and headPortrait != ''">
+				headPortrait = #{headPortrait},
+			</if>
+			<if test="refuseReason!=null and refuseReason!=''">
+				refuseReason=#{refuseReason},
+			</if>
+			<if test="experience!=null and experience!=''">
+				experience=#{experience},
+			</if>
+			<if test="shell!=null and shell!=''">
+				shell=#{shell},
+				feedTime= now(),
+			</if>
+			<if test="level!=null and level!=''">
+				level=#{level},
+			</if>
+			<if test="parentPk!=null ">
+				parentPk=#{parentPk},
+			</if>
+			<if test = "levelName!= null and levelName !='' ">
+				levelName=#{levelName},
+			</if>
+			<if test = "addMembers!= null and addMembers !='' ">
+				addMembers=#{addMembers},
+			</if>
+			<if test = "addPk!= null and addPk !='' ">
+				addPk=#{addPk},
+			</if>
+			
+			updateTime = now()
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bMember">
+    <![CDATA[
+        DELETE FROM b2b_member WHERE
+        pk = #{id}  AND 
+        mobile = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(password)">
+				AND password = #{password}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(rolePk)">
+				AND rolePk = #{rolePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(registerSource)">
+				AND registerSource = #{registerSource}
+			</if>
+			<if test="@Ognl@isNotEmpty(invitationCode)">
+				AND invitationCode = #{invitationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeBegin)">
+				AND loginTime >= #{loginTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeEnd)">
+				AND loginTime &lt;= #{loginTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				AND headPortrait = #{headPortrait}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_member
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where pk = #{pk}
+	</select>
+	<select id="getByMobile" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where mobile = #{mobile} 
+	</select>
+	<select id="getByPassword" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where password = #{password}
+	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where companyPk = #{companyPk}
+	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where companyName = #{companyName}
+	</select>
+	<select id="getByRolePk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where rolePk = #{rolePk}
+	</select>
+	<select id="getByAuditPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where auditPk = #{auditPk}
+	</select>
+	<select id="getByInvitationCode" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where invitationCode = #{invitationCode}
+	</select>
+	<select id="getByBeInvitedCode" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where beInvitedCode = #{beInvitedCode}
+	</select>
+	<select id="getByHeadPortrait" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where headPortrait = #{headPortrait}
+	</select>
+	<select id="getByRefuseReason" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where refuseReason = #{refuseReason}
+	</select>
+	<select id="getByEmployeeNumber" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where employeeNumber = #{employeeNumber}
+	</select>
+	<select id="getByEmployeeName" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where employeeName = #{employeeName}
+	</select>
+	<select id="getByParentPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where parentPk = #{parentPk}
+	</select>
+
+	<select id="getByMobileForDelete" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_member where mobile = #{mobile}
+	</select>
+	
+</mapper>
+

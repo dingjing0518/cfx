@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysNewsDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,title,insertTime,isDelete,isVisable,content,recommend,top,keyword,newAbstrsct,url,estimatedTime,status,newSource,pvCount,recommendPosition,isPush
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_news (
+         pk, title, insertTime, isDelete, isVisable, content, recommend, top, keyword, newAbstrsct, url, estimatedTime, status, newSource, pvCount,recommendPosition,isPush
+        ) VALUES (
+         #{pk}, #{title}, #{insertTime}, #{isDelete}, #{isVisable}, #{content}, #{recommend}, #{top}, #{keyword}, #{newAbstrsct}, #{url}, #{estimatedTime}, #{status}, #{newSource}, #{pvCount},#{recommendPosition} ,#{isPush}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysNews">
+        UPDATE sys_news 
+        <set>
+        	<if test="title != null and title !=''">
+        		 title = #{title} ,
+        	</if>
+        	<if test="insertTime != null">
+        		insertTime = #{insertTime} ,
+        	</if>
+        	<if test="isDelete != null and isDelete !=''">
+        		  isDelete = #{isDelete} ,
+        	</if>
+        	<if test="isVisable != null and isVisable !=''">
+        		  isVisable = #{isVisable} ,
+        	</if>
+        	<if test="content != null and content !=''">
+        		  content = #{content} ,
+        	</if>
+        	<if test="recommend != null and recommend !=''">
+        		 recommend = #{recommend} ,
+        	</if>
+        	<if test="top != null and top !=''">
+        		 top = #{top} ,
+        	</if>
+        	<if test="keyword != null and keyword !=''">
+        		 keyword = #{keyword} ,
+        	</if>
+        	<if test="newAbstrsct != null and newAbstrsct !=''">
+        		newAbstrsct = #{newAbstrsct} ,
+        	</if>
+        	<if test="url != null and url !=''">
+        		 url = #{url} ,
+        	</if>
+        	<if test="estimatedTime != null">
+        		 estimatedTime = #{estimatedTime} ,
+        	</if>
+        	<if test="status != null and status !=''">
+        		status = #{status} ,
+        	</if>
+        	<if test="newSource != null and newSource !=''">
+				newSource = #{newSource} ,
+        	</if>
+			<if test="isPush != null and isPush !=''">
+				isPush = #{isPush} ,
+			</if>
+        	<if test="pvCount != null">
+        		pvCount = #{pvCount} ,
+        	</if>
+        	<if test="recommendPosition != null">
+        		recommendPosition = #{recommendPosition}
+        	</if>
+        	
+        </set>
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.SysNews">
+    <![CDATA[
+        DELETE FROM sys_news WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(title)">
+				AND title = #{title}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(content)">
+				AND content = #{content}			</if>
+			<if test="@Ognl@isNotEmpty(recommend)">
+				AND recommend = #{recommend}			</if>
+			<if test="@Ognl@isNotEmpty(top)">
+				AND top = #{top}			</if>
+			<if test="@Ognl@isNotEmpty(keyword)">
+				AND keyword = #{keyword}			</if>
+			<if test="@Ognl@isNotEmpty(newAbstrsct)">
+				AND newAbstrsct = #{newAbstrsct}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(estimatedTimeBegin)">
+				AND estimatedTime >= #{estimatedTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(estimatedTimeEnd)">
+				AND estimatedTime &lt;= #{estimatedTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(newSource)">
+				AND newSource = #{newSource}			</if>
+			<if test="@Ognl@isNotEmpty(pvCount)">
+				AND pvCount = #{pvCount}			</if>
+			<if test="@Ognl@isNotEmpty(isPush)">
+				AND isPush = #{isPush}			</if>
+
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_news
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where pk = #{pk}	</select>
+	<select id="getByTitle" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where title = #{title}	</select>
+	<select id="getByContent" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where content = #{content}	</select>
+	<select id="getByKeyword" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where keyword = #{keyword}	</select>
+	<select id="getByNewAbstrsct" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where newAbstrsct = #{newAbstrsct}	</select>
+	<select id="getByUrl" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where url = #{url}	</select>
+	<select id="getByNewSource" resultType="cn.cf.dto.SysNewsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_news where newSource = #{newSource}	</select>
+</mapper>
+

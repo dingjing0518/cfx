@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderGoodsDaoEx">
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+           pk,deliveryPk,goodsPk,
+           productName,productPk,
+           varietiesName,seedvarietyName,
+           specName,seriesName,gradeName,
+           gradePk,batchNumber,weight,
+           boxes,orderNumber,tareWeight,
+           originalFreight,presentFreight,
+           goodsName,goodsOriginalFreight,goodsPresentFreight,unit
+	    ]]>
+    </sql>
+
+    
+    <update id="updateByPkSelective" parameterType="cn.cf.dto.LgDeliveryOrderGoodsDto">
+    	 update lg_delivery_order_goods
+	      <trim prefix="set" suffixOverrides=",">
+	      <if test="deliveryPk != null">
+	        deliveryPk = #{deliveryPk,jdbcType=VARCHAR},
+	      </if>
+	      <if test="goodsPk != null">
+	        goodsPk = #{goodsPk,jdbcType=VARCHAR},
+	      </if>
+	      <if test="productName != null">
+	        productName = #{productName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="productPk != null">
+	        productPk = #{productPk,jdbcType=VARCHAR},
+	      </if>
+	      <if test="varietiesName != null">
+	        varietiesName = #{varietiesName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="seedvarietyName != null">
+	        seedvarietyName = #{seedvarietyName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="specName != null">
+	        specName = #{specName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="seriesName != null">
+	        seriesName = #{seriesName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="gradeName != null">
+	        gradeName = #{gradeName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="gradePk != null">
+	        gradePk = #{gradePk,jdbcType=VARCHAR},
+	      </if>
+	      <if test="batchNumber != null">
+	        batchNumber = #{batchNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="weight != null">
+	        weight = #{weight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="boxes != null">
+	        boxes = #{boxes,jdbcType=INTEGER},
+	      </if>
+	      <if test="orderNumber != null">
+	        orderNumber = #{orderNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="tareWeight != null">
+	        tareWeight = #{tareWeight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="originalFreight != null">
+	        originalFreight = #{originalFreight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="presentFreight != null">
+	        presentFreight = #{presentFreight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="goodsName != null">
+	        goodsName = #{goodsName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="goodsOriginalFreight != null">
+	        goodsOriginalFreight = #{goodsOriginalFreight,jdbcType=DECIMAL},
+	      </if>
+	      <if test="goodsPresentFreight != null">
+	        goodsPresentFreight = #{goodsPresentFreight,jdbcType=DECIMAL},
+	      </if>
+	    </trim>
+	    where pk = #{pk,jdbcType=VARCHAR}
+  </update>
+  
+
+  
+      <!-- 修改商品信息 -->
+  <update id="updateOrderGoodsByDeliveryPk" parameterType="java.util.Map">
+    update lg_delivery_order_goods set
+    originalFreight = #{basisLinePrice,jdbcType=DECIMAL},
+    presentFreight = #{basisLinePrice,jdbcType=DECIMAL},
+    goodsOriginalFreight = #{goodsOriginalFreight,jdbcType=DECIMAL},
+    goodsPresentFreight = #{goodsPresentFreight,jdbcType=DECIMAL}
+    where pk = #{pk,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

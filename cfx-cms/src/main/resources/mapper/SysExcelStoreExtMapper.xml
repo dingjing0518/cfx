@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysExcelStoreExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,params,isDeal,insertTime,methodName,url,accountPk,type,paramsName
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name LIKE '%${name}%'			</if>
+			<if test="@Ognl@isNotEmpty(params)">
+				AND params = #{params}			</if>
+			<if test="@Ognl@isNotEmpty(isDeal)">
+				AND isDeal = #{isDeal}			</if>
+			<if test="insertTimeStart !=null and insertTimeStart !=''">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertTimeStart}			</if>
+			<if test="insertTimeEnd !=null and insertTimeEnd !=''">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(methodName)">
+				AND methodName LIKE '%${methodName}%' </if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(accountPk)">
+				AND accountPk = #{accountPk}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(paramsName)">
+				AND paramsName = #{paramsName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		count(*)
+		FROM
+		(
+		SELECT
+		ss.*, acc.`name` as accountName,
+		acc.account AS account,
+		ro.`name` AS roleName,
+		ro.pk AS rolePk
+		FROM
+		(SELECT
+		<include refid="columns"/>
+		FROM sys_excel_store
+		<include refid="searchGridWhere"/>
+		) ss
+		LEFT JOIN manage_account acc ON ss.accountPk = acc.pk
+		LEFT JOIN manage_role ro ON acc.rolePk = ro.pk
+		) tab
+		where 1=1
+		<if test="@Ognl@isNotEmpty(accountName)">
+			AND accountName LIKE '%${accountName}%'			</if>
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.SysExcelStoreExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		ss.*, acc.`name` as accountName,
+		acc.account AS account,
+		ro.`name` AS roleName,
+		ro.pk AS rolePk
+		FROM
+		(SELECT
+		pk,name,params,isDeal,insertTime,methodName,url,
+		accountPk,type,paramsName,DATE_FORMAT(date_add(insertTime, interval 1 hour),'%Y-%m-%d %H:%i:%S') preTimes
+		FROM sys_excel_store
+			<include refid="searchGridWhere"/>
+		) ss
+		LEFT JOIN manage_account acc ON ss.accountPk = acc.pk
+		LEFT JOIN manage_role ro ON acc.rolePk = ro.pk
+		) tab
+		where 1=1
+		<if test="@Ognl@isNotEmpty(accountName)">
+			AND accountName LIKE '%${accountName}%'			</if>
+
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+
+	</select>
+
+
+	<select id="getFirstTimeExcelStore" resultType="cn.cf.dto.SysExcelStoreExtDto" parameterType="java.util.Map">
+        SELECT
+          *
+        FROM
+        (
+        SELECT
+        ss.*, acc.`name` as accountName,
+        acc.account AS account,
+        ro.`name` AS roleName,
+        ro.pk AS rolePk
+        FROM
+        (SELECT
+        pk,name,params,isDeal,insertTime,methodName,url,
+        accountPk,type,paramsName,DATE_FORMAT(date_add(insertTime, interval 1 hour),'%Y-%m-%d %H:%i:%S') preTimes
+        FROM sys_excel_store
+         WHERE
+        isDeal = 2
+        <if test="@Ognl@isNotEmpty(methodName)">
+            AND methodName LIKE concat(concat("%",SUBSTRING_INDEX(#{methodName},"_",1)),"%") </if>
+        <if test="@Ognl@isNotEmpty(type)">
+            AND type = #{type}			</if>
+			order by insertTime ASC
+			limit 0,1
+        ) ss
+        LEFT JOIN manage_account acc ON ss.accountPk = acc.pk
+        LEFT JOIN manage_role ro ON acc.rolePk = ro.pk
+        ) tab
+	</select>
+
+	<select id="getIsFirstTimeExcelStore" resultType="cn.cf.dto.SysExcelStoreExtDto" parameterType="java.util.Map">
+		SELECT
+		  *
+		FROM sys_excel_store
+		WHERE
+		isDeal = 2
+		order by insertTime ASC
+		limit 0,1
+	</select>
+</mapper>
+

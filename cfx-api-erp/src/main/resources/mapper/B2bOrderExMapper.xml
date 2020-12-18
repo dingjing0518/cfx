@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserPk,supplierPk,orderStatus,orderAmount,actualAmount,insertTime,meno,memberPk,memberName,storeName,storePk,paymentType,paymentName,economicsGoodsType,economicsGoodsName,source,paymentTime,logisticsModelPk,logisticsModelName,purchaseType,isDelete,isDeleteSp,employeeNumber,employeeName,employeePk,completeTime,orderClassify,receivablesTime,isBatches,deliverDetails,otherNumber,purchaserInfo,supplierInfo,addressInfo,ownAmount,block
+	    ]]>
+	</sql>
+
+	
+	<update id="updateOrderStatusAndAmount" parameterType="cn.cf.dto.B2bOrderDto">
+		UPDATE b2b_order 
+			<set>
+			<if test="actualAmount != null ">
+				actualAmount=#{actualAmount},
+			</if>
+			<if test="orderStatus != null ">
+				orderStatus=#{orderStatus},
+			</if>
+			<if test="receivablesTime != null">
+				receivablesTime = #{receivablesTime},
+			</if>
+			<if test="paymentType != null and paymentType !=''">
+				paymentType = #{paymentType},
+			</if>
+			<if test="paymentName != null and paymentName !=''">
+				paymentName = #{paymentName},
+			</if>
+			<if test="paymentTime != null">
+				paymentTime = #{paymentTime},
+			</if>
+		</set>
+        where orderNumber =
+		#{orderNumber}
+	</update>
+
+	<select id="getByOrderNumberEx" resultType="cn.cf.dto.B2bOrderDtoEx"
+		parameterType="java.lang.String">
+		SELECT *
+		FROM b2b_order where orderNumber = #{orderNumber}
+	</select>
+	
+	
+</mapper>
+

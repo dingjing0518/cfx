@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryRecordDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,activityPk,awardPk,status,name,awardName,awardStatus,awardType,insertTime,provinceName,province,cityName,city,areaName,area,town,townName,contacts,contactsTel,grantType,note,memberPk,memberName,address,companyPk,companyName,mobile,addressPk,activityType
+	    ]]>
+	</sql>
+
+
+
+	<update id="updateEx" parameterType="cn.cf.model.B2bLotteryRecord">
+		UPDATE b2b_lottery_record
+		<set>
+			<if test="address!=null ">
+				address = #{address} ,
+			</if>
+			<if test="province!=null ">
+				province = #{province} ,
+				provinceName = #{provinceName} ,
+			</if>
+			<if test="city!=null">
+				city = #{city} ,
+				cityName = #{cityName} ,
+			</if>
+			<if test="area!=null ">
+				area = #{area} ,
+				areaName = #{areaName} ,
+			</if>
+			<if test="town!=null">
+				town = #{town} ,
+				townName = #{townName} ,
+			</if>
+			<if test="contacts!=null">
+				contacts = #{contacts} ,
+			</if>
+			<if test="contactsTel!=null ">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="addressPk !=null ">
+				addressPk = #{addressPk}
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+
+
+
+
+
+
+
+ 
+
+	<select id="searchBeforeRecords" resultType="cn.cf.model.B2bLotteryRecord">
+		SELECT
+		<include refid="columns" />
+		FROM
+		b2b_lottery_record
+		WHERE
+		memberPk = #{memberPk}
+		AND awardType = 2
+		AND
+		(addressPk is not null and addressPk !='')
+		ORDER BY
+		insertTime DESC
+	</select>
+
+	<select id="searchToDayByActivityPk" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+				IFNULL(count(pk),0)
+		FROM
+		b2b_lottery_record
+		WHERE
+		to_days(insertTime) = to_days(now())
+		<if test="@Ognl@isNotEmpty(memberPk)">
+			AND memberPk = #{memberPk}
+		</if>
+
+	</select>
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+			<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+		
+		</select>
+		
+		<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+		
+
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(awardPk)">
+				AND awardPk = #{awardPk}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}			</if>
+			<if test="@Ognl@isNotEmpty(awardType)">
+				AND awardType = #{awardType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(addressPk)">
+				AND addressPk = #{addressPk}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(grantType)">
+				AND grantType = #{grantType}			</if>
+			<if test="@Ognl@isNotEmpty(note)">
+				AND note = #{note}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}			</if>
+				<if test="@Ognl@isNotEmpty(activityType)">
+				AND activityType = #{activityType}			</if>
+						<if test="@Ognl@isNotEmpty(isAdmin)">
+			  and	  (memberPk=#{isAdmin} or memberPk='')		</if>
+		</where>
+	</sql>
+
+
+</mapper>
+

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgUserAddressDaoEx">
+
+	<update id="updateIsDefault">
+		update lg_user_address set isDefault = 2 where (userPk = #{userPk} or
+		companyPk = #{companyPk} ) and `type`=#{type}
+	</update>
+
+	<update id="updatePartField" parameterType="cn.cf.dto.LgUserAddressDto">
+		UPDATE lg_user_address
+		<trim prefix="set" suffixOverrides=",">
+			<if test="companyPk != null and companyPk !=''">
+				companyPk = #{companyPk} ,
+			</if>
+			<if test="insertTime != null and insertTime !=''">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="address != null ">
+				address = #{address} ,
+			</if>
+			<if test="provinceName != null ">
+				provinceName = #{provinceName} ,
+			</if>
+			<if test="province != null ">
+				province = #{province} ,
+			</if>
+			<if test="cityName != null ">
+				cityName = #{cityName} ,
+			</if>
+			<if test="city != null ">
+				city = #{city} ,
+			</if>
+			<if test="area != null ">
+				area = #{area} ,
+			</if>
+			<if test="areaName != null ">
+				areaName = #{areaName} ,
+			</if>
+			<if test="town !=null ">
+				town = #{town},
+			</if>
+			<if test="townName !=null ">
+				townName = #{townName},
+			</if>
+			<if test="isDelete != null and isDelete !=''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="contacts != null and contacts !=''">
+				contacts = #{contacts} ,
+			</if>
+			<if test="contactsTel != null and contactsTel !=''">
+				contactsTel = #{contactsTel} ,
+			</if>
+			<if test="isDefault != null and isDefault !=''">
+				isDefault = #{isDefault} ,
+			</if>
+			<if test="type != null  ">
+				type = #{type} ,
+			</if>
+			<if test="title != null and title !=''">
+				title = #{title} ,
+			</if>
+			fixedTel = #{fixedTel} ,
+			zipCode = #{zipCode}
+		</trim>
+		WHERE
+		pk = #{pk}
+	</update>
+
+	<select id="searchEntity" parameterType="cn.cf.dto.LgUserAddressDto"
+		resultType="int">
+		select count(1) from lg_user_address where 1=1
+		<if test="@Ognl@isNotEmpty(pk)">
+			AND pk != #{pk}
+		</if>
+		<if test="@Ognl@isNotEmpty(userPk)">
+			AND (userPk = #{userPk} or companyPk = #{companyPk})
+		</if>
+		<if test="@Ognl@isNotEmpty(address)">
+			AND address = #{address}
+		</if>
+		<if test="@Ognl@isNotEmpty(province)">
+			AND province = #{province}
+		</if>
+		<if test="@Ognl@isNotEmpty(city)">
+			AND city = #{city}
+		</if>
+		<if test="@Ognl@isNotEmpty(area)">
+			AND area = #{area}
+		</if>
+		<if test="@Ognl@isNotEmpty(town)">
+			AND town = #{town}
+		</if>
+		<if test="@Ognl@isNotEmpty(contacts)">
+			AND contacts = #{contacts}
+		</if>
+		<if test="@Ognl@isNotEmpty(contactsTel)">
+			AND contactsTel = #{contactsTel}
+		</if>
+		<if test="@Ognl@isNotEmpty(type)">
+			AND `type` = #{type}
+		</if>
+		AND isDelete =1
+	</select>
+	
+	<select id="getByPkEx" resultType="cn.cf.dto.LgUserAddressDto"
+		parameterType="java.lang.String">
+		SELECT * FROM lg_user_address where pk = #{pk} and isDelete =1
+	</select>
+
+</mapper>

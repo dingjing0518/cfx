@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bStoreDaoEx">
+
+		<select id="getCompStoreByStorePk" resultType="cn.cf.dto.B2bStoreDtoEx">
+			SELECT
+				s.pk AS pk,
+				s.block,
+				s.NAME,
+				c.pk AS companyPk,
+				IF (
+					s.contacts IS NULL
+					OR s.contacts = '',
+					c.contacts,
+					s.contacts
+				) AS contacts,
+				IF (
+					s.contactsTel IS NULL
+					OR s.contactsTel = '',
+					c.contactsTel,
+					s.contactsTel
+				) AS contactsTel,
+				 c.provinceName,
+				 c.cityName,
+				 c.areaName,
+				 s.startTime,
+				 s.endTime,
+				 s.introduce,
+				 c.headPortrait,
+				 shopNotices,
+				 s.qq,
+				 logoSettings,
+				 s.isOpen,
+				 s.upperWeight,
+				  s.tightStock,
+				 s.showPricebfOpen
+			FROM b2b_store s
+			LEFT JOIN b2b_company c ON s.companyPk = c.pk
+			WHERE s.pk = #{pk}
+		</select>
+
+
+		<select id="getByGoodsPk" resultType="cn.cf.dto.B2bStoreDto">
+			SELECT s.* from b2b_goods g INNER JOIN b2b_store s on g.storePk = s.pk
+			WHERE g.pk = #{goodsPk}
+		</select>
+		
+		<select id="searchStoreByBrandPk" resultType="cn.cf.dto.B2bStoreDto"
+			parameterType="java.util.Map">
+			SELECT
+			s.*
+			FROM
+			b2b_goods_brand gb
+			LEFT JOIN b2b_store s ON gb.storePk = s.pk
+			WHERE
+			gb.isDelete = 1
+			<if test="brandPks != null and brandPks !=''">
+				AND gb.brandPk in
+				<foreach item="item" index="index" collection="brandPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			AND gb.auditStatus = 2
+			AND s.pk IS NOT NULL
+			GROUP BY
+			s.pk
+		</select>
+
+		<select id="storeIsOpen" resultType="cn.cf.dto.B2bStoreDto">
+		 <![CDATA[
+		 	SELECT
+				*
+			FROM
+				b2b_store
+			WHERE
+				pk = #{pk}
+			AND isOpen = 1
+			AND startTime <= DATE_FORMAT(NOW(), '%H:%i')
+			AND endTime >= DATE_FORMAT(NOW(), '%H:%i') 
+		 ]]>
+		</select>
+
+
+
+
+
+</mapper>
+

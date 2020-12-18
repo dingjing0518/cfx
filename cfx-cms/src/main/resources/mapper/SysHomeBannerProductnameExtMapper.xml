@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysHomeBannerProductnameExtDao">
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		pk,productPk,productName,sort,isVisable,isDelete,insertTime,updateTime,detail,url
+	    ]]>
+    </sql>
+    <select id="getAllSysBannerProductNameList" resultType="cn.cf.dto.SysHomeBannerProductnameDto">
+        SELECT
+        <include refid="columns" />
+        FROM sys_home_bannerproductname where isDelete = 1 and isVisable = 1
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+    </select>
+
+    <select id="getSysBannerProductNameToOtherList" resultType="cn.cf.dto.SysHomeBannerProductnameDto">
+        SELECT
+        <include refid="columns" />
+        FROM sys_home_bannerproductname where isDelete = 1
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+    </select>
+    
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}          </if>
+            <if test="@Ognl@isNotEmpty(productPk)">
+                AND productPk = #{productPk}            </if>
+            <if test="@Ognl@isNotEmpty(productName)">
+                AND productName = #{productName}            </if>
+            <if test="@Ognl@isNotEmpty(sort)">
+                AND sort = #{sort}          </if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}            </if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}          </if>
+            <if test="detail!=null">
+                AND detail = #{detail}          </if>
+            <if test="@Ognl@isNotEmpty(url)">
+                AND url = #{url}            </if>
+            <if test="@Ognl@isNotEmpty(insertTimeStart)">
+                AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeStart}           </if>
+            <if test="@Ognl@isNotEmpty(insertTimeEnd)">
+                AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}          </if>
+            <if test="@Ognl@isNotEmpty(updateTimeBegin)">
+                AND updateTime >= #{updateTimeBegin}            </if>
+            <if test="@Ognl@isNotEmpty(updateTimeEnd)">
+                AND updateTime &lt;= #{updateTimeEnd}           </if>
+                
+                AND isDelete = 1
+        </where>
+    </sql>
+
+
+    <select id="searchExtList" resultType="cn.cf.dto.SysHomeBannerProductnameDto"
+        parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM sys_home_bannerproductname
+        <include refid="searchGridWhere" />
+    </select>
+</mapper>

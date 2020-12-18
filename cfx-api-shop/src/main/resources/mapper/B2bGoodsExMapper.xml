@@ -1,0 +1,989 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bGoodsDaoEx">
+	<select id="isGoodsRepeated" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1)
+		FROM b2b_goods
+		WHERE
+		isDelete = 1
+		and block=#{block}
+		and storePk =#{storePk}
+		and brandPk =#{brandPk}
+		<!--cf: 区分号，等级，包装批号，品牌,批号， -->
+		<if test="block=='cf'">
+			and FIND_IN_SET('"batchNumber":"${batchNumber}"',goodsInfo)
+			<choose>
+				<when test="distinctNumber ==null || distinctNumber == ''">
+					and locate('"distinctNumber"',goodsInfo)=0
+				</when>
+				<otherwise>
+					and FIND_IN_SET('"distinctNumber":"${distinctNumber}"',goodsInfo)
+				</otherwise>
+			</choose>
+			and FIND_IN_SET('"gradePk":"${gradePk}"',goodsInfo)
+			<choose>
+				<when test="packNumber ==null || packNumber == ''">
+					and locate('"packNumber"',goodsInfo)=0
+				</when>
+				<otherwise>
+					and FIND_IN_SET('"packNumber":"${packNumber}"',goodsInfo)
+				</otherwise>
+			</choose>
+		</if>
+
+		<!--sx: 物料名称、品牌、所属公司、 -->
+		<if test="block=='sx'">
+			and FIND_IN_SET('"materialName":"${materialName}"',goodsInfo)
+			and companyPk =#{companyPk}
+		</if>
+		<if test="pk!=null and pk !=''">
+			and pk!=#{pk}
+		</if>
+
+	</select>
+
+	<update id="updateGoods" parameterType="cn.cf.model.B2bGoods">
+		UPDATE b2b_goods
+		<set>
+			updateTime = now(),
+			<if test="isDelete>0">
+				isDelete =#{isDelete},
+			</if>
+			<if test="price!=null">
+				price = #{price},
+			</if>
+			<if test="salePrice!=null">
+				salePrice = #{salePrice},
+			</if>
+			<if test="tonPrice !=null">
+				tonPrice = #{tonPrice},
+			</if>
+			<if test="companyPk!=null and companyPk!=''">
+				companyPk =#{companyPk},
+			</if>
+			<if test="companyName!=null and companyName!=''">
+				companyName = #{companyName},
+			</if>
+			<if test="brandPk!=null and brandPk!=''">
+				brandPk =#{brandPk},
+			</if>
+			<if test="brandName!=null and brandName!=''">
+				brandName = #{brandName},
+			</if>
+			<if test="isUpdown!=null and  isUpdown >-1">
+				isUpdown = #{isUpdown},
+				upTime =now(),
+			</if>
+			<if test="tareWeight!=null  ">
+				tareWeight = #{tareWeight},
+			</if>
+			<if test="totalBoxes!=null ">
+				totalBoxes = #{totalBoxes},
+			</if>
+			<if test="totalWeight!=null ">
+				totalWeight = #{totalWeight},
+			</if>
+			<if test="type!=null and type!=''">
+				type = #{type},
+			</if>
+			<if test="isNewProduct != null">
+				isNewProduct=#{isNewProduct},
+			</if>
+			<if test=" pk3!= null">
+				pk3=#{pk3},
+			</if>
+			<if test=" pk4!= null">
+				pk4=#{pk4},
+			</if>
+			<if test=" pk1!= null">
+				pk1=#{pk1},
+			</if>
+			<if test=" pk2!= null">
+				pk2=#{pk2},
+			</if>
+			<if test="goodsInfo!=null">
+				goodsInfo=#{goodsInfo},
+			</if>
+		</set>
+		where pk = #{pk}
+	</update>
+	
+	<select id="searchGoodsGrid" resultType="cn.cf.dto.B2bGoodsDtoEx"
+		parameterType="java.util.Map">
+		select REPLACE (REPLACE (REPLACE (g.goodsInfo, ',', ','),CHAR
+		(13),''),CHAR (10),'') as goodsInfo, g.*,
+		CASE g.isUpdown
+		WHEN 1 THEN
+		'待上架'
+		WHEN 2 THEN
+		'上架'
+		WHEN 3 THEN
+		'下架'
+		END AS upDown,
+		ifnull(s.isOpen, 2)
+		AS isOpen,
+		ifnull(s.showPricebfOpen, 1) AS showPricebfOpen,
+		s.upperWeight AS upperWeight,
+		IFNULL(s.tightStock, 0) AS tightStock,
+		s.startTime,
+		s.endTime
+		FROM
+		b2b_goods g
+		LEFT JOIN b2b_store s ON g.storePk
+		= s.pk
+		LEFT JOIN b2b_company c ON g.companyPk = c.pk
+		LEFT JOIN
+		b2b_goods_brand b ON g.brandPk = b.pk
+		<include refid="searchGoodsGridWhere" />
+		<if test="orderName != null and orderName !=''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="orderName == null or orderName ==''">
+			order by g.updateTime desc
+		</if>
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+
+	<select id="searchGoodsGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_goods g
+		left join b2b_store s on g.storePk =
+		s.pk
+		left join b2b_company c on
+		g.companyPk = c.pk
+		left join
+		b2b_goods_brand b on g.brandPk = b.pk
+		<include refid="searchGoodsGridWhere" />
+	</select>
+
+	<sql id="searchGoodsGridWhere">
+		<where>
+			1=1
+			<if test="pk != null and pk !=''">
+				AND g.pk = #{pk}
+			</if>
+			<if test="block != null and block !=''">
+				AND g.block = #{block}
+			</if>
+			<if test="storeName != null and storeName !=''">
+				AND g.storeName = #{storeName}
+			</if>
+			<if test="brandName != null and brandName !=''">
+				AND g.brandName = #{brandName}
+			</if>
+			<if test="storePk != null">
+				AND g.storePk = #{storePk}
+			</if>
+			<if test="companyPk != null and companyPk !=''">
+				AND g.companyPk = #{companyPk}
+			</if>
+			<if test="companyPks != null and companyPks !=''">
+				AND g.companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="pks != null and pks !=''">
+				AND g.pk in
+				<foreach item="item" index="index" collection="pks" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="brandPks != null and brandPks !=''">
+				AND b.brandPk IN
+				<foreach item="item" index="index" collection="brandPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="brandPk != null and brandPk !=''">
+				AND g.brandPk IN
+				<foreach item="item" index="index" collection="brandPk"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productPk != null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="technologyPk != null and technologyPk !=''">
+				<foreach collection="technologyPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"technologyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialPk != null and rawMaterialPk !=''">
+				<foreach collection="rawMaterialPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialParentPk != null and rawMaterialParentPk !=''">
+				<foreach collection="rawMaterialParentPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialParentPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="specifications != null and specifications !=''">
+			    and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="specPk != null and specPk !=''">
+				<foreach collection="specPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"specPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="gradePk != null and gradePk !=''">
+				<foreach collection="gradePk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"gradePk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="varietiesPk != null and varietiesPk !=''">
+				<foreach collection="varietiesPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="varietiesName != null and varietiesName !=''">
+				and FIND_IN_SET('"varietiesName":"${varietiesName}"',goodsInfo)
+			</if>
+			<if test="specName != null and specName !=''">
+				and FIND_IN_SET('"specName":"${specName}"',goodsInfo)
+			</if>
+			<if test="seedvarietyPk != null and seedvarietyPk !=''">
+				<foreach collection="seedvarietyPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"seedvarietyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="isUpdown != null and isUpdown !=''">
+				AND g.isUpdown = #{isUpdown}
+			</if>
+			<if test="packNumber != null and packNumber !=''">
+				and FIND_IN_SET('"packNumber":"${packNumber}"',goodsInfo)
+			</if>
+			<if test="technologyName != null and technologyName !=''">
+				and FIND_IN_SET('"technologyName":"${technologyName}"',goodsInfo)
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+			</if>
+			<if test="plantPk != null and plantPk !=''">
+				and FIND_IN_SET('"plantPk":"${plantPk}"',goodsInfo)
+			</if>
+			<if test="plantName != null and plantName !=''">
+				and FIND_IN_SET('"plantName":"${plantName}"',goodsInfo)
+			</if>
+			<if test="warePk != null and warePk !=''">
+				and FIND_IN_SET('"warePk":"${warePk}"',goodsInfo)
+			</if>
+			<if test="type != null and type != ''">
+				AND g.type = #{type}
+			</if>
+			<if test="updateTimeBegin !=null and updateTimeBegin !=''">
+				and g.updateTime &gt;=CONCAT(#{updateTimeBegin},'
+				00:00:00')
+			</if>
+			<if test="updateTimeEnd !=null and updateTimeEnd !=''">
+				and g.updateTime &lt;=CONCAT(#{updateTimeEnd},'
+				23:59:59')
+			</if>
+			<if test="@Ognl@isNotEmpty(searchKeys)">
+			 	${searchKeys}
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+			 AND ( g.brandName  like '%${searchKey}%' 
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"specName":',1),'"specName":"'),''),'"',1) like '%${searchKey}%' 
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"seriesName":',1),'"seriesName":"'),''),'"',1) like '%${searchKey}%' 
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"varietiesName":',1),'"varietiesName":"'),''),'"',1) like '%${searchKey}%' 
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"gradeName":',1),'"gradeName":"'),''),'"',1) like '%${searchKey}%' 
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"productName":',1),'"productName":"'),''),'"',1) like '%${searchKey}%'
+			or SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${searchKey}%'
+			)
+			</if>
+			<if test="isNewProduct != null">
+				AND g.isNewProduct = #{isNewProduct}
+			</if>
+			<if test="isDelete>0">
+				AND g.isDelete =#{isDelete}
+			</if>
+			<if test="companyStatus != null and companyStatus != '' ">
+				AND c.auditStatus = 2 and c.auditSpStatus = 2 and
+				c.isVisable = 1 and c.isDelete = 1
+			</if>
+			<if test="productName != null and productName !=''">
+				and FIND_IN_SET('"productName":"${productName}"',goodsInfo)
+			</if>
+			<if test="distinctNumber != null and distinctNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+			</if>
+			<if test="auction != null and auction !=''">
+				AND g.type != '${auction}'
+			</if>
+			<if test="binding != null and binding !=''">
+				AND g.type != '${binding}'
+			</if>
+			<if test="goodsType != null and goodsType !=''">
+				AND g.type IN
+				<foreach item="item" index="index" collection="goodsType"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="getGoodDetailsByPks" resultType="cn.cf.dto.B2bGoodsDto">
+		SELECT
+		REPLACE (REPLACE (REPLACE (goodsInfo, ',', ','),CHAR
+		(13),''),CHAR (10),'') as goodsInfo,b2b_goods.*
+		FROM
+		b2b_goods
+		WHERE
+		isDelete = 1
+		AND isUpdown = 2
+		<if test="@Ognl@isNotEmpty(goodPks)">
+			AND pk IN
+			<foreach item="item" index="index" collection="goodPks" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="searchUpdownCounts" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bGoodsDtoEx">
+		SELECT
+		isUpdown,count(isUpdown) as counts
+		FROM
+		b2b_goods
+		<include refid="searchGridWhereForGoods" />
+		GROUP BY
+		isUpdown
+	</select>
+
+	<sql id="searchGridWhereForGoods">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			1=1
+			<if test="technologyPk != null and technologyPk !=''">
+				<foreach collection="technologyPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"technologyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialPk != null and rawMaterialPk !=''">
+				<foreach collection="rawMaterialPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialParentPk != null and rawMaterialParentPk !=''">
+				<foreach collection="rawMaterialParentPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialParentPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}
+			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}
+			</if>
+			<if test="storePk != null">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(price)">
+				AND price = #{price}
+			</if>
+			<if test="@Ognl@isNotEmpty(salePrice)">
+				AND salePrice = #{salePrice}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPks)">
+				AND companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(brandPk)">
+				AND brandPk IN
+				<foreach item="item" index="index" collection="brandPk"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}
+			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				and FIND_IN_SET('"productName":"${productName}"',goodsInfo)
+			</if>
+			<if test="productPk !=null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(specifications)">
+				and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND FIND_IN_SET('"specName":"${specName}"',goodsInfo)
+			</if>
+			<if test="specPk !=null and specPk !=''">
+				<foreach collection="specPk" item="item" open=" AND(" close=" )"
+					separator=" or ">
+					FIND_IN_SET('"specPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				AND FIND_IN_SET('"seriesName":"${seriesName}"',goodsInfo)
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND FIND_IN_SET('"gradeName":"${gradeName}"',goodsInfo)
+			</if>
+			<if test="gradePk != null and gradePk!=''">
+				<foreach collection="gradePk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"gradePk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND FIND_IN_SET('"varietiesName":"${varietiesName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND FIND_IN_SET('"specName":"${specName}"',goodsInfo)
+			</if>
+			<if test="varietiesPk != null and varietiesPk!=''">
+				<foreach collection="varietiesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				AND FIND_IN_SET('"seedvarietyName":"${seedvarietyName}"',goodsInfo)
+			</if>
+			<if test="seedvarietyPk != null and seedvarietyPk !=''">
+				<foreach collection="seedvarietyPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seedvarietyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(isUpdown)">
+				AND isUpdown = #{isUpdown}
+			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND FIND_IN_SET('"packNumber":"${packNumber}"',goodsInfo)
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(tareWeight)">
+				AND tareWeight = #{tareWeight}
+			</if>
+			<if test="@Ognl@isNotEmpty(totalBoxes)">
+				AND totalBoxes = #{totalBoxes}
+			</if>
+			<if test="@Ognl@isNotEmpty(totalWeight)">
+				AND totalWeight = #{totalWeight}
+			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}
+			</if>
+			<if test="@Ognl@isNotEmpty(isNewProduct)">
+				AND isNewProduct = #{isNewProduct}
+			</if>
+			<if test="@Ognl@isNotEmpty(plantPk)">
+				AND FIND_IN_SET('"plantPk":"${plantPk}"',goodsInfo)
+			</if>
+			<if test="plantName != null and plantName !=''">
+				and FIND_IN_SET('"plantName":"${plantName}"',goodsInfo)
+			</if>
+			<if test="updateTimeBegin !=null and updateTimeBegin !=''">
+				and updateTime &gt;=CONCAT(#{updateTimeBegin},'
+				00:00:00')
+			</if>
+			<if test="updateTimeEnd !=null and updateTimeEnd !=''">
+				and updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+			</if>
+			<if test="auction != null and auction !=''">
+				AND type != #{auction}
+			</if>
+			<if test="binding != null and binding !=''">
+				AND type != #{binding}
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				 AND ( brandName  like '%${searchKey}%' 
+				or SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"specName":',1),'"specName":"'),''),'"',1) like '%${searchKey}%' 
+				or SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"seriesName":',1),'"seriesName":"'),''),'"',1) like '%${searchKey}%' 
+				or SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"varietiesName":',1),'"varietiesName":"'),''),'"',1) like '%${searchKey}%' 
+				or SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"gradeName":',1),'"gradeName":"'),''),'"',1) like '%${searchKey}%' 
+				or SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"productName":',1),'"productName":"'),''),'"',1) like '%${searchKey}%' 
+				)
+			</if>
+			<if test="distinctNumber != null and distinctNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+			</if>
+		</where>
+	</sql>
+
+
+	<update id="updateDataZero" parameterType="java.util.Map">
+		UPDATE b2b_goods
+		<set>
+			<if test="clearKuCun==true">
+				totalBoxes=0 ,totalWeight=0 ,
+			</if>
+			<if test="clearUpdown ==true ">
+				isUpdown = 3 ,
+			</if>
+			<if test="clearPrice ==true">
+				price = 0.00 ,tonPrice=0.00,salePrice=0.00,
+			</if>
+		</set>
+		WHERE storePk=#{storePk} and isDelete = #{isDelete}
+	</update>
+
+	<update id="updateImportGoods">
+		UPDATE b2b_goods
+		<set>
+			totalBoxes = #{totalBoxes},
+			totalWeight = #{totalWeight},
+			tareWeight =#{tareWeight},
+			salePrice = #{salePrice},
+			tonPrice = #{tonPrice},
+			price=#{price},
+			updateTime = now(),
+			goodsInfo=#{goodsInfo},
+			isUpdown = #{isUpdown}
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+	<select id="getOpenDetails" parameterType="java.lang.String"
+		resultType="cn.cf.dto.B2bGoodsDto">
+		SELECT
+		REPLACE (REPLACE (REPLACE (g.goodsInfo, ',',
+		','),CHAR (13),''),CHAR (10),'') as goodsInfo,
+		g.*
+		FROM
+		b2b_store s
+		LEFT
+		JOIN b2b_goods g on
+		g.storePk=s.pk
+		WHERE
+		g.pk=#{goodPk}
+		AND s.isOpen = 1
+		AND
+		TIME_TO_SEC(s.startTime) &lt;= TIME_TO_SEC(now())
+		AND
+		TIME_TO_SEC(s.endTime) >= TIME_TO_SEC(now())
+	</select>
+
+	<select id="searchListBySalesMan" resultType="cn.cf.dto.B2bGoodsDtoEx">
+		SELECT
+		pk,
+		ifnull(storeName, '') AS storeName,
+		storePk,
+		price,
+		salePrice,
+		tonPrice,
+		companyPk,
+		ifnull(companyName, '') AS companyName,
+		brandPk,
+		ifnull(brandName, '') AS brandName,
+		insertTime,
+		isUpdown,
+		updateTime,
+		upTime,
+		tareWeight,
+		totalBoxes,
+		totalWeight,
+		REPLACE (REPLACE (REPLACE (goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'')
+		as goodsInfo,
+		isNewProduct,
+		block,
+		type,
+		pk1,
+		pk2,
+		pk3,
+		pk4,
+		CASE isUpdown
+		WHEN 1 THEN
+		'待上架'
+		WHEN 2 THEN
+		'上架'
+		WHEN 3 THEN
+		'下架'
+		END AS upDown,
+		s.upperWeight,
+		IFNULL(s.tightStock, 0) AS tightStock
+		FROM
+		b2b_goods,
+		(
+		SELECT
+		pk AS sPk,
+		upperWeight,
+		tightStock
+		FROM
+		b2b_store
+		WHERE
+		pk = #{storePk}) as
+		s
+		<include refid="searchGoodsBySaleMan" />
+		and b2b_goods.storePk = s.sPk
+		and b2b_goods.type!='auction'
+		and
+		b2b_goods.type!='binding'
+		<if test="sType ==1">
+			and b2b_goods.pk is null
+		</if>
+		<if test="sqlStr!=null and sqlStr!=''">
+			and (${sqlStr})
+		</if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+	<select id="searchGridCountBySalesMan" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		b2b_goods,
+		(
+		SELECT
+		pk AS sPk,
+		upperWeight,
+		tightStock
+		FROM
+		b2b_store
+		WHERE
+		pk = #{storePk}) as
+		s
+		<include refid="searchGoodsBySaleMan" />
+		and b2b_goods.storePk = s.sPk
+		and b2b_goods.type!='auction'
+		and
+		b2b_goods.type!='binding'
+		<if test="sType ==1">
+			and b2b_goods.pk is null
+		</if>
+		<if test="sqlStr!=null and sqlStr!=''">
+			and (${sqlStr})
+		</if>
+	</select>
+	
+	<sql id="searchGoodsBySaleMan">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			1=1
+    	 	<if test="productPk != null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+	   		<if test="specPk != null and specPk !=''">
+				<foreach collection="specPk" item="item" open=" AND(" close=" )"
+					separator=" or ">
+					FIND_IN_SET('"specPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="gradePk != null and gradePk !=''">
+				<foreach collection="gradePk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"gradePk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="varietiesPk != null and varietiesPk !=''">
+				<foreach collection="varietiesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seedvarietyPk != null and seedvarietyPk !=''">
+				<foreach collection="seedvarietyPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seedvarietyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="technologyPk != null and technologyPk !=''">
+				<foreach collection="technologyPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"technologyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialPk != null and rawMaterialPk !=''">
+				<foreach collection="rawMaterialPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialParentPk != null and rawMaterialParentPk !=''">
+				<foreach collection="rawMaterialParentPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialParentPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="brandPk != null and brandPk !=''">
+				AND  brandPk IN
+				<foreach item="item" index="index" collection="brandPk"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="storePk != null">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPks)">
+				AND companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}
+			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				and FIND_IN_SET('"productName":"${productName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(specifications)">
+				and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				and FIND_IN_SET('"specName":"${specName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				and FIND_IN_SET('"seriesName":"${seriesName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				and FIND_IN_SET('"gradeName":"${gradeName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND goodsInfo like '%varietiesName%${varietiesName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				and goodsInfo like '%specName%${specName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				and FIND_IN_SET('"seedvarietyName":"${seedvarietyName}"',goodsInfo)
+			</if>
+			<!-- <if test="@Ognl@isNotEmpty(auditPk)"> AND auditPk = #{auditPk} </if> -->
+			<if test="@Ognl@isNotEmpty(isUpdown)">
+				AND isUpdown = #{isUpdown}
+			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND goodsInfo like '%packNumber%${packNumber}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(tareWeight)">
+				AND tareWeight = #{tareWeight}
+			</if>
+			<if test="@Ognl@isNotEmpty(totalBoxes)">
+				AND totalBoxes = #{totalBoxes}
+			</if>
+			<if test="@Ognl@isNotEmpty(totalWeight)">
+				AND totalWeight = #{totalWeight}
+			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}
+			</if>
+			<if test="@Ognl@isNotEmpty(isNewProduct)">
+				AND isNewProduct = #{isNewProduct}
+			</if>
+			<if test="@Ognl@isNotEmpty(plantPk)">
+				and FIND_IN_SET('"plantPk":"${plantPk}"',goodsInfo)
+			</if>
+				<if test="plantName != null and plantName !=''">
+				and FIND_IN_SET('"plantName":"${plantName}"',goodsInfo)
+			</if>
+			<if test="@Ognl@isNotEmpty(distinctNumber)">
+				and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+			</if>
+			<if test="updateTimeBegin !=null and updateTimeBegin !=''">
+				and updateTime &gt;=CONCAT(#{updateTimeBegin},'
+				00:00:00')
+			</if>
+			<if test="updateTimeEnd !=null and updateTimeEnd !=''">
+				and updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+			</if>
+			<if test="auction != null and auction !=''">
+				AND type != #{auction}
+			</if>
+			<if test="binding != null and binding !=''">
+				AND type != #{binding}
+			</if>
+			<if test="@Ognl@isNotEmpty(searchKey)">
+				and b2b_goods.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchSaleGoodsCounts" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*)
+		FROM
+		b2b_goods
+		<include refid="searchGridWhereForGoods" />
+	</select>
+
+	 
+
+	<select id="getDetailsById" resultType="cn.cf.dto.B2bGoodsDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		REPLACE (REPLACE (REPLACE (g.goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'')
+		as goodsInfo,
+		g.*,
+		ifnull(s.isOpen, 2) AS isOpen,
+		ifnull(s.showPricebfOpen, 1) AS showPricebfOpen,
+		s.upperWeight,
+		IFNULL(s.tightStock, 0) AS tightStock,
+		s.startTime,
+		s.endTime,
+		s.qq,
+		s.contactsTel
+
+		FROM
+		b2b_goods g
+		LEFT JOIN b2b_store s ON g.storePk = s.pk
+		LEFT JOIN b2b_company c ON g.companyPk = c.pk
+		where g.pk= #{pk}
+
+	</select>
+
+
+	<select id="searchGoodsDetail" resultType="cn.cf.dto.B2bGoodsDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		g.*,
+		ifnull(s.isOpen, 2) AS isOpen,
+		s.startTime,
+		s.endTime,
+		ifnull(s.showPricebfOpen,
+		1) AS
+		showPricebfOpen,s.upperWeight
+		FROM
+		b2b_goods g
+		LEFT JOIN b2b_store s ON
+		g.storePk=s.pk
+		WHERE
+		1=1
+		<if test="goodPks != null and goodPks !=''">
+		and	g.pk in
+			<foreach item="item" index="index" collection="goodPks" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+		and g.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+		<if test="isOpen!=null and isOpen!=''">
+			and s.isOpen=#{isOpen}
+		</if>
+		<if test="isUpdown!=null and isUpdown!=''">
+			and g.isUpdown =#{isUpdown}
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			AND TIME_TO_SEC(s.startTime) &lt;=
+			TIME_TO_SEC(#{startTime})
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND TIME_TO_SEC(s.endTime) >= TIME_TO_SEC(#{endTime})
+		</if>
+		<if test="type!=null and type!=''">
+			and g.type=#{type}
+		</if>
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+
+	<select id="searchGoodsGridCountList" parameterType="java.util.Map"
+			resultType="int">
+		SELECT count(*) FROM b2b_goods g
+		LEFT JOIN b2b_store s ON
+		g.storePk=s.pk
+		WHERE 1=1 
+		<if test="goodPks != null and goodPks !=''">
+			and g.pk in
+			<foreach item="item" index="index" collection="goodPks"
+					 open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="isOpen!=null and isOpen!=''">
+			and s.isOpen=#{isOpen}
+		</if>
+		<if test="isUpdown!=null and isUpdown!=''">
+			and g.isUpdown =#{isUpdown}
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			AND TIME_TO_SEC(s.startTime) &lt;=
+			TIME_TO_SEC(#{startTime})
+		</if>
+		<if test="endTime!=null and endTime!=''">
+			AND TIME_TO_SEC(s.endTime) >= TIME_TO_SEC(#{endTime})
+		</if>
+		<if test="type!=null and type!=''">
+			and g.type=#{type}
+		</if>
+<if test="searchKey != null and searchKey != ''">
+and g.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+	</select>
+</mapper>
+

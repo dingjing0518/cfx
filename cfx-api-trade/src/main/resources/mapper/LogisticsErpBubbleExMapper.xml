@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpBubbleDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,productPk,productName,insetTime,isDelete,isVisable
+	    ]]>
+	</sql>
+
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name like '%${name}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insetTimeBegin)">
+				AND insetTime >= #{insetTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insetTimeEnd)">
+				AND insetTime &lt;= #{insetTimeEnd}			</if>
+				
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			AND isDelete = 1
+				<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+		</where>
+	</sql>
+
+	<select id="searchExistence" parameterType="cn.cf.dto.LogisticsErpBubbleDto"
+		resultType="int">
+		SELECT
+		count(*)
+		FROM
+		logistics_erp_bubble
+		WHERE
+		 isDelete =1
+		<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			and pk !=#{pk}
+			 
+	</select>
+	
+	<select id="searchBubbleList" resultType="cn.cf.dto.LogisticsErpBubbleDto">
+	SELECT
+		<include refid="columns" />
+		FROM logistics_erp_bubble
+		<include refid="searchGridWhere" />
+			ORDER BY name ,productPk  
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	 <select id="searchBubbleCount" parameterType="java.util.Map"
+		resultType="int">
+ SELECT
+		count(*)
+		FROM logistics_erp_bubble
+		<include refid="searchGridWhere" />
+		 
+ </select>
+ 
+  <select id="searchBubbleCounts" resultType="map">
+SELECT
+	count(1) AS allCounts,
+	IFNULL(
+		SUM(
+			CASE isVisable
+			WHEN 1 THEN
+				1
+			ELSE
+				0
+			END
+		),
+		0
+	) AS visableCounts,
+	IFNULL(
+		SUM(
+			CASE isVisable
+			WHEN 2 THEN
+				1
+			ELSE
+				0
+			END
+		),
+		0
+	) AS unVisableCounts
+FROM
+	logistics_erp_bubble
+	<include refid="searchGridWhere" />
+ </select>
+</mapper>
+

@@ -1,0 +1,1383 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderExtDao">
+     <select id="getlgOrder" resultType="cn.cf.model.LgOrderGridModel"
+            parameterType="Map">
+        SELECT
+        de.pk,
+        de.deliveryNumber as orderPk,
+        DATE_FORMAT(
+        de.orderTime,
+        '%Y-%m-%d %H:%i:%s'
+        )
+        AS orderTime,
+        CONCAT(
+        DATE_FORMAT(de.arrivedTimeStart,'%Y-%m-%d %H:%i:%s') ,"_",
+        DATE_FORMAT(de.arrivedTimeEnd,'%Y-%m-%d %H:%i:%s') )AS arrivedTime ,
+        CONCAT(
+        IFNULL(go.productName,''),
+        IFNULL(go.varietiesName,''),
+        IFNULL(go.seedvarietyName,''),
+        IFNULL(go.specName,''),
+        IFNULL(go.seriesName,''),
+        IFNULL(go.gradeName,''),
+        IFNULL(go.batchNumber,'')
+        ) AS goodsName,
+        CASE de.orderStatus
+        WHEN 2 THEN
+        "已取消"
+        WHEN 3 THEN
+        "已签收"
+        WHEN 4 THEN
+        "配送中"
+        WHEN 5 THEN
+        "提货中"
+        WHEN 6 THEN
+        "已确认,待指派车辆"
+        WHEN 8 THEN
+        "待确认"
+        WHEN 9 THEN
+        "待付款"
+        WHEN 10 THEN
+        "已关闭"
+        ELSE
+        ""
+        END AS orderStatusName,
+        go.boxes,
+        go.weight,
+        go.presentFreight,
+        de.presentTotalFreight,
+        ifnull(go.originalFreight,0) as  originalFreight,
+        ifnull( de.originalTotalFreight,0) as originalTotalFreight,
+        de.orderStatus,
+        if(${colFromComName}, ifnull(de.supplierName,de.fromCompanyName),INSERT (  ifnull(de.supplierName,de.fromCompanyName), 3, 5, '*****'))  as supplierName,
+        de.fromCompanyName,
+        de.orderTime,
+        if(${colLogisticsComName}, de.logisticsCompanyName, INSERT ( de.logisticsCompanyName, 3, 5, '*****')) as logisticsCompanyName,
+        if(${colFromAddress}, CONCAT(
+        IFNULL(de.fromProvinceName,'') ,
+        IFNULL(de.fromCityName,''),
+        IFNULL(de.fromAreaName,''),
+        IFNULL(de.fromTownName,''),
+        IFNULL(de.fromAddress,'')
+        ),"*****" )AS fromAddress,
+        if(${colFromContacts} , de.fromContacts,  INSERT (de.fromContacts,  1, 1, '*')) as fromContacts ,
+        if(${colFromContactsTel} , de.fromContactsTel, INSERT ( de.fromContactsTel,  4, 4, '****')) as fromContactsTel ,
+        if(${colToAddress},  CONCAT(
+        IFNULL(de.toProvinceName,''),
+        IFNULL(de.toCityName,''),
+        IFNULL(de.toAreaName,''),
+        IFNULL(de.toTownName,''),
+        IFNULL(de.toAddress,'')
+        ),"*****") AS toAddress,
+        if(${colToComName}, de.toCompanyName, INSERT ( de.toCompanyName, 3, 5, '*****')) as toCompanyName,        
+        if(${colToContacts} , de.toContacts,  INSERT (de.toContacts,  1, 1, '*')) as toContacts ,
+        if(${colToContactsTel} , de.toContactsTel, INSERT ( de.toContactsTel,  4, 4, '****')) as toContactsTel ,
+        CASE de.isConfirmed
+        WHEN 1 THEN
+        "异常订单—已确认"
+        WHEN 2 THEN
+        "异常订单—未确认"
+        ELSE
+        ""
+        END AS
+        isConfirmedName,
+        de.settleWeight,
+        de.isConfirmed,
+        de.isAbnormal,
+        de.isMatched
+        from lg_delivery_order de
+        inner join lg_delivery_order_goods go on
+        de.Pk = go.deliveryPk
+        <include refid="searchGridWhere" />
+
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+
+    <select id="countlgOrder" resultType="Integer" parameterType="Map">
+        select count(*)
+        from lg_delivery_order de inner join lg_delivery_order_goods go
+        on
+        de.Pk = go.deliveryPk
+        <include refid="searchGridWhere" />
+    </select>
+
+    <sql id="searchGridWhere">
+        <where>
+            1=1
+            <if test="orderNum !=null and orderNum !=''">
+                and de.deliveryNumber like '%${orderNum}%'
+            </if>
+
+            <if test="toCompanyName !=null and toCompanyName !=''">
+                and de.toCompanyName like '%${toCompanyName}%'
+            </if>
+            <if test="goodsInfo !=null and goodsInfo !=''">
+                and ( go.productName like "%${goodsInfo}%" or
+                go.varietiesName like "%${goodsInfo}%" or
+                go.gradeName like
+                "%${goodsInfo}%" or
+                go.batchNumber like "%${goodsInfo}%"
+                )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                AND str_to_date(de.orderTime, '%Y-%m-%d') &gt;=
+                str_to_date(#{orderTimeStart}, '%Y-%m-%d')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                AND str_to_date(de.orderTime, '%Y-%m-%d') &lt;=
+                str_to_date(#{orderTimeEnd}, '%Y-%m-%d')
+            </if>
+            <if test="arrivedTimeStart !=null and arrivedTimeStart !=''">
+                and str_to_date(de.arrivedTimeStart, '%Y-%m-%d') &gt;=
+                str_to_date(#{arrivedTimeStart},'%Y-%m-%d')
+            </if>
+            <if test="arrivedTimeEnd !=null and arrivedTimeEnd !=''">
+                and str_to_date(de.arrivedTimeEnd, '%Y-%m-%d') &lt;=str_to_date(#{arrivedTimeEnd},
+                '%Y-%m-%d')
+            </if>
+            <if test="fromCompanyName !=null and fromCompanyName !=''">
+                <![CDATA[	AND
+			IF (de.supplierName!='',
+			de.supplierName LIKE  '%${fromCompanyName}%',
+			de.fromCompanyName LIKE  '%${fromCompanyName}%'
+			)]]>
+            </if>
+            <if test="toContactsTel !=null and toContactsTel !=''">
+                and de.toContactsTel like '%${toContactsTel}%'
+            </if>
+            <if test="toCompanyName !=null and toCompanyName !=''">
+                and de.toCompanyName like '%${toCompanyName}%'
+            </if>
+            <if test="fromContactsTel !=null and fromContactsTel !=''">
+                and de.fromContactsTel like '%${fromContactsTel}%'
+            </if>
+            <if test="orderStatus!=null  and orderStatus!='' ">
+                and de.orderStatus=#{orderStatus}
+            </if>
+            <if test="isMatched !=null">
+                and de.isMatched = #{isMatched}
+            </if>
+            <if test="isAbnormal !=null">
+                and de.isAbnormal = #{isAbnormal}
+            </if>
+            <if test="isConfirmed !=null">
+                and de.isConfirmed = #{isConfirmed}
+            </if>
+            <if test="companyPk !=null">
+                and de.logisticsCompanyPk =#{companyPk}
+            </if>
+            <if test="insertTime !=null and insertTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d %H:%i:%s') &lt;=
+				str_to_date(#{insertTime}, '%Y-%m-%d %H:%i:%s')
+			</if>
+            <if test="orderName != null">
+                order by de.${orderName} ${orderType}
+            </if>
+        </where>
+    </sql>
+    <select id="selectHideDetailByPk"     parameterType="Map"
+            resultType="cn.cf.dto.LgOrderDetailDto">
+        SELECT
+        de.pk,
+        de.orderPk,
+        de.orderStatus,
+        CASE de.orderStatus
+        WHEN 2 THEN
+        "已取消"
+        WHEN 3 THEN
+        "已签收"
+        WHEN 4 THEN
+        "配送中"
+        WHEN 5 THEN
+        "提货中"
+        WHEN 6 THEN
+        "已确认,待指派车辆"
+        WHEN 8 THEN
+        "待确认"
+        WHEN 9 THEN
+        "待付款"
+        WHEN 10 THEN
+        "已关闭"
+        ELSE
+        ""
+        END AS orderStatusName,
+        de.logisticsCompanyPk,
+        de.logisticsCompanyName,
+        de.orderTime,
+        de.fromCompanyName,
+        if(${colFromComName}, ifnull(de.supplierName,de.fromCompanyName),INSERT (  ifnull(de.supplierName,de.fromCompanyName), 3, 5, '*****'))  as supplierName,
+         if(${colFromContacts} , de.fromContacts,  INSERT (de.fromContacts,  1, 1, '*')) as fromContacts ,
+        if(${colFromContactsTel} , de.fromContactsTel, INSERT ( de.fromContactsTel,  4, 4, '****')) as fromContactsTel ,
+        de.presentTotalFreight,
+        if(${colFromAddress}, CONCAT(
+        IFNULL(de.fromProvinceName,'') ,
+        IFNULL(de.fromCityName,''),
+        IFNULL(de.fromAreaName,''),
+        IFNULL(de.fromTownName,''),
+        IFNULL(de.fromAddress,'')
+        ),"*****" )AS fromAddress,
+         if(${colToAddress},  CONCAT(
+        IFNULL(de.toProvinceName,''),
+        IFNULL(de.toCityName,''),
+        IFNULL(de.toAreaName,''),
+        IFNULL(de.toTownName,''),
+        IFNULL(de.toAddress,'')
+        ),"*****") AS toAddress,
+        if(${colToComName}, de.toCompanyName, INSERT ( de.toCompanyName, 3, 5, '*****')) as toCompanyName,        
+        if(${colToContacts} , de.toContacts,  INSERT (de.toContacts,  1, 1, '*')) as toContacts ,
+        if(${colToContactsTel} , de.toContactsTel, INSERT ( de.toContactsTel,  4, 4, '****')) as toContactsTel ,
+        de.deliveryNumber,
+        de.abnormalRemark,
+        de.paymentName,
+        de.remark,
+        go.productName,
+        go.varietiesName,
+        go.seedvarietyName,
+        go.specName,
+        go.seriesName,
+        go.gradeName,
+        go.batchNumber,
+        go.boxes,
+        go.weight,
+        go.presentFreight,
+        go.goodsName,
+        if(${colInvoinceName},  de.invoiceName ,INSERT (de.invoiceName, 3, 5, '*****'))  AS invoiceTitle,
+        if(${colInvoinceTaxidNum},  de.invoiceTaxidNumber ,INSERT (de.invoiceTaxidNumber, 1, 8, '********'))  AS taxidNumber,
+        if(${colInvoinceBankAccount},  de.invoiceBankName , '*****')  AS bankName,
+        if(${colInvoinceBankName},  de.invoiceBankAccount , '*****')  AS bankAccount,
+        de.invoiceRegAddress AS regAddress,
+        de.originalTotalFreight AS originalTotalFreight,
+        de.basisLinePrice AS basisLinePrice,
+        de.memberPk,
+        CASE go.unit
+        WHEN 1 THEN
+        "箱"
+        WHEN 2 THEN
+        "锭"
+        WHEN 3 THEN
+        "件"
+        WHEN 4 THEN
+        "粒"
+        ELSE
+        "箱"
+        END AS unit
+        FROM
+        lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods go ON de.pk = go.deliveryPk
+        WHERE
+        de.pk = #{pk}
+    </select>
+    <select id="selectDetailByPk" parameterType="String"
+            resultType="cn.cf.dto.LgOrderDetailDto">
+        SELECT
+        de.pk,
+        de.orderPk,
+        de.orderStatus,
+        CASE de.orderStatus
+        WHEN 2 THEN
+        "已取消"
+        WHEN 3 THEN
+        "已签收"
+        WHEN 4 THEN
+        "配送中"
+        WHEN 5 THEN
+        "提货中"
+        WHEN 6 THEN
+        "已确认,待指派车辆"
+        WHEN 8 THEN
+        "待确认"
+        WHEN 9 THEN
+        "待付款"
+        WHEN 10 THEN
+        "已关闭"
+        ELSE
+        ""
+        END AS orderStatusName,
+        de.logisticsCompanyPk,
+        de.logisticsCompanyName,
+        de.orderTime,
+        de.fromCompanyName,
+        de.presentTotalFreight,
+        CONCAT(
+        IFNULL(de.fromProvinceName, ''),
+        IFNULL(de.fromCityName, ''),
+        IFNULL(de.fromAreaName, ''),
+        IFNULL(de.fromTownName, ''),
+        IFNULL(de.fromAddress, '')
+        ) AS fromAddress,
+        CONCAT(
+        IFNULL(de.toProvinceName, ''),
+        IFNULL(de.toCityName, ''),
+        IFNULL(de.toAreaName, ''),
+        IFNULL(de.toTownName, ''),
+        IFNULL(de.toAddress, '')
+        ) AS toAddress,
+        de.fromContacts,
+        de.fromContactsTel,
+        de.toCompanyName,
+        de.deliveryNumber,
+        de.toContacts,
+        de.toContactsTel,
+        de.abnormalRemark,
+        de.paymentName,
+        de.remark,
+        go.productName,
+        go.varietiesName,
+        go.seedvarietyName,
+        go.specName,
+        go.seriesName,
+        go.gradeName,
+        go.batchNumber,
+        go.boxes,
+        go.weight,
+        go.presentFreight,
+        go.goodsName,
+        de.invoiceName AS invoiceTitle,
+        de.invoiceTaxidNumber AS taxidNumber,
+        de.invoiceRegAddress AS regAddress,
+        de.invoiceBankName AS bankName,
+        de.invoiceBankAccount AS bankAccount,
+        de.originalTotalFreight AS originalTotalFreight,
+        de.basisLinePrice AS basisLinePrice,
+        de.memberPk,
+        de.supplierName,
+        CASE go.unit
+        WHEN 1 THEN
+        "箱"
+        WHEN 2 THEN
+        "锭"
+        WHEN 3 THEN
+        "件"
+        WHEN 4 THEN
+        "粒"
+        ELSE
+        "箱"
+        END AS unit
+        FROM
+        lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods go ON de.pk = go.deliveryPk
+        WHERE
+        de.pk = #{pk}
+    </select>
+
+    <update id="savePushLgCompanyName" parameterType="java.util.Map">
+        UPDATE lg_delivery_order
+        <set>
+            logisticsCompanyPk = #{logisticsCompanyPk},
+            logisticsCompanyName =#{logisticsCompanyName},
+            basisLinePrice = #{basisLinePrice},
+            linePricePk = #{linePricePk},
+            settleWeight = #{settleWeight},
+            presentTotalFreight = #{presentTotalFreight},
+            originalTotalFreight = #{originalTotalFreight},
+            isMatched = #{isMatched},
+            updateTime = SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+    <update id="sureMoney" parameterType="java.util.Map">
+        UPDATE lg_delivery_order
+        <set>
+            orderStatus = #{orderStatus},
+            financialTime = SYSDATE(),
+            updateTime = SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+    <update id="submitFeedBack">
+        UPDATE lg_delivery_order
+        <set>
+            abnormalRemark = #{abnormalRemark},
+            isAbnormal = 2,
+            isConfirmed = 2,
+            updateTime =SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+    <select id="selectAddress" parameterType="String"
+            resultType="cn.cf.entity.LogisticsOrderAddress">
+        SELECT
+        pk,
+        fromContacts,
+        fromContactsTel,
+        fromAddress,
+        fromProvinceName,
+        fromProvincePk,
+        fromCityName,
+        fromCityPk,
+        fromAreaName,
+        fromAreaPk,
+        fromTownPk,
+        fromTownName,
+        toAddress,
+        toProvinceName,
+        toProvincePk,
+        toCityName,
+        toCityPk,
+        toAreaName,
+        toAreaPk,
+        toTownPk,
+        toTownName,
+        toContacts,
+        toContactsTel
+        FROM
+        lg_delivery_order
+        WHERE
+        pk =
+        #{pk}
+    </select>
+
+    <update id="saveOrder" parameterType="cn.cf.entity.LogisticsOrderAddress">
+        UPDATE lg_delivery_order
+        <set>
+            fromContacts=#{fromContacts},
+            fromContactsTel=#{fromContactsTel},
+            fromAddress=#{fromAddress},
+            fromProvinceName=#{fromProvinceName},
+            fromProvincePk = #{fromProvincePk},
+            fromCityName =#{fromCityName},
+            fromCityPk = #{fromCityPk},
+            fromAreaName = #{fromAreaName},
+            fromAreaPk = #{fromAreaPk},
+            fromTownPk = #{fromTownPk},
+            fromTownName =#{fromTownName},
+            toAddress = #{toAddress},
+            toProvinceName = #{toProvinceName},
+            toProvincePk = #{toProvincePk},
+            toCityName = #{toCityName },
+            toCityPk = #{toCityPk},
+            toAreaName = #{toAreaName},
+            toAreaPk = #{toAreaPk},
+            toTownPk = #{toTownPk},
+            toTownName = #{toTownName},
+            toContacts = #{toContacts},
+            toContactsTel = #{toContactsTel},
+            updateTime = SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+
+    <update id="sureFeedback">
+        UPDATE lg_delivery_order
+        <set>
+            isConfirmed = 1,
+            updateTime = SYSDATE()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+
+
+
+    <select id="exportDeliveryForm" parameterType="String"
+            resultType="cn.cf.entity.DeliveryForm">
+        SELECT
+        de.deliveryNumber,
+        de.orderPk,
+        CONCAT(
+        IFNULL(de.fromProvinceName,'') ,
+        IFNULL(de.fromCityName,''),
+        IFNULL(de.fromAreaName,''),
+        IFNULL(de.fromTownName,''),
+        IFNULL(de.fromAddress,'')
+        ) AS fromAddress,
+        CONCAT(
+        IFNULL(de.toProvinceName,''),
+        IFNULL(de.toCityName,''),
+        IFNULL(de.toAreaName,''),
+        IFNULL(de.toTownName,''),
+        IFNULL(de.toAddress,'')
+        ) AS toAddress,
+        de.fromContacts,
+        de.fromCompanyName,
+        de.fromContactsTel,
+        de.deliveryTime,
+        og.goodsName,
+        CONCAT(
+        IFNULL(og.specName,''),
+        "(",
+        IFNULL(og.seriesName,''),
+        ")"
+        ) AS
+        specName,
+        og.batchNumber,
+        og.productName,
+        og.gradeName,
+        og.boxes,
+        og.tareWeight,
+        og.weight,
+        de.toContacts,
+        de.toContactsTel,
+        de.toCompanyName,
+        CONCAT(
+        DATE_FORMAT(de.arrivedTimeStart,'%Y-%m-%d %H:%i'),"~",
+        DATE_FORMAT(de.arrivedTimeEnd,'%Y-%m-%d %H:%i')
+        ) AS arrivedTime,
+        de.remark
+        FROM
+        lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods og ON og.deliveryPk =
+        de.pk
+        WHERE de.pk = #{pk}
+    </select>
+
+    <select id="selectByStatus" parameterType="java.util.Map"
+            resultType="cn.cf.entity.SearchLgLine">
+        SELECT
+        de.pk,
+        de.fromProvincePk,
+        de.fromCityPk,
+        de.fromAreaPk,
+        de.fromTownPk,
+        de.toProvincePk,
+        de.toCityPk,
+        de.toAreaPk,
+        de.toTownPk,
+        og.productPk,
+        og.gradePk,
+        og.weight
+        FROM
+        lg_delivery_order de
+        LEFT JOIN
+        lg_delivery_order_goods og ON og.deliveryPk = de.pk
+        WHERE 1= 1
+        <if test="isAbnormal !=null ">
+            and de.isAbnormal = #{isAbnormal}
+        </if>
+        <if test="isMatched !=null">
+            and de.isMatched = #{isMatched}
+        </if>
+        order by de.insertTime DESC
+    </select>
+
+
+    <select id="searchInvoiceCount" parameterType="java.util.Map"
+            resultType="Integer">
+        select count(*)
+        from lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods og ON og.deliveryPk = de.pk
+        LEFT JOIN lg_company lg ON lg.pk = de.logisticsCompanyPk
+        LEFT JOIN lg_logistics_invoices li	ON li.pk = de.supplierInvoicePk
+        <include refid="searchGridInvoiceWhere" />
+    </select>
+
+    <sql id="searchGridInvoiceWhere">
+        <where>
+            1=1
+            <if test="orderPk !=null and orderPk !=''">
+                and de.deliveryNumber like '%${orderPk}%'
+            </if>
+
+            <if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+                and de.logisticsCompanyName like
+                '%${logisticsCompanyName}%'
+            </if>
+
+            <if test="applicationStartTime !=null and applicationStartTime !=''">
+                and str_to_date (li.applyTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{applicationStartTime},'%Y-%m-%d')
+            </if>
+
+            <if test="applicationEndTime !=null and applicationEndTime !=''">
+                and str_to_date (li.applyTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{applicationEndTime}, '%Y-%m-%d')
+            </if>
+
+            <if test="invoiceName !=null and invoiceName !=''">
+                and de.invoiceName like '%${invoiceName}%'
+            </if>
+
+            <if test="invoiceRegPhone !=null and invoiceRegPhone !=''">
+                and de.invoiceRegPhone like '%${invoiceRegPhone}%'
+            </if>
+
+            <if test="invoiceStartTime !=null and invoiceStartTime !=''">
+                and str_to_date (lm.invoiceTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{invoiceStartTime},'%Y-%m-%d')
+            </if>
+
+            <if test="invoiceEndTime !=null and invoiceEndTime !=''">
+                and str_to_date (lm.invoiceTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{invoiceEndTime}, '%Y-%m-%d')
+            </if>
+
+            <if test="applicateStartTime !=null and applicateStartTime !=''">
+                and str_to_date (lm.applyTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{applicateStartTime},'%Y-%m-%d')
+            </if>
+
+            <if test="applicateEndTime !=null and applicateEndTime !=''">
+                and str_to_date (lm.applyTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{applicateEndTime}, '%Y-%m-%d')
+            </if>
+
+            <if test="memberInvoiceStatus !=null">
+                and de.memberInvoiceStatus =#{memberInvoiceStatus}
+            </if>
+            <if test="supplierInvoiceStatus !=null and supplierInvoiceStatus!=''">
+                and de.supplierInvoiceStatus =#{supplierInvoiceStatus}
+            </if>
+			
+  			<if test="insertTime !=null and insertTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d %H:%i:%s') &lt;=
+				str_to_date(#{insertTime}, '%Y-%m-%d %H:%i:%s')
+			</if>
+
+            <if test="isAbnormal !=null">
+                and de.isAbnormal =#{isAbnormal}
+            </if>
+            <if test="orderStatus !=null">
+                and de.orderStatus =#{orderStatus}
+            </if>
+            <if test="orderName != null">
+                order by de.${orderName} ${orderType}
+            </if>
+        </where>
+    </sql>
+
+
+    <update id="updateInvoice" parameterType="java.util.Map">
+        UPDATE
+        lg_delivery_order
+        SET
+        memberInvoiceStatus = #{memberInvoiceStatus},
+        memberInvoicePk = #{memberInvoicePk},
+        updateTime = SYSDATE()
+        WHERE
+        pk = #{pk}
+    </update>
+
+    <update id="updateSettleFreight" parameterType="java.util.Map">
+        UPDATE
+        lg_delivery_order
+        SET
+        isSettleFreight = #{isSettleFreight},
+        updateTime =
+        SYSDATE()
+        WHERE
+        pk = #{pk}
+    </update>
+
+
+    <update id="updateSupplierInvoice" parameterType="java.util.Map">
+        UPDATE
+        lg_delivery_order
+        SET
+        supplierInvoiceStatus = #{supplierInvoiceStatus},
+        updateTime = SYSDATE()
+        WHERE
+        pk = #{pk}
+    </update>
+
+
+
+
+    <select id="searchSupplierSettleAccountCount" parameterType="java.util.Map"
+            resultType="Integer">
+        SELECT count(*)
+        FROM lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods lo ON
+        lo.deliveryPk = de.pk
+        LEFT JOIN lg_company co ON co.pk =
+        de.logisticsCompanyPk
+        <include refid="searchGridSupplierSettleAccountWhere" />
+
+    </select>
+
+    <sql id="searchGridSupplierSettleAccountWhere">
+        <where>
+            1=1
+            <if test="orderPk !=null and orderPk !=''">
+                and de.deliveryNumber like '%${orderPk}%'
+            </if>
+
+            <if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+                and de.logisticsCompanyName like
+                '%${logisticsCompanyName}%'
+            </if>
+
+            <if test="logisticsCompanyContactsTel !=null and logisticsCompanyContactsTel !=''">
+                and co.contactsTel like '%${logisticsCompanyContactsTel}%'
+            </if>
+
+            <if test="placeOrderStartTime !=null and placeOrderStartTime !=''">
+                and str_to_date (de.insertTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{placeOrderStartTime},'%Y-%m-%d')
+            </if>
+
+            <if test="placeOrderEndTime !=null and placeOrderEndTime !=''">
+                and str_to_date (de.insertTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{placeOrderEndTime}, '%Y-%m-%d')
+            </if>
+			<if test="insertTime !=null and insertTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d %H:%i:%s') &lt;=
+				str_to_date(#{insertTime}, '%Y-%m-%d %H:%i:%s')
+			</if>
+            <if test="isAbnormal !=null">
+                and de.isAbnormal =#{isAbnormal}
+            </if>
+            <if test="isMatched !=null">
+                and de.isMatched =#{isMatched}
+            </if>
+
+            and de.orderStatus in
+            <foreach  item="item" collection="orderStatus" index="index"  open="(" separator="," close=")">#{item}</foreach>
+
+            <if test="isSettleFreight !=null">
+                and de.isSettleFreight =#{isSettleFreight}
+            </if>
+
+            <if test="orderName != null">
+                order by de.${orderName} ${orderType}
+            </if>
+        </where>
+    </sql>
+
+
+    <select id="searchSupplierInvoiceCount" parameterType="java.util.Map"
+            resultType="Integer">
+        select count(*)
+        from lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods og ON
+        og.deliveryPk = de.pk
+        LEFT JOIN
+        lg_company lg ON lg.pk =
+        de.logisticsCompanyPk
+        <include refid="searchGridInvoiceWhere" />
+    </select>
+
+    <select id="searchPurchaserInvoiceCount" parameterType="java.util.Map"
+            resultType="Integer">
+        SELECT count(*)
+        FROM
+        lg_delivery_order de
+        LEFT JOIN lg_member_invoices lm
+        ON lm.pk = de.memberInvoicePk
+        <include refid="searchGridInvoiceWhere" />
+    </select>
+
+
+
+
+    <select id="matchAddress" parameterType="String" resultType="cn.cf.entity.SearchLgLine">
+        SELECT
+        de.fromAddress,
+        de.fromProvinceName,
+        de.fromProvincePk,
+        de.fromCityName,
+        de.fromCityPk,
+        de.fromAreaName,
+        de.fromAreaPk,
+        de.fromTownPk,
+        de.fromTownName,
+        de.toAddress,
+        de.toProvinceName,
+        de.toProvincePk,
+        de.toCityName,
+        de.toCityPk,
+        de.toAreaName,
+        de.toAreaPk,
+        de.toTownPk,
+        de.toTownName,
+        lg.productPk,
+        lg.gradePk,
+        lg.weight
+        FROM
+        lg_delivery_order de
+        LEFT JOIN lg_delivery_order_goods lg ON lg.deliveryPk = de.pk
+        WHERE
+        de.pk = #{pk}
+    </select>
+    
+    <select id="searchGrossProfitCount" parameterType="java.util.Map"
+		resultType="Integer">
+		SELECT count(*)
+		FROM lg_delivery_order de
+		LEFT JOIN lg_company lc ON lc.pk = de.logisticsCompanyPk
+		LEFT JOIN lg_delivery_order_goods lo ON lo.deliveryPk = de.pk
+		<include refid="searchDataReportWhere" />
+	</select>
+    
+    <select id="searchGrossProfit" parameterType="java.util.Map"
+		resultType="cn.cf.entity.DataReportExtDto">
+		SELECT
+           if(${colLogisticsName},de.logisticsCompanyName, INSERT ( de.logisticsCompanyName, 3, 5, '*****')) as logisticsCompanyName,        
+			lc.contacts AS logisticsContacts,
+			lc.contactsTel AS logisticsContactsTel,
+			de.deliveryNumber,
+			de.isSettleFreight,
+			CASE de.isSettleFreight 
+			WHEN 1 THEN
+			"未结算"
+			WHEN 2 THEN
+			"已结算"
+			ELSE
+			""
+			END AS isSettleFreightName,
+			CASE de.isAbnormal 
+			WHEN 1 THEN
+			"正常"
+			WHEN 2 THEN
+			"异常"
+			ELSE
+			""
+			END AS isAbnormal,
+			de.isConfirmed,
+			de.purchaserName ,
+			de.member AS purchaserContactsTel,
+			str_to_date(de.insertTime,'%Y-%m-%d') AS insertTime,
+			CASE de.orderStatus 
+			WHEN 2 THEN
+				"已取消"
+			WHEN 3 THEN
+				"已签收"
+			WHEN 4 THEN
+				"配送中"
+			WHEN 5 THEN
+				"提货中"
+			WHEN 6 THEN
+				"已确认,待指派车辆"
+			WHEN 8 THEN
+				"待确认"
+			WHEN 9 THEN
+				"待付款"
+			WHEN 10 THEN
+				"已关闭"
+			ELSE ""
+			END AS orderStatusName,
+			IFNULL(de.basisLinePrice,0) AS basisLinePrice,
+			IFNULL(de.settleWeight,0) AS settleWeight,  
+	           CASE de.source 
+            WHEN 0 THEN
+                IF((de.linePricePk IS not NULL AND de.linePricePk != '') ,IFNULL(lo.originalFreight,0), "--" )
+            ELSE lo.originalFreight
+            END AS profitOriginalFreight,
+            CASE de.source 
+            WHEN 0 THEN
+                IF((de.linePricePk IS not NULL AND de.linePricePk != '') ,IFNULL(lo.presentFreight,0), "--" )
+            ELSE lo.presentFreight
+            END AS profitPresentFreight,
+            
+             CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.presentFreight,0)
+            ELSE lo.presentFreight
+            END AS presentFreight,
+            
+             CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.originalFreight,0)
+            ELSE lo.originalFreight
+            END AS originalFreight,
+            
+            CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.goodsPresentFreight,0)
+            ELSE lo.goodsPresentFreight
+            END AS goodsPresentFreight,
+            
+             CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.goodsOriginalFreight,0)
+            ELSE lo.goodsOriginalFreight
+            END AS goodsOriginalFreight,
+           
+			de.presentTotalFreight,
+			lo.weight,
+			lo.productName,
+			IFNULL(lo.presentFreight,0) as presentFreight ,
+			de.fromCompanyName,
+			
+			de.supplierName,
+			de.purchaserName,  
+			de.orderPk,
+			 if(${colPurName},de.invoiceName, INSERT ( de.invoiceName, 3, 5, '*****')) as invoiceName,        
+			ROUND((IFNULL(lo.goodsOriginalFreight,0)- IFNULL(lo.goodsPresentFreight,0)),2) as profit
+		FROM
+			lg_delivery_order de
+		LEFT JOIN lg_company lc ON lc.pk = de.logisticsCompanyPk
+		LEFT JOIN lg_delivery_order_goods lo ON lo.deliveryPk = de.pk
+		where
+			1=1
+			<if test="orderPk !=null and orderPk !=''">
+				and de.orderPk like '%${orderPk}%'
+			</if>
+			<if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+				and de.logisticsCompanyName like '%${logisticsCompanyName}%'
+			</if>
+			<if	test="logisticsContacts !=null and logisticsContacts !=''">
+				and lc.contacts like '%${logisticsContacts}%'
+			</if>
+			<if test="purchaserName !=null and purchaserName !=''">
+				and de.purchaserName like '%${purchaserName}%'
+			</if>
+			<if	test="purchasersContacts !=null and purchasersContacts !=''">
+				and de.member like '%${purchasersContacts}%'
+			</if>
+			<if test="insertStartTime !=null and insertStartTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d') &gt;=
+				str_to_date(#{insertStartTime},'%Y-%m-%d')
+			</if>
+			<if test="insertEndTime !=null and insertEndTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d') &lt;=
+				str_to_date(#{insertEndTime}, '%Y-%m-%d')
+			</if>
+			<if test="isSettleFreight !=null">
+				and de.isSettleFreight = #{isSettleFreight}
+			</if>
+			<if test="isAbnormal !=null">
+				and de.isAbnormal =#{isAbnormal}
+			</if>
+			<if test="isMatched !=null">
+				and de.isMatched =#{isMatched}
+			</if>
+			<if test="orderStatus !=null">
+				and de.orderStatus in
+			   <foreach  item="item" collection="orderStatus" index="index"  open="(" separator="," close=")">#{item}</foreach>
+			</if>
+			<if test="orderName != null">
+				order by de.${orderName} ${orderType}
+			</if>
+			<if test="limit != null">
+			limit ${start}, ${limit}
+			</if>
+	</select>
+	
+	  <select id="searchCustomGrossProfit" parameterType="java.util.Map"
+		resultType="cn.cf.dto.DataReportDto">
+
+         SELECT
+			if(${colLogisticsName} ,de.logisticsCompanyName ,INSERT ( de.logisticsCompanyName, 3, 5, '*****') ) as logisticsCompanyName,
+			lc.contacts AS logisticsContacts,
+			lc.contactsTel AS logisticsContactsTel,
+			de.deliveryNumber as orderPk ,
+			de.isSettleFreight,
+            de.isMatched,
+			CASE de.isSettleFreight 
+			WHEN 1 THEN
+			"未结算"
+			WHEN 2 THEN
+			"已结算"
+			ELSE
+			""
+			END AS isSettleFreightName,
+			de.isAbnormal as isAbnormalflag,
+			CASE de.isAbnormal 
+			WHEN 1 THEN
+			"正常"
+			WHEN 2 THEN
+			"异常"
+			ELSE
+			""
+			END AS isAbnormal,
+		    de.isConfirmed,
+		    if(${colPurName},de.purchaserName,INSERT ( de.purchaserName, 3, 5, '*****'))     as purchaserName,
+			if(${colPurContactsTel},de.member, INSERT (de.member,  4, 4, '****'))     as purchaserContactsTel,
+			de.insertTime,
+			CASE de.orderStatus 
+			WHEN 2 THEN
+				"已取消"
+			WHEN 3 THEN
+				"已签收"
+			WHEN 4 THEN
+				"配送中"
+			WHEN 5 THEN
+				"提货中"
+			WHEN 6 THEN
+				"已确认,待指派车辆"
+			WHEN 8 THEN
+				"待确认"
+			WHEN 9 THEN
+				"待付款"
+			WHEN 10 THEN
+				"已关闭"
+			ELSE
+				""
+			END AS orderStatusName,
+            de.orderStatus,
+			IFNULL(de.basisLinePrice,0) AS basisLinePrice,
+			IFNULL(de.settleWeight,0) AS settleWeight,  
+			IFNULL(lo.weight,0) as weight ,
+			
+			 CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.goodsPresentFreight,0)
+            ELSE lo.goodsPresentFreight
+            END AS goodsPresentFreight,
+            
+            CASE de.source 
+            WHEN 0 THEN
+               IFNULL(lo.goodsOriginalFreight,0)
+            ELSE lo.goodsOriginalFreight
+            END AS goodsOriginalFreight,
+            
+              CASE de.source 
+            WHEN 0 THEN
+                IF((de.linePricePk IS not NULL AND de.linePricePk != '') ,IFNULL(lo.presentFreight,0), "--" )
+            ELSE lo.presentFreight
+            END AS presentFreight,
+            
+                  CASE de.source 
+            WHEN 0 THEN
+                IF((de.linePricePk IS not NULL AND de.linePricePk != '') ,IFNULL(lo.originalFreight,0), "--" )
+            ELSE lo.originalFreight
+            END AS originalFreight,
+			
+			lo.productName,
+	        if(${colFromCompanyName}, ifnull(de.supplierName,de.fromCompanyName),INSERT (  ifnull(de.supplierName,de.fromCompanyName), 3, 5, '*****'))  as fromCompanyName,
+			CASE de.source 
+			WHEN 0 THEN
+				IFNULL(de.signTime,"--")
+			ELSE
+				"--"
+			END AS signTime,
+			if(${colToCompanyName},de.toCompanyName,INSERT ( de.toCompanyName, 3, 5, '*****')) as toCompanyName,
+			if(${colToAddress},CONCAT(toProvinceName,toCityName,toAreaName,toTownName,toAddress),"*****")  as toAddress,
+			CASE de.source 
+			WHEN 0 THEN
+				timestampdiff(SECOND,de.insertTime,de.signTime) 
+			ELSE
+				0
+			END AS transConsumption
+		FROM
+			lg_delivery_order de
+		LEFT JOIN lg_company lc ON lc.pk = de.logisticsCompanyPk
+		LEFT JOIN lg_delivery_order_goods lo ON lo.deliveryPk = de.pk
+          <where>
+            1=1
+            <if test="orderPk !=null and orderPk !=''">
+                and de.deliveryNumber like '%${orderPk}%'
+            </if>
+            <if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+                and de.logisticsCompanyName like '%${logisticsCompanyName}%'
+            </if>
+            <if test="logisticsContacts !=null and logisticsContacts !=''">
+                and lc.contacts like '%${logisticsContacts}%'
+            </if>
+            <if test="purchaserName !=null and purchaserName !=''">
+                and de.purchaserName like '%${purchaserName}%'
+            </if>
+            <if test="purchasersContacts !=null and purchasersContacts !=''">
+                and de.member like '%${purchasersContacts}%'
+            </if>
+            <if test="insertStartTime !=null and insertStartTime !=''">
+                and str_to_date (de.insertTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{insertStartTime},'%Y-%m-%d')
+            </if>
+            <if test="insertEndTime !=null and insertEndTime !=''">
+                and str_to_date (de.insertTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{insertEndTime}, '%Y-%m-%d')
+            </if>
+            <if test="isSettleFreight !=null">
+                and de.isSettleFreight = #{isSettleFreight}
+            </if>
+            <if test="isAbnormal !=null">
+                and de.isAbnormal =#{isAbnormal}
+            </if>
+            <if test="isMatched !=null">
+                and de.isMatched =#{isMatched}
+            </if>
+            <if test="orderStatus !=null">
+                and de.orderStatus in
+               <foreach  item="item" collection="orderStatus" index="index"  open="(" separator="," close=")">#{item}</foreach>
+            </if>
+            <if test="orderName != null">
+                order by ${orderName} ${orderType}
+            </if>
+            <if test="limit != null">
+                limit ${start}, ${limit}
+            </if>
+        </where>
+	</select>
+
+	<sql id="searchDataReportWhere">
+		<where>
+			1=1
+			<if test="orderPk !=null and orderPk !=''">
+				and de.deliveryNumber like '%${orderPk}%'
+			</if>
+			<if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+				and de.logisticsCompanyName like '%${logisticsCompanyName}%'
+			</if>
+			<if	test="logisticsContacts !=null and logisticsContacts !=''">
+				and lc.contacts like '%${logisticsContacts}%'
+			</if>
+			<if test="purchaserName !=null and purchaserName !=''">
+				and de.purchaserName like '%${purchaserName}%'
+			</if>
+			<if	test="purchasersContacts !=null and purchasersContacts !=''">
+				and de.member like '%${purchasersContacts}%'
+			</if>
+			<if test="insertStartTime !=null and insertStartTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d') &gt;=
+				str_to_date(#{insertStartTime},'%Y-%m-%d')
+			</if>
+			<if test="insertEndTime !=null and insertEndTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d') &lt;=
+				str_to_date(#{insertEndTime}, '%Y-%m-%d')
+			</if>
+			<if test="insertTime !=null and insertTime !=''">
+				and str_to_date (de.insertTime,'%Y-%m-%d %H:%i:%s') &lt;=
+				str_to_date(#{insertTime}, '%Y-%m-%d %H:%i:%s')
+			</if>
+			<if test="isSettleFreight !=null">
+				and de.isSettleFreight = #{isSettleFreight}
+			</if>
+			<if test="isAbnormal !=null">
+				and de.isAbnormal =#{isAbnormal}
+			</if>
+			<if test="isMatched !=null">
+				and de.isMatched =#{isMatched}
+			</if>
+			<if test="orderStatus !=null">
+				and de.orderStatus in
+			   <foreach  item="item" collection="orderStatus" index="index"  open="(" separator="," close=")">#{item}</foreach>
+			</if>
+		
+		</where>
+	</sql>
+
+    <sql id="searchListDataReportWhere">
+        <where>
+            1=1
+            <if test="orderPk !=null and orderPk !=''">
+                and orderPk like '%${orderPk}%'
+            </if>
+            <if test="logisticsCompanyName !=null and logisticsCompanyName !=''">
+                and logisticsCompanyName like '%${logisticsCompanyName}%'
+            </if>
+            <if	test="logisticsContacts !=null and logisticsContacts !=''">
+                and logisticsContactsTel like '%${logisticsContacts}%'
+            </if>
+            <if test="purchaserName !=null and purchaserName !=''">
+                and purchaserName like '%${purchaserName}%'
+            </if>
+            <if	test="purchasersContacts !=null and purchasersContacts !=''">
+                and purchaserContactsTel like '%${purchasersContacts}%'
+            </if>
+            <if test="insertStartTime !=null and insertStartTime !=''">
+                and str_to_date (insertTime,'%Y-%m-%d') &gt;=
+                str_to_date(#{insertStartTime},'%Y-%m-%d')
+            </if>
+            <if test="insertEndTime !=null and insertEndTime !=''">
+                and str_to_date (insertTime,'%Y-%m-%d') &lt;=
+                str_to_date(#{insertEndTime}, '%Y-%m-%d')
+            </if>
+            <if test="isSettleFreight !=null">
+                and isSettleFreight = #{isSettleFreight}
+            </if>
+            <if test="isAbnormal !=null">
+                and isAbnormalflag =#{isAbnormal}
+            </if>
+            <if test="isMatched !=null">
+                and isMatched =#{isMatched}
+            </if>
+            <if test="orderStatus !=null">
+                and orderStatus in
+                <foreach  item="item" collection="orderStatus" index="index"  open="(" separator="," close=")">#{item}</foreach>
+            </if>
+            <if test="orderName != null">
+                order by ${orderName} ${orderType}
+            </if>
+            <if test="limit != null">
+                limit ${start}, ${limit}
+            </if>
+        </where>
+    </sql>
+	
+	
+	<select id="searchPurchaserInvoice" parameterType="java.util.Map"
+		resultType="cn.cf.dto.PurchaserInvoiceDto">
+		SELECT
+		de.pk,
+        if(${colInvoiceName},de.invoiceName,INSERT ( de.invoiceName, 3, 5, '*****')) as invoiceName,
+		if(${colInvoiceTaxidNumber},de.invoiceTaxidNumber,INSERT ( de.invoiceTaxidNumber, 1, 8, '********')) as invoiceTaxidNumber,
+		if(${colInvoiceAddress},
+		CONCAT(
+        IFNULL(de.invoiceProvinceName,'') ,
+        IFNULL(de.invoiceCityName,''),
+        IFNULL(de.invoiceAreaName,''),
+        IFNULL(de.invoiceRegAddress,'')
+        ), '*****') as invoiceRegAddress,
+		if(${colInvoiceRegPhone},de.invoiceRegPhone,INSERT ( de.invoiceRegPhone,4, 4, '****')) as invoiceRegPhone,
+        if(${colInvoiceBankName},de.invoiceBankName,"******") as invoiceBankName,
+		if(${colInvoiceAccountName},de.invoiceBankAccount,"******") as invoiceBankAccount,
+		if(${colInvoiceContacts},de.toContacts,INSERT ( de.toContacts,1, 1, '*')) as contactName,
+		if(${colInvoiceContactsTel},de.toContactsTel,INSERT ( de.toContactsTel,4, 4, '****')) as contactTel,
+		if(${colAddress},  CONCAT(
+        IFNULL(de.toProvinceName,'') ,
+        IFNULL(de.toCityName,''),
+        IFNULL(de.toAreaName,''),
+        IFNULL(de.toTownName,''),
+        IFNULL(de.toAddress,'')
+        ), '*****') as contactAddress,
+		str_to_date(lm.invoiceTime,'%Y-%m-%d') as invoiceTime,
+		str_to_date(lm.applyTime,'%Y-%m-%d') as applyTime,
+		de.presentTotalFreight,
+		de.orderStatus,
+		CASE de.memberInvoiceStatus
+		WHEN 1 THEN
+		"未开票"
+		WHEN 2 THEN
+		"已开票"
+		WHEN 3 THEN
+		"已寄送"
+		ELSE
+		""
+		END AS memberInvoiceName,
+		de.memberInvoiceStatus
+		FROM
+		lg_delivery_order de
+		LEFT JOIN lg_member_invoices lm ON lm.pk =
+		de.memberInvoicePk
+		<include refid="searchGridInvoiceWhere" />
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+	
+	<select id="searchInvoice" parameterType="java.util.Map"
+		resultType="cn.cf.dto.SupplierInvoiceDto">
+		select
+		de.pk,
+		de.deliveryNumber as orderPk,
+	    if(${colComName},de.logisticsCompanyName,INSERT ( de.logisticsCompanyName, 3, 5, '*****')) as logisticsCompanyName,
+		if(${colContacts},lg.contacts,INSERT ( lg.contacts, 1, 1, '*')) as contacts,
+		if(${colContactsTel},lg.contactsTel,INSERT ( lg.contactsTel, 4, 4, '****')) as contactsTel,
+		og.weight,
+		de.settleWeight,
+		de.basisLinePrice,
+		de.orderStatus,
+		CASE
+		de.orderStatus
+		WHEN 2 THEN
+			"已取消"
+		WHEN 3 THEN
+			"已签收"
+		WHEN 4 THEN
+			"配送中"
+		WHEN 5 THEN
+			"提货中"
+		WHEN 6 THEN
+			"已确认,待指派车辆"
+		WHEN 8 THEN
+			"待确认"
+		WHEN 9 THEN
+			"待付款"
+		WHEN 10 THEN
+			"已关闭"
+		ELSE
+			""
+		END AS orderStatusName,
+		de.supplierInvoiceStatus,
+		CASE
+		de.supplierInvoiceStatus
+		WHEN 1 THEN
+		"未开票"
+		WHEN 2 THEN
+		"待确认"
+		WHEN 3 THEN
+		"已确认"
+		ELSE
+		""
+		END AS supplierInvoiceName,
+		og.presentFreight,
+		de.presentTotalFreight,
+		str_to_date
+		(li.applyTime,'%Y-%m-%d') as applyTime,
+		str_to_date
+		(de.insertTime,'%Y-%m-%d') as insertTime
+		from lg_delivery_order de
+		LEFT JOIN lg_delivery_order_goods og ON og.deliveryPk = de.pk
+		LEFT JOIN lg_company lg ON lg.pk = de.logisticsCompanyPk
+		LEFT JOIN lg_logistics_invoices li	ON li.pk = de.supplierInvoicePk
+		<include refid="searchGridInvoiceWhere" />
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+	
+	<select id="searchSupplierSettleAccountList" parameterType="java.util.Map"
+		resultType="cn.cf.dto.SettleAccountDto">
+		SELECT
+		de.pk,
+		if(${colComName},de.logisticsCompanyName,INSERT ( de.logisticsCompanyName, 3, 5, '*****')) as logisticsCompanyName,
+		de.deliveryNumber as orderPk,
+		de.presentTotalFreight,
+		lo.presentFreight,
+		str_to_date
+		(de.insertTime,'%Y-%m-%d'),
+		de.orderStatus,
+		CASE de.orderStatus 
+		WHEN 2 THEN
+			"已取消"
+		WHEN 3 THEN
+			"已签收"
+		WHEN 4 THEN
+			"配送中"
+		WHEN 5 THEN
+			"提货中"
+		WHEN 6 THEN
+			"已确认,待指派车辆"
+		WHEN 8 THEN
+			"待确认"
+		WHEN 9 THEN
+			"待付款"
+		WHEN 10 THEN
+			"已关闭"
+		ELSE
+			""
+		END AS orderStatusName,
+		de.basisLinePrice,
+		de.isSettleFreight,
+		CASE
+		de.isSettleFreight
+		WHEN 1 THEN
+		"未结算"
+		WHEN 2 THEN
+		"已结算"
+		ELSE
+		""
+		END AS isSettleFreightName,
+		CASE
+		de.isAbnormal
+		WHEN 1 THEN
+		"正常"
+		WHEN 2 THEN
+		"异常"
+		ELSE
+		""
+		END AS isAbnormalName,
+		de.isAbnormal,
+		de.isConfirmed,
+		if(${colContacts},co.contacts,INSERT (co.contacts,  1, 1, '*')) AS logisticsCompanyContacts,
+		if(${colContactsTel},co.contactsTel,INSERT (co.contactsTel,  4, 4, '****')) AS logisticsCompanyContactsTel,
+		lo.weight,
+		DATE_FORMAT(
+		de.orderTime,
+		'%Y-%m-%d %H:%i:%s'
+		) as orderTime,
+		de.settleWeight
+		FROM lg_delivery_order de
+		LEFT
+		JOIN lg_delivery_order_goods lo ON lo.deliveryPk = de.pk
+		LEFT JOIN lg_company
+		co ON co.pk = de.logisticsCompanyPk
+		<include refid="searchGridSupplierSettleAccountWhere" />
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+</mapper>

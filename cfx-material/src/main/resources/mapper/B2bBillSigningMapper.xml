@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillSigningDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,organizationCode,accountInfo,isDelete,insertTime,status
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_bill_signing (
+         pk, companyPk, companyName, organizationCode, accountInfo, isDelete, insertTime, status
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName}, #{organizationCode}, #{accountInfo}, #{isDelete}, #{insertTime}, #{status}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bBillSigning">
+    <![CDATA[
+        UPDATE b2b_bill_signing SET
+	        companyPk = #{companyPk} , companyName = #{companyName} , organizationCode = #{organizationCode} , accountInfo = #{accountInfo} , isDelete = #{isDelete} , insertTime = #{insertTime} , status = #{status}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bBillSigning">
+    <![CDATA[
+        DELETE FROM b2b_bill_signing WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}			</if>
+			<if test="@Ognl@isNotEmpty(accountInfo)">
+				AND accountInfo = #{accountInfo}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_bill_signing
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing where companyName = #{companyName}	</select>
+	<select id="getByOrganizationCode" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing where organizationCode = #{organizationCode}	</select>
+	<select id="getByAccountInfo" resultType="cn.cf.dto.B2bBillSigningDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_signing where accountInfo = #{accountInfo}	</select>
+</mapper>
+

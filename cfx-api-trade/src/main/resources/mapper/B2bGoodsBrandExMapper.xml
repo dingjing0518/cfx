@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bGoodsBrandDaoEx">
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,brandName,brandPk,storePk,storeName,insertTime,isDelete,auditStatus,auditTime,auditPk,flag
+	    ]]>
+	</sql>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(brandPk)">
+				AND brandPk = #{brandPk}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}			</if>
+			<if test="@Ognl@isNotEmpty(flag)">
+				AND flag = #{flag}			</if>
+		</where>
+	</sql>
+	
+	<select id="searchBrand" resultType="cn.cf.dto.B2bBrandDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_goods_brand
+		<include refid="searchGridWhere" />
+	</select>
+
+
+
+</mapper>

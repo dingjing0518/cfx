@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bInvitationRecordDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,member,mname,mphone,mcompanyPk,mcompanyName,beInvitedCode,tname,tphone,tcompanyPk,tcompanyName,insertTime,applyStatus,invitationStatus,awardStatus,address,provinceName,province,cityName,city,areaName,area,town,townName,contacts,contactsTel,activityPk,awardName,grantType,note,addressPk
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}
+			</if>
+			<if test="@Ognl@isNotEmpty(mname)">
+				AND mname like '%${mname}%'		</if>
+			<if test="@Ognl@isNotEmpty(mphone)">
+				AND mphone like '%${mphone}%'			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyPk)">
+				AND mcompanyPk = #{mcompanyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyName)">
+				AND mcompanyName = #{mcompanyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(tname)">
+				AND tname like '%${tname}%'			</if>
+			<if test="@Ognl@isNotEmpty(tphone)">
+				AND tphone like '%${tphone}%'					</if>
+			<if test="@Ognl@isNotEmpty(tcompanyPk)">
+				AND tcompanyPk = #{tcompanyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(tcompanyName)">
+				AND tcompanyName = #{tcompanyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(applyStatus)">
+				AND applyStatus = #{applyStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(invitationStatus)">
+				AND invitationStatus = #{invitationStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}
+			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(addressPk)">
+				AND (addressPk is not null and  addressPk !='')
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bInvitationRecordDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		d.pk,
+		d.tname,
+		d.tphone,
+		d.tcompanyPk,
+		d.tcompanyName,
+		d.insertTime,
+		d.invitationStatus,
+		d.awardStatus,
+		d.address,
+		d.provinceName,
+		d.province,
+		d.cityName,
+		d.city,
+		d.areaName,
+		d.area,
+		d.town,
+		d.townName,
+		d.contacts,
+		d.contactsTel,
+		d.activityPk,
+		d.awardName,
+		d.grantType,
+		d.note,
+		d.beInvitedCode,
+		d.addressPk,
+	IF ((SYSDATE() BETWEEN ay.startTime AND ay.endTime) AND ay.isDelete=1 AND ay.isVisable=1,1,2) AS isOverDue
+	FROM
+		b2b_invitation_record d
+	LEFT JOIN b2b_lottery_activity ay ON ay.pk = d.activityPk
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bInvitationRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where pk = #{pk}
+	</select>
+	
+	<select id="getByMemberPk" resultType="cn.cf.model.B2bInvitationRecord"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where member = #{memberPk}
+		ORDER BY insertTime DESC 
+		LIMIT 0,1
+	</select>
+	
+	<select id="getbyTCompanyName" resultType="cn.cf.dto.B2bInvitationRecordDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where tcompanyName = #{tcompanyName}
+		and invitationStatus!=3 and activityPk=#{activityPk}
+		limit 1
+	</select>
+	
+	<!-- 邀请管理页面页签数字 -->
+	<select id="searchinvitationStatusCounts" resultType="cn.cf.dto.B2bInvitationRecordDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		count(1) AS counts,
+		IFNULL(
+		SUM(
+		CASE invitationStatus
+		WHEN 1 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS confirmedCount,
+		IFNULL(
+		SUM(
+		CASE invitationStatus
+		WHEN 2 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS successCount,
+		IFNULL(
+		SUM(
+		CASE invitationStatus
+		WHEN 3 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS failCount
+		FROM
+		b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+	
+ 
+	
+	
+	<update id="updateEx" parameterType="cn.cf.model.B2bInvitationRecord">
+		UPDATE b2b_invitation_record
+		<set>
+			<if test="address!=null and address!=''">
+				address = #{address},
+			</if>
+			<if test="province!=null and province!=''">
+				province = #{province},
+				provinceName = #{provinceName},
+			</if>
+			<if test="city!=null and city!=''">
+				city = #{city},
+				cityName = #{cityName},
+			</if>
+			<if test="area!=null and area!=''">
+				area = #{area},
+				areaName = #{areaName},
+			</if>
+			<if test="town!=null and town!=''">
+				town = #{town},
+				townName = #{townName},
+			</if>
+			<if test="contacts!=null and contacts!=''">
+				contacts = #{contacts},
+			</if>
+			<if test="contactsTel!=null and contactsTel!=''">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="invitationStatus!=null and invitationStatus!=''">
+				invitationStatus = #{invitationStatus},
+			</if>
+			<if test="applyStatus!=null and applyStatus!=''">
+				applyStatus = #{applyStatus},
+			</if>
+			<if test="tname!=null and tname!=''">
+				tname = #{tname},
+			</if>	
+			<if test="tphone!=null and tphone!=''">
+				tphone = #{tphone},
+			</if>
+			<if test="addressPk !=null and addressPk !=''">
+				addressPk = #{addressPk}
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	
+	<select id="getDtoExByPk" resultType="cn.cf.dto.B2bInvitationRecordDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where pk = #{pk}
+	</select>
+	
+	<select id="selectRecordAddress" resultType="cn.cf.dto.B2bAddressDto">
+		SELECT
+		addressPk as pk,address,provinceName,province,cityName,city,areaName,area,townName,town,contacts,contactsTel
+		FROM b2b_invitation_record where beInvitedCode = #{beInvitedCode}
+		order by insertTime desc
+		limit 0,1
+	</select>
+</mapper>
+

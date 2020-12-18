@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillOrderDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,serialNumber,status,amount,insertTime,purchaserPk,purchaserName,supplierPk,supplierName,storePk,storeName,goodsName,goodsShotName,returnUrl
+	    ]]>
+	</sql>
+
+
+	<update id="updateBillOrder" parameterType="cn.cf.model.B2bBillOrder">
+        UPDATE b2b_bill_order
+        <set>
+        	<if test="status != null">
+        		status = #{status}
+        	</if>
+        </set>
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+	</update>
+	
+	<select id="searchCancelOrderList" resultType="cn.cf.dto.B2bBillOrderDto">
+		select * from b2b_bill_order where status = 1 or status = 4
+			
+	</select>
+</mapper>
+

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryAwardDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,activityPk,name,awardType,awardVariety,awardName,amount,awardPercent,insertTime,updateTime,isDelete,isVisable,awardRule,status,relevancyPk,awardSort,showSort
+	    ]]>
+	</sql>
+
+ 
+
+ 
+ 
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+	AND activityPk = #{activityPk}
+</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(awardType)">
+				AND awardType = #{awardType}			</if>
+			<if test="@Ognl@isNotEmpty(awardVariety)">
+				AND awardVariety = #{awardVariety}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(amount)">
+				AND amount = #{amount}			</if>
+			<if test="@Ognl@isNotEmpty(awardPercent)">
+				AND awardPercent = #{awardPercent}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(awardRule)">
+				AND awardRule = #{awardRule}			</if>
+			<if test="@Ognl@isNotEmpty(amountFlag)">
+			AND amount >0			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+		</where>
+	</sql>
+  <select id="searchAwardList" resultType="cn.cf.dto.B2bLotteryAwardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_award where 
+		 isDelete=1 and isVisable=1 and  amount >0	
+		<if test="@Ognl@isNotEmpty(betweenFlag)">
+	     and	startTime &lt;= NOW() AND NOW() &lt;= endTime 
+		</if>
+		   
+		<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			
+		</if>
+		<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			
+		</if>
+		
+		</select>
+</mapper>
+

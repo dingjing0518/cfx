@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgLineDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,companyPk,status,productPk,productName,gradePk,gradeName,fromProvicePk,fromProviceName,fromCityPk,fromCityName,fromAreaPk,fromAreaName,toProvicePk,toProviceName,toCityPk,toCityName,toAreaPk,toAreaName,isDelete,insertTime,updateTime,leastWeight,freight,basicPrice,fromTownPk,fromTownName,toTownPk,toTownName
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_line (
+         pk, name, companyPk, status, productPk, productName, gradePk, gradeName, fromProvicePk, fromProviceName, fromCityPk, fromCityName, fromAreaPk, fromAreaName, toProvicePk, toProviceName, toCityPk, toCityName, toAreaPk, toAreaName, isDelete, insertTime, updateTime, leastWeight, freight, basicPrice, fromTownPk, fromTownName, toTownPk, toTownName
+        ) VALUES (
+         #{pk}, #{name}, #{companyPk}, #{status}, #{productPk}, #{productName}, #{gradePk}, #{gradeName}, #{fromProvicePk}, #{fromProviceName}, #{fromCityPk}, #{fromCityName}, #{fromAreaPk}, #{fromAreaName}, #{toProvicePk}, #{toProviceName}, #{toCityPk}, #{toCityName}, #{toAreaPk}, #{toAreaName}, #{isDelete}, #{insertTime}, #{updateTime}, #{leastWeight}, #{freight}, #{basicPrice}, #{fromTownPk}, #{fromTownName}, #{toTownPk}, #{toTownName}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgLine">
+    <![CDATA[
+        UPDATE lg_line SET
+	        name = #{name} , companyPk = #{companyPk} , status = #{status} , productPk = #{productPk} , productName = #{productName} , gradePk = #{gradePk} , gradeName = #{gradeName} , fromProvicePk = #{fromProvicePk} , fromProviceName = #{fromProviceName} , fromCityPk = #{fromCityPk} , fromCityName = #{fromCityName} , fromAreaPk = #{fromAreaPk} , fromAreaName = #{fromAreaName} , toProvicePk = #{toProvicePk} , toProviceName = #{toProviceName} , toCityPk = #{toCityPk} , toCityName = #{toCityName} , toAreaPk = #{toAreaPk} , toAreaName = #{toAreaName} , isDelete = #{isDelete} , insertTime = #{insertTime} , updateTime = #{updateTime} , leastWeight = #{leastWeight} , freight = #{freight} , basicPrice = #{basicPrice} , fromTownPk = #{fromTownPk} , fromTownName = #{fromTownName} , toTownPk = #{toTownPk} , toTownName = #{toTownName}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgLine">
+    <![CDATA[
+        DELETE FROM lg_line WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(gradePk)">
+				AND gradePk = #{gradePk}			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName = #{gradeName}			</if>
+			<if test="@Ognl@isNotEmpty(fromProvicePk)">
+				AND fromProvicePk = #{fromProvicePk}			</if>
+			<if test="@Ognl@isNotEmpty(fromProviceName)">
+				AND fromProviceName = #{fromProviceName}			</if>
+			<if test="@Ognl@isNotEmpty(fromCityPk)">
+				AND fromCityPk = #{fromCityPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromCityName)">
+				AND fromCityName = #{fromCityName}			</if>
+			<if test="@Ognl@isNotEmpty(fromAreaPk)">
+				AND fromAreaPk = #{fromAreaPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromAreaName)">
+				AND fromAreaName = #{fromAreaName}			</if>
+			<if test="@Ognl@isNotEmpty(toProvicePk)">
+				AND toProvicePk = #{toProvicePk}			</if>
+			<if test="@Ognl@isNotEmpty(toProviceName)">
+				AND toProviceName = #{toProviceName}			</if>
+			<if test="@Ognl@isNotEmpty(toCityPk)">
+				AND toCityPk = #{toCityPk}			</if>
+			<if test="@Ognl@isNotEmpty(toCityName)">
+				AND toCityName = #{toCityName}			</if>
+			<if test="@Ognl@isNotEmpty(toAreaPk)">
+				AND toAreaPk = #{toAreaPk}			</if>
+			<if test="@Ognl@isNotEmpty(toAreaName)">
+				AND toAreaName = #{toAreaName}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(leastWeight)">
+				AND leastWeight = #{leastWeight}			</if>
+			<if test="@Ognl@isNotEmpty(freight)">
+				AND freight = #{freight}			</if>
+			<if test="@Ognl@isNotEmpty(basicPrice)">
+				AND basicPrice = #{basicPrice}			</if>
+			<if test="@Ognl@isNotEmpty(fromTownPk)">
+				AND fromTownPk = #{fromTownPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromTownName)">
+				AND fromTownName = #{fromTownName}			</if>
+			<if test="@Ognl@isNotEmpty(toTownPk)">
+				AND toTownPk = #{toTownPk}			</if>
+			<if test="@Ognl@isNotEmpty(toTownName)">
+				AND toTownName = #{toTownName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_line
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where pk = #{pk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where name = #{name}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where companyPk = #{companyPk}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where productPk = #{productPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where productName = #{productName}	</select>
+	<select id="getByGradePk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where gradePk = #{gradePk}	</select>
+	<select id="getByGradeName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where gradeName = #{gradeName}	</select>
+	<select id="getByFromProvicePk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromProvicePk = #{fromProvicePk}	</select>
+	<select id="getByFromProviceName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromProviceName = #{fromProviceName}	</select>
+	<select id="getByFromCityPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromCityPk = #{fromCityPk}	</select>
+	<select id="getByFromCityName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromCityName = #{fromCityName}	</select>
+	<select id="getByFromAreaPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromAreaPk = #{fromAreaPk}	</select>
+	<select id="getByFromAreaName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromAreaName = #{fromAreaName}	</select>
+	<select id="getByToProvicePk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toProvicePk = #{toProvicePk}	</select>
+	<select id="getByToProviceName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toProviceName = #{toProviceName}	</select>
+	<select id="getByToCityPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toCityPk = #{toCityPk}	</select>
+	<select id="getByToCityName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toCityName = #{toCityName}	</select>
+	<select id="getByToAreaPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toAreaPk = #{toAreaPk}	</select>
+	<select id="getByToAreaName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toAreaName = #{toAreaName}	</select>
+	<select id="getByFromTownPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromTownPk = #{fromTownPk}	</select>
+	<select id="getByFromTownName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where fromTownName = #{fromTownName}	</select>
+	<select id="getByToTownPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toTownPk = #{toTownPk}	</select>
+	<select id="getByToTownName" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_line where toTownName = #{toTownName}	</select>
+</mapper>
+

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bProductPriceIndexExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,productPk,productName,priceIndex,insertTime,updateTime,isDelete,isVisable
+	    ]]>
+	</sql>
+
+	<update id="updateObj" parameterType="cn.cf.model.B2bProductPriceIndex">
+
+        UPDATE b2b_product_price_index
+        <set>
+			<if test="productPk != null and productPk != ''">
+				productPk = #{productPk} ,
+			</if>
+			<if test="productName != null and productName != ''">
+				productName = #{productName} ,
+			</if>
+			<if test="priceIndex != null and priceIndex != ''">
+				priceIndex = #{priceIndex} ,
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				updateTime = #{updateTime} ,
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete} ,
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable}
+			</if>
+		</set>
+        WHERE 
+        	pk = #{pk}  	        
+
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(priceIndex)">
+				AND priceIndex = #{priceIndex}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_product_price_index
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bProductPriceIndexDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_product_price_index
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="getLoanNumberInfo" resultType="cn.cf.entity.ProductPriceIndexEntry">
+		SELECT
+			lo.loanNumber,lo.repaymentTime,
+			c.name as purchaserName,c.pk,c.contacts,c.contactsTel,
+			lo.loanStatus,noweight AS weightShipped,
+			json_extract(og.goodsInfo, '$.productPk') as productPk,
+			CONCAT_WS(' ',json_extract(og.goodsInfo, '$.productName'),
+			json_extract(og.goodsInfo, '$.varietiesName'),
+			json_extract(og.goodsInfo, '$.specifications'),
+			json_extract(og.goodsInfo, '$.seriesName'),
+			json_extract(og.goodsInfo, '$.batchNumber'),
+			json_extract(og.goodsInfo, '$.distinctNumber'),
+			json_extract(og.goodsInfo, '$.gradeName'),
+			json_extract(og.goodsInfo, '$.packNumber')
+		) as goodsInfo,
+			ppi.priceIndex as priceIndex,
+			og.presentPrice as presentPrice,
+			og.childOrderNumber as childOrderNumber
+		FROM
+		(select * from b2b_loan_number
+			where economicsGoodsType = 2
+				  and loanStatus IN (3,6)
+		) lo
+		inner JOIN
+		(SELECT
+			orderNumber,presentPrice,goodsInfo,(IF(afterWeight = 0,weight,afterWeight)-weightShipped) noweight ,childOrderNumber
+		 from b2b_order_goods  where orderStatus !=-1
+		 ) og ON og.orderNumber = lo.orderNumber
+		LEFT JOIN b2b_company c ON c.pk = lo.purchaserPk
+		LEFT JOIN b2b_product_price_index ppi ON (ppi.productPk = json_extract(og.goodsInfo, '$.productPk') and ppi.isDelete  = 1 and ppi.isVisable  = 1 )
+
+	</select>
+	
+	<select id="getExtByProductPk" resultType="cn.cf.dto.B2bProductPriceIndexDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_product_price_index where productPk = #{productPk}	 and isVisable =1 </select>
+
+</mapper>
+

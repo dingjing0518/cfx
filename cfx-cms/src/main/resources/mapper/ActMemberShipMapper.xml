@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.ActMemberShipDao">
+
+<resultMap type="cn.cf.dto.ActMemberShipDto" id="MemberShipResult">
+		<result property="id" column="id"/>
+		<result property="firstName" column="firstName"/>
+		<result property="email" column="email"/>
+		
+		<result property="groupId" column="groupId"/>
+		<result property="groups" column="groupName"/>
+		
+</resultMap>
+	
+	
+
+	
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		ID_,NAME_,TYPE_
+	    ]]>
+	</sql>
+	
+
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(id)">
+				AND u.ID_ = #{id}
+			</if>
+		
+	
+		
+		</where>
+	</sql>
+
+		<delete id="deleteActListGroup" parameterType="java.util.Map">
+    <![CDATA[
+        DELETE FROM ACT_ID_MEMBERSHIP WHERE
+        USER_ID_ = #{accountId} and GROUP_ID_=#{groupId}
+    ]]>
+	</delete>
+	
+	
+	<select id="searchActMemShipCount" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from ACT_ID_MEMBERSHIP m
+join ACT_ID_USER u
+on m.USER_ID_=u.ID_ join ACT_ID_GROUP g
+on m.GROUP_ID_=g.ID_ where 1=1 
+  <if test="@Ognl@isNotEmpty(id)">
+				AND u.ID_ = #{id}
+			</if>
+
+	</select>
+	
+	
+	<select id="searchActMemShipList" parameterType="java.util.Map"
+		resultMap="MemberShipResult">
+		select
+	      if(${colAccountName},   u.ID_ , INSERT (  u.ID_ ,  1, 1, '*')) as id,
+	      if(${colName},   u.FIRST_ , INSERT ( u.FIRST_ ,  1, 1, '*')) as firstName,
+		u.EMAIL_ as email,
+		g.ID_ as groupId,
+		g.NAME_ as groupName 
+		from ACT_ID_MEMBERSHIP m
+		join ACT_ID_USER u
+		on m.USER_ID_=u.ID_ join ACT_ID_GROUP g
+		on m.GROUP_ID_=g.ID_
+				where 1=1 
+
+
+        <if test="@Ognl@isNotEmpty(id)">
+				AND u.ID_ = #{id}
+			</if>
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	
+
+	
+
+	
+</mapper>
+

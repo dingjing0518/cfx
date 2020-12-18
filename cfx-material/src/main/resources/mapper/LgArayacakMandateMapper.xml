@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgArayacakMandateDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,userPk,userMobile,companyPk,companyName,mandateName,mandateUrl,insertTime,updateTime,delStatus
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_arayacak_mandate (
+         pk, userPk, userMobile, companyPk, companyName, mandateName, mandateUrl, insertTime, updateTime, delStatus
+        ) VALUES (
+         #{pk}, #{userPk}, #{userMobile}, #{companyPk}, #{companyName}, #{mandateName}, #{mandateUrl}, #{insertTime}, #{updateTime}, #{delStatus}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgArayacakMandate">
+    <![CDATA[
+        UPDATE lg_arayacak_mandate SET
+	        userPk = #{userPk} , userMobile = #{userMobile} , companyPk = #{companyPk} , companyName = #{companyName} , mandateName = #{mandateName} , mandateUrl = #{mandateUrl} , insertTime = #{insertTime} , updateTime = #{updateTime} , delStatus = #{delStatus}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgArayacakMandate">
+    <![CDATA[
+        DELETE FROM lg_arayacak_mandate WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(userPk)">
+				AND userPk = #{userPk}			</if>
+			<if test="@Ognl@isNotEmpty(userMobile)">
+				AND userMobile = #{userMobile}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(mandateName)">
+				AND mandateName = #{mandateName}			</if>
+			<if test="@Ognl@isNotEmpty(mandateUrl)">
+				AND mandateUrl = #{mandateUrl}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(delStatus)">
+				AND delStatus = #{delStatus}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_arayacak_mandate
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where pk = #{pk}	</select>
+	<select id="getByUserPk" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where userPk = #{userPk}	</select>
+	<select id="getByUserMobile" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where userMobile = #{userMobile}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where companyName = #{companyName}	</select>
+	<select id="getByMandateName" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where mandateName = #{mandateName}	</select>
+	<select id="getByMandateUrl" resultType="cn.cf.dto.LgArayacakMandateDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_arayacak_mandate where mandateUrl = #{mandateUrl}	</select>
+</mapper>
+

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+
+<mapper namespace="cn.cf.dao.ActUserDao">
+
+<resultMap type="cn.cf.dto.ActUserDto" id="UserResult">
+		<result property="id" column="id_"/>
+		<result property="firstName" column="first_"/>
+		<result property="lastName" column="last_"/>
+		<result property="email" column="email_"/>
+		<result property="password" column="pwd_"/>
+	</resultMap>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(id)">
+				AND ID_ like  '%${id}%'		</if>
+		
+		</where>
+	</sql>
+	
+	<select id="selectByPk"  parameterType="java.util.Map" resultType="cn.cf.dto.ActUserDto">
+	select u.ID_ as id ,u.first_ as  firstName , u.last_ as  lastName,
+		u.email_ as email,u.pwd_ as password,
+	   m.GROUP_ID_ as groupId from ACT_ID_USER u
+	left join ACT_ID_MEMBERSHIP  m on m.USER_ID_ = u.ID_
+	where   ID_ = #{id}	 
+	</select>
+
+
+	<select id="searchUserCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from ACT_ID_USER
+        <include refid="searchGridWhere" />
+	</select>
+	<select id="searchUserList" parameterType="java.util.Map"
+		resultMap="UserResult">
+		select * from  ACT_ID_USER 
+		<include refid="searchGridWhere" />
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+
+	<insert id="insertActUser" parameterType="java.util.Map">
+		insert into ACT_ID_USER values(#{accountId},null,#{name},null,#{email},null,null);
+	</insert>
+
+	<select id="getMemberShipByUserId"  parameterType="java.util.Map" resultType="cn.cf.dto.MemberShip">
+	select USER_ID_ as userId  , GROUP_ID_ as groupId
+	   from ACT_ID_MEMBERSHIP   
+	where   USER_ID_ = #{account}	 
+	</select>
+	
+	<delete id="deleteUser" parameterType="java.util.Map">
+    <![CDATA[
+        	DELETE   FROM ACT_ID_USER WHERE ID_ = #{id}
+    ]]>
+	</delete>
+	
+	<update id="update" parameterType="java.util.Map">
+		UPDATE ACT_ID_USER
+		<set>
+			FIRST_ = #{name},
+			EMAIL_ = #{email}
+		</set>
+		WHERE ID_ = #{accountId}
+	</update>
+</mapper>
+

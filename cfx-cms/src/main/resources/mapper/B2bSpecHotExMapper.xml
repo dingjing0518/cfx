@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecHotDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		 `pk`,
+  `firstLevelPk`,
+  `firstLevelName` ,
+  `secondLevelPk`,
+  `secondLevelName`,
+  `thirdLevelPk`,
+  `thirdLevelName` ,
+  `linkUrl` ,
+  `status` ,
+  `sort` ,
+  `insertTime` ,
+  `updateTime`,
+  `isDelete` ,
+  `block`,
+  `fourthLevelPk`,
+  `fourthLevelName`
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+		
+			<if test="@Ognl@isNotEmpty(firstLevelPk)">
+				AND firstLevelPk = #{firstLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(firstLevelName)">
+				AND firstLevelName = #{firstLevelName}			</if>
+				
+				
+			<if test="@Ognl@isNotEmpty(secondLevelPk)">
+				AND secondLevelPk = #{secondLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(secondLevelName)">
+				AND secondLevelName = #{secondLevelName}			</if>
+				
+				
+				
+			<if test="@Ognl@isNotEmpty(thirdLevelPk)">
+				AND thirdLevelPk = #{thirdLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(thirdLevelName)">
+				AND thirdLevelName = #{thirdLevelName}			</if>
+				
+				
+			<if test="@Ognl@isNotEmpty(fourthLevelPk)">
+				AND fourthLevelPk = #{fourthLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(fourthLevelName)">
+				AND fourthLevelName = #{fourthLevelName}			</if>
+				
+				
+				
+				
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertTimeBegin}</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateTimeBegin}</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateTimeEnd}</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+		
+		</where>
+	</sql>
+
+	<select id="searchSpecHotCount" 
+		resultType="int">
+		SELECT count(*) FROM b2b_spec_hot
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchSpecHotList" resultType="cn.cf.dto.B2bSpecHotDto">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec_hot
+		<include refid="searchGridWhere" />
+		<if test="orderName != null and orderName != ''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="orderName == null and orderName == ''">
+			order by insertTime desc
+		</if>
+	       limit #{start},#{limit}
+	</select>
+
+
+	<update id="updateExt" parameterType="cn.cf.model.B2bSpecHot">
+		UPDATE b2b_spec_hot
+		<set>
+		
+			<if test="firstLevelPk != null">
+				firstLevelPk = #{firstLevelPk} ,
+			</if>
+			<if test="firstLevelName != null">
+				firstLevelName = #{firstLevelName} ,
+			</if>
+			
+			<if test="secondLevelPk != null">
+				secondLevelPk = #{secondLevelPk} ,
+			</if>
+			<if test="secondLevelName != null">
+				secondLevelName = #{secondLevelName} ,
+			</if>
+			
+			
+			<if test="secondLevelPk != null">
+				secondLevelPk = #{secondLevelPk} ,
+			</if>
+			<if test="secondLevelName != null">
+				secondLevelName = #{secondLevelName} ,
+			</if>
+			
+			
+			<if test="thirdLevelPk != null">
+				thirdLevelPk = #{thirdLevelPk} ,
+			</if>
+			<if test="thirdLevelName != null">
+				thirdLevelName = #{thirdLevelName} ,
+			</if>
+			
+			<if test="fourthLevelPk != null">
+				fourthLevelPk = #{fourthLevelPk} ,
+			</if>
+			<if test="fourthLevelName != null">
+				fourthLevelName = #{fourthLevelName} ,
+			</if>
+			
+			<if test="linkUrl != null">
+				linkUrl = #{linkUrl} ,
+			</if>
+			<if test="status != null">
+				status = #{status} ,
+			</if>
+			<if test="sort != null">
+				sort = #{sort} ,
+			</if>
+
+			<if test="insertTime != null">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime} ,
+			</if>
+			<if test="isDelete != null">
+				isDelete = #{isDelete},
+			</if>
+			<if test="block != null">
+				block = #{block},
+			</if>
+		
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+	
+	
+	<select id="isExitSpecHot" parameterType="java.util.Map" 	resultType="int">
+		SELECT
+		count(1)
+		FROM b2b_spec_hot
+		where 1=1 
+		<if test="@Ognl@isNotEmpty(firstLevelPk)">
+				AND firstLevelPk = #{firstLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(firstLevelName)">
+				AND firstLevelName = #{firstLevelName}			</if>
+			<if test="@Ognl@isNotEmpty(secondLevelPk)">
+				AND secondLevelPk = #{secondLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(secondLevelName)">
+				AND secondLevelName = #{secondLevelName}			</if>
+				
+				
+			<if test="@Ognl@isNotEmpty(thirdLevelPk)">
+				AND thirdLevelPk = #{thirdLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(thirdLevelName)">
+				AND thirdLevelName = #{thirdLevelName}			</if>
+				
+			<if test="@Ognl@isNotEmpty(fourthLevelPk)">
+				AND fourthLevelPk = #{fourthLevelPk}			</if>
+			<if test="@Ognl@isNotEmpty(fourthLevelName)">
+				AND fourthLevelName = #{fourthLevelName}			</if>
+	      <if test="@Ognl@isNotEmpty(pk)">
+				AND pk != #{pk}			</if>
+	</select>
+	
+</mapper>
+

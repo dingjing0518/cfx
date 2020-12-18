@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryRecordDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,activityPk,awardPk,status,name,awardName,awardStatus,awardType,insertTime,provinceName,province,cityName,city,areaName,area,town,townName,addressPk,contacts,contactsTel,grantType,note,memberPk,memberName,address,companyPk,companyName,mobile,activityType
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_lottery_record (
+         pk, activityPk, awardPk, status, name, awardName, awardStatus, awardType, insertTime, provinceName, province, cityName, city, areaName, area, town, townName, addressPk, contacts, contactsTel, grantType, note, memberPk, memberName, address, companyPk, companyName, mobile,activityType
+        ) VALUES (
+         #{pk}, #{activityPk}, #{awardPk}, #{status}, #{name}, #{awardName}, #{awardStatus}, #{awardType}, #{insertTime}, #{provinceName}, #{province}, #{cityName}, #{city}, #{areaName}, #{area}, #{town}, #{townName}, #{addressPk}, #{contacts}, #{contactsTel}, #{grantType}, #{note}, #{memberPk}, #{memberName}, #{address}, #{companyPk}, #{companyName}, #{mobile} ,#{activityType}       
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bLotteryRecord">
+    <![CDATA[
+        UPDATE b2b_lottery_record SET
+	        activityPk = #{activityPk} , awardPk = #{awardPk} , status = #{status} , name = #{name} , awardName = #{awardName} , awardStatus = #{awardStatus} , awardType = #{awardType} , insertTime = #{insertTime} , provinceName = #{provinceName} , province = #{province} , cityName = #{cityName} , city = #{city} , areaName = #{areaName} , area = #{area} , town = #{town} , townName = #{townName} , addressPk = #{addressPk} , contacts = #{contacts} , contactsTel = #{contactsTel} , grantType = #{grantType} , note = #{note} , memberPk = #{memberPk} , memberName = #{memberName} , address = #{address} , companyPk = #{companyPk} , companyName = #{companyName} , mobile = #{mobile}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bLotteryRecord">
+    <![CDATA[
+        DELETE FROM b2b_lottery_record WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(awardPk)">
+				AND awardPk = #{awardPk}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}			</if>
+			<if test="@Ognl@isNotEmpty(awardType)">
+				AND awardType = #{awardType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(addressPk)">
+				AND addressPk = #{addressPk}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(grantType)">
+				AND grantType = #{grantType}			</if>
+			<if test="@Ognl@isNotEmpty(note)">
+				AND note = #{note}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}			</if>
+				<if test="@Ognl@isNotEmpty(activityType)">
+				AND activityType = #{activityType}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+			<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where pk = #{pk}	</select>
+	<select id="getByActivityPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where activityPk = #{activityPk}	</select>
+	<select id="getByAwardPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where awardPk = #{awardPk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where name = #{name}	</select>
+	<select id="getByAwardName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where awardName = #{awardName}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where provinceName = #{provinceName}	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where province = #{province}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where cityName = #{cityName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where city = #{city}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where areaName = #{areaName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where area = #{area}	</select>
+	<select id="getByTown" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where town = #{town}	</select>
+	<select id="getByTownName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where townName = #{townName}	</select>
+	<select id="getByAddressPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where addressPk = #{addressPk}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where contactsTel = #{contactsTel}	</select>
+	<select id="getByNote" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where note = #{note}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where memberName = #{memberName}	</select>
+	<select id="getByAddress" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where address = #{address}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where companyName = #{companyName}	</select>
+	<select id="getByMobile" resultType="cn.cf.dto.B2bLotteryRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_lottery_record where mobile = #{mobile}	</select>
+</mapper>
+

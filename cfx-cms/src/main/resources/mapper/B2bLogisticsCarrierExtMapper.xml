@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLogisticsCarrierExtDao">
+    <update id="update" parameterType="java.util.Map">
+        UPDATE b2b_logistics_carrier
+        <set>
+            <if test="isDelete !=null and isDelete !=''">
+                isDelete = #{isDelete},
+            </if>
+            <if test="carrierName !=null and carrierName !=''">
+                carrierName = #{carrierName},
+            </if>
+            <if test="isVisable !=null and isVisable !=''">
+                isVisable = #{isVisable},
+            </if>
+            updateTime = #{updateTime}
+        </set>
+        WHERE
+        <if test="pk !=null and pk!=''">
+            pk = #{pk}
+        </if>
+        <if test="carrierPk !=null and carrierPk!=''">
+            carrierPk = #{carrierPk}
+        </if>
+    </update>
+</mapper>

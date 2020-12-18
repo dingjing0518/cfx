@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAuctionOfferDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,auctionPk,auctionPrice,thanStartingPrice,boxes,weight,provideBoxes,provideWeight,companyPk,companyName,contacts,contactsTel,
+		memberPk, employeeName,employeeNumber,saleManPk,saleManContacts,saleManContactsTel,insertTime,bidTime,
+		orderTime,overDateTime,bidStatus,isFinished,type
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_auction_offer (
+         pk, auctionPk, auctionPrice, thanStartingPrice,boxes, weight, provideBoxes, provideWeight, companyPk, 
+         companyName, contacts, contactsTel, memberPk,employeeName,employeeNumber,saleManPk,saleManContacts,
+         saleManContactsTel, insertTime, bidTime, orderTime,overDateTime ,bidStatus, isFinished, type
+        ) VALUES (
+         #{pk}, #{auctionPk}, #{auctionPrice},#{thanStartingPrice}, #{boxes}, #{weight}, #{provideBoxes}, #{provideWeight}, #{companyPk}, 
+         #{companyName}, #{contacts}, #{contactsTel}, #{memberPk},#{employeeName},#{employeeNumber},#{saleManPk},
+         #{saleManContacts},#{saleManContactsTel}, #{insertTime}, #{bidTime}, #{orderTime},#{overDateTime}, #{bidStatus}, #{isFinished}, #{type}   
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bAuctionOffer">
+    <![CDATA[
+        UPDATE b2b_auction_offer SET
+	        auctionPk = #{auctionPk} , auctionPrice = #{auctionPrice} , thanStartingPrice = #{thanStartingPrice} , 
+	        boxes = #{boxes} ,  weight = #{weight} , 
+	        provideBoxes = #{provideBoxes} , provideWeight = #{provideWeight} , companyPk = #{companyPk} , 
+	        companyName = #{companyName} , contacts = #{contacts} , contactsTel = #{contactsTel} , 
+	        memberPk = #{memberPk} , saleManPk = #{saleManPk} , saleManContacts = #{saleManContacts} ,
+	        saleManContactsTel = #{saleManContactsTel} , insertTime = #{insertTime} , bidTime = #{bidTime} , orderTime = #{orderTime} , 
+	        bidStatus = #{bidStatus} , isFinished = #{isFinished} , type = #{type}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bAuctionOffer">
+    <![CDATA[
+        DELETE FROM b2b_auction_offer WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(auctionPk)">
+				AND auctionPk = #{auctionPk}			</if>
+			<if test="@Ognl@isNotEmpty(auctionPrice)">
+				AND auctionPrice = #{auctionPrice}			</if>
+			<if test="@Ognl@isNotEmpty(boxes)">
+				AND boxes = #{boxes}			</if>
+			<if test="@Ognl@isNotEmpty(weight)">
+				AND weight = #{weight}			</if>
+			<if test="@Ognl@isNotEmpty(provideBoxes)">
+				AND provideBoxes = #{provideBoxes}			</if>
+			<if test="@Ognl@isNotEmpty(provideWeight)">
+				AND provideWeight = #{provideWeight}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(saleManPk)">
+				AND saleManPk = #{saleManPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(saleManContacts)">
+				AND saleManContacts = #{saleManContacts}			
+			</if>
+			<if test="@Ognl@isNotEmpty(saleManContactsTel)">
+				AND saleManContactsTel = #{saleManContactsTel}			
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(bidTimeBegin)">
+				AND bidTime >= #{bidTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(bidTimeEnd)">
+				AND bidTime &lt;= #{bidTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(orderTimeBegin)">
+				AND orderTime >= #{orderTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(orderTimeEnd)">
+				AND orderTime &lt;= #{orderTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(bidStatus)">
+				AND bidStatus = #{bidStatus}			</if>
+			<if test="@Ognl@isNotEmpty(isFinished)">
+				AND isFinished = #{isFinished}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_auction_offer
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer
+		<include refid="searchGridWhere" />
+		order by auctionPrice desc,boxes desc,insertTime
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where pk = #{pk}	</select>
+	<select id="getByAuctionPk" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where auctionPk = #{auctionPk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where companyName = #{companyName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where contactsTel = #{contactsTel}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.B2bAuctionOfferDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_offer where memberPk = #{memberPk}	</select>
+</mapper>
+

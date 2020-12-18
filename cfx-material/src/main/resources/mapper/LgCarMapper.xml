@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgCarDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,plateNumber,carLength,carType,licenseUrl,isDeleted,insertTime,updateTime
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_car (
+         pk, companyPk, plateNumber, carLength, carType, licenseUrl, isDeleted, insertTime, updateTime
+        ) VALUES (
+         #{pk}, #{companyPk}, #{plateNumber}, #{carLength}, #{carType}, #{licenseUrl}, #{isDeleted}, #{insertTime}, #{updateTime}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgCar">
+    <![CDATA[
+        UPDATE lg_car SET
+	        companyPk = #{companyPk} , plateNumber = #{plateNumber} , carLength = #{carLength} , carType = #{carType} , licenseUrl = #{licenseUrl} , isDeleted = #{isDeleted} , insertTime = #{insertTime} , updateTime = #{updateTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgCar">
+    <![CDATA[
+        DELETE FROM lg_car WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(plateNumber)">
+				AND plateNumber = #{plateNumber}			</if>
+			<if test="@Ognl@isNotEmpty(carLength)">
+				AND carLength = #{carLength}			</if>
+			<if test="@Ognl@isNotEmpty(carType)">
+				AND carType = #{carType}			</if>
+			<if test="@Ognl@isNotEmpty(licenseUrl)">
+				AND licenseUrl = #{licenseUrl}			</if>
+			<if test="@Ognl@isNotEmpty(isDeleted)">
+				AND isDeleted = #{isDeleted}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_car
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="searchList" resultType="cn.cf.dto.LgCarDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM lg_car
+        <include refid="searchGridWhere" />
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+	
+	<select id="getByPk" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where companyPk = #{companyPk}	</select>
+	<select id="getByPlateNumber" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where plateNumber = #{plateNumber}	</select>
+	<select id="getByCarLength" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where carLength = #{carLength}	</select>
+	<select id="getByCarType" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where carType = #{carType}	</select>
+	<select id="getByLicenseUrl" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_car where licenseUrl = #{licenseUrl}	</select>
+</mapper>
+

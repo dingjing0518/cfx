@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpStepInfoDaoEx">
+ <!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,logisticsPk,productPk,productName,startWeight,endWeight,packNumber,price,isDelete,isStore,block
+	    ]]>
+	</sql>
+	<delete id="deleteByLogisticsPk">
+    <![CDATA[
+       DELETE FROM logistics_erp_stepInfo WHERE logisticsPk=#{logisticsPk}
+    ]]>
+	</delete>	
+	 <select id="searchLogisticsErpStepInfoList" resultType="cn.cf.dto.LogisticsErpStepInfoDto">
+	 SELECT
+		<include refid="columns" />
+		FROM logistics_erp_stepInfo where logisticsPk = #{logisticsPk}
+		and isDelete = 1
+	 </select>
+</mapper>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgRoleTypeMenuExDao">
+
+    <select id="getRoleMenuByRolePk" parameterType="java.util.Map"
+            resultType="cn.cf.dto.LgRoleMenuDto">
+        SELECT pk,roleTypePk as rolePk,menuPk  from lg_role_menu WHERE roleTypePk=#{rolePk}
+    </select>
+
+    <delete id="deleteByLgRoleMenuPk">
+        DELETE from lg_role_menu where roleTypePk=#{rolePk}
+    </delete>
+    
+    <insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_role_menu (
+         pk, roleTypePk, menuPk
+        ) VALUES (
+         #{pk}, #{rolePk}, #{menuPk}        
+        )
+    ]]>
+	</insert>
+    
+</mapper>
+

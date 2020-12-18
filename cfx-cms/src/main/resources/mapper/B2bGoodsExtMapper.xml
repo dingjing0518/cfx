@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bGoodsExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,price,tonPrice,salePrice,storePk,storeName,companyPk,companyName,brandPk,
+		brandName,insertTime,
+		isUpdown,
+		(CASE isUpdown
+		WHEN 1 THEN '待上架'
+		WHEN 2 THEN '上架'
+		WHEN 3 THEN '下架'
+		END) isUpdownName,
+		updateTime,upTime,tareWeight,totalBoxes,totalWeight,
+		type,isDelete,isNewProduct,goodsInfo
+	    ]]>
+	</sql>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(price)">
+				AND price = #{price}			</if>
+			<if test="@Ognl@isNotEmpty(tonPrice)">
+				AND tonPrice = #{tonPrice}			</if>
+			<if test="@Ognl@isNotEmpty(salePrice)">
+				AND salePrice = #{salePrice}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(brandPk)">
+				AND	SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"brandPk":', 1),'"brandPk":"'),''), '"', 1 ) =  #{brandPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"productPk":', 1),'"productPk":"'),''), '"', 1 ) =  #{productPk}
+						</if>
+			<if test="@Ognl@isNotEmpty(specPk)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"specPk":', 1),'"specPk":"'),''), '"', 1 ) =  #{specPk}
+				</if>
+			<if test="@Ognl@isNotEmpty(seriesPk)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"seriesPk":', 1),'"seriesPk":"'),''), '"', 1 ) =  #{seriesPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(varietiesPk)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"varietiesPk":', 1),'"varietiesPk":"'),''), '"', 1 ) =  #{varietiesPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyPk)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"seedvarietyPk":', 1),'"seedvarietyPk":"'),''), '"', 1 ) =  #{seedvarietyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertStratTime)">
+				AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertStratTime}			</if>
+			<if test="@Ognl@isNotEmpty(insertEndTime)">
+				AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(insertTime)">
+				AND insertTime &lt;= #{insertTime}			</if>
+			<if test="@Ognl@isNotEmpty(isUpdown)">
+				AND isUpdown = #{isUpdown}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(upStartTime)">
+				AND str_to_date(upTime,'%Y-%m-%d') >= #{upStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(upEndTime)">
+				AND str_to_date(upTime,'%Y-%m-%d') &lt;= #{upEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"batchNumber":', 1),'"batchNumber":"'),''), '"', 1 )  LIKE '%${batchNumber}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(tareWeight)">
+				AND tareWeight = #{tareWeight}			</if>
+			<if test="@Ognl@isNotEmpty(totalBoxes)">
+				AND totalBoxes = #{totalBoxes}			</if>
+			<if test="@Ognl@isNotEmpty(totalWeight)">
+				AND totalWeight = #{totalWeight}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isNewProduct)">
+				AND isNewProduct = #{isNewProduct}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+				
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_goods
+		<include refid="searchGridWhere" />
+	</select>
+
+
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bGoodsExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		pk,price,tonPrice,salePrice,storePk,companyPk,brandPk,insertTime,
+		isUpdown,
+		(CASE isUpdown
+		WHEN 1 THEN '待上架'
+		WHEN 2 THEN '上架'
+		WHEN 3 THEN '下架'
+		END) isUpdownName,
+        (CASE  type
+        WHEN 'normal' THEN '正常'
+        WHEN 'sale' THEN '特卖'
+        WHEN 'presale' THEN '预售'
+          WHEN 'binding' THEN '拼团'
+        WHEN 'auction' THEN '竞拍'
+        END)  typeName,
+        (CASE  isNewProduct
+        WHEN 0 THEN '显示'
+        WHEN 1 THEN '不显示'
+        END)  isNewProductName,
+		<choose>
+			<when test="brandNameCol == 'OPER_GOODSMG_UPDOWN_COL_BRANDNAME' or  brandNameCol == 'MARKET_GOODSSTATISTIC_COL_BRANDNAME'">
+			  '*****' AS brandName,
+			</when>
+			<otherwise>
+				brandName,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="storeNameCol == 'OPER_GOODSMG_UPDOWN_COL_STORENAME' or storeNameCol == 'MARKET_GOODSSTATISTIC_COL_STORENAME'">
+				INSERT(storeName, 3, 5, '*****') AS storeName,
+			</when>
+			<otherwise>
+				storeName,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameCol == 'OPER_GOODSMG_UPDOWN_COL_COMPANYNAME' or companyNameCol == 'MARKET_GOODSSTATISTIC_COL_COMPANYNAME'">
+				INSERT(companyName, 3, 5, '*****') AS companyName,
+			</when>
+			<otherwise>
+				companyName,
+			</otherwise>
+		</choose>
+		updateTime,upTime,tareWeight,totalBoxes,totalWeight,
+		type,isDelete,isNewProduct,goodsInfo,
+		  (CASE  json_extract(goodsInfo, '$.stampDuty') 
+        WHEN 1 THEN '否'
+        WHEN 2 THEN '是'
+          ELSE  '否'
+        END)   stampDutyName
+		FROM b2b_goods
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	
+	<update id="updateGoods" parameterType="cn.cf.dto.B2bGoodsExtDto">
+  
+        UPDATE b2b_goods 
+        <set>
+        
+         <if test="companyPk != null and companyPk !='' ">
+         companyPk = #{companyPk} ,
+         </if>
+         <if test="companyName != null and companyName !='' ">
+         companyName = #{companyName} ,
+         </if>
+         <if test="brandPk != null and brandPk !='' ">
+         brandPk = #{brandPk} ,
+         </if>
+         <if test="brandName != null and brandName !='' ">
+         brandName = #{brandName} ,
+         </if>
+         <if test="insertTime != null and insertTime !='' ">
+         insertTime = #{insertTime} ,
+         </if>
+         <if test="isUpdown != null and isUpdown !='' ">
+         isUpdown = #{isUpdown} ,
+         </if>
+         updateTime = now() ,
+         <if test="upTime != null and upTime !='' ">
+         upTime = #{upTime} ,
+         </if>
+         <if test="tareWeight != null and tareWeight !='' ">
+         tareWeight = #{tareWeight} ,
+         </if>
+         <if test="totalBoxes != null and totalBoxes !='' ">
+         totalBoxes = #{totalBoxes} ,
+         </if>
+         <if test="totalWeight != null and totalWeight !='' ">
+         totalWeight = #{totalWeight} ,
+         </if>
+         <if test="type != null and type !='' ">
+         type = #{type} ,
+         </if>
+        </set>                                            
+        WHERE 
+        	pk = #{pk}  	        
+    
+	</update>
+	
+	<select id="getAllGoodsForLucene" resultType="cn.cf.dto.B2bGoodsExtDto">
+		SELECT
+					g.pk AS pk,
+					g.insertTime AS insertTime,
+					g.updateTime AS updateTime,
+					g.price AS price,
+					g.salePrice AS salePrice,
+					g.companyPk AS companyPk,
+					g.companyName AS companyName,
+					g.brandName AS brandName,
+					g.productName AS productName,
+					g.specifications AS specifications,
+					g.specName AS specName,
+					g.seriesName AS seriesName,
+					g.gradeName AS gradeName,
+					g.varietiesName AS varietiesName,
+					g.seedvarietyName AS seedvarietyName,
+					g.packNumber AS packNumber,
+					g.batchNumber AS batchNumber,
+					g.tareWeight AS tareWeight,
+					g.totalBoxes AS totalBoxes,
+					g.totalWeight AS totalWeight,
+					g.plantName AS plantName,
+					g.wareName AS wareName,
+					g.storePk AS storePk,
+					w.address AS wareAddress,
+					g.specifications AS specifications,
+					ifnull(s.isOpen, 2) AS isOpen,
+					s.upperWeight AS upperWeight,
+					g.totalWeight AS totalWeight,
+					s.startTime AS startTime,
+					s.endTime AS endTime,
+					s.qq AS qq,
+					s.customerTel AS customerTel,
+					s.showPricebfOpen AS showPricebfOpen,
+					gb.brandPk AS brandPk,
+					g.productPk AS productPk,
+					g.specPk AS specPk,
+					g.seriesPk AS seriesPk,
+					g.gradePk AS gradePk,
+					g.varietiesPk AS varietiesPk,
+					g.seedvarietyPk AS seedvarietyPk,
+					g.unit AS unit
+		FROM
+			b2b_goods g
+		LEFT JOIN b2b_ware w ON g.warePk = w.pk
+		LEFT JOIN b2b_goods_brand gb ON g.brandPk = gb.pk
+		LEFT JOIN b2b_store s ON g.storePk = s.pk
+		LEFT JOIN b2b_company c ON g.companyPk = c.pk
+		WHERE
+			1 = 1
+		AND g.isNewProduct = 0
+	</select>
+	
+	<select id = "searchGoodsUpdateReportList" resultType="cn.cf.entity.GoodsUpdateReport"
+		parameterType="java.util.Map" > 
+	SELECT
+		a.* 
+	FROM(
+		SELECT
+			g.pk AS goodsPk ,ac.account,ac.`name` AS accountName,mc.companyPk ,CONCAT(s.startTime,"-",s.endTime)  AS openTime,  DATE_FORMAT(g.updateTime,'%Y-%m-%d %T') as updateTime,s.`name`
+		FROM
+			(
+				SELECT  *
+				FROM	b2b_goods
+				WHERE
+				 str_to_date(updateTime,'%Y-%m-%d') >=str_to_date( #{startTime},'%Y-%m-%d')	
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= str_to_date(#{endTime},'%Y-%m-%d')	
+				ORDER BY
+					updateTime DESC
+			) AS  g
+		INNER JOIN (select * from b2b_store where block not like '%sx%') s ON s.pk = g.storePk
+		LEFT JOIN marketing_company mc ON mc.companyPk = s.companyPk  AND mc.companyType = 2
+		LEFT JOIN manage_account ac ON ac.pk = mc.accountPk
+		GROUP BY  g.storePk
+		) a
+		ORDER BY a.updateTime DESC 
+	</select>
+	
+	
+	<sql id="searchGridPriceTrendWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(price)">
+				AND price = #{price}			</if>
+			<if test="@Ognl@isNotEmpty(tonPrice)">
+				AND tonPrice = #{tonPrice}			</if>
+			<if test="@Ognl@isNotEmpty(isUpdown)">
+				AND isUpdown = #{isUpdown}			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND packNumber = #{packNumber}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND (type = 'normal' or	type = 'presale')		</if>
+			<if test="@Ognl@isNotEmpty(isHome)">
+				AND isHome = #{isHome}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+		<if test="@Ognl@isNotEmpty(goodsInfo)">
+			<choose>
+	            <when test="block == 'cf'">
+	               AND (
+	                     SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"productName":', 1),'"productName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"varietiesName":', 1),'"varietiesName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"specifications":', 1),'"specifications":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"batchNumber":', 1),'"batchNumber":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"gradeName":', 1),'"gradeName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               )
+	            </when>
+	            <otherwise>
+	                   AND (
+	                     SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"technologyName":', 1),'"technologyName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"rawMaterialParentName":', 1),'"rawMaterialParentName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"rawMaterialName":', 1),'"rawMaterialName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"specName":', 1),'"specName":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               or    SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"materialName":', 1),'"batchNumber":"'),''), '"', 1 ) like '%${goodsInfo}%'
+	               )
+	            </otherwise>
+	        </choose>
+		</if>		
+		</where>
+	</sql>
+	
+	<select id="searchGridPriceTrendExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_goods
+		<include refid="searchGridPriceTrendWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridPriceTrendExt" resultType="cn.cf.dto.B2bGoodsExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_goods
+		<include refid="searchGridPriceTrendWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType} 
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	<select id = "getProductUpdateByOneday" resultType="cn.cf.entity.GoodsUpdateReport"
+		parameterType="java.lang.String" >
+		SELECT
+			a.* ,str_to_date('${date}','%Y-%m-%d') as date
+		FROM(
+		SELECT
+			g.pk AS goodsPk ,IFNULL(ac.account,"") as  account, IFNULL(ac.`name`,"") AS accountName,IFNULL(mc.companyPk ,"")as companyPk ,
+			CONCAT(s.startTime,"-",s.endTime)  AS openTime,  DATE_FORMAT(max(g.updateTime),'%Y-%m-%d %T') as updateTime,s.`name`
+		FROM
+			(
+				SELECT  *
+				FROM	b2b_goods
+				WHERE
+				 str_to_date(updateTime,'%Y-%m-%d') =str_to_date( #{date},'%Y-%m-%d')	
+			) AS  g
+		INNER JOIN b2b_store s ON s.pk = g.storePk  
+		LEFT JOIN marketing_company mc ON mc.companyPk = s.pk  AND mc.companyType = 2
+		LEFT JOIN manage_account ac ON ac.pk = mc.accountPk
+		GROUP BY  g.storePk
+		) a
+		ORDER BY a.updateTime DESC 
+		
+	</select>
+	
+	
+	
+	<select id = "searchOriginalUpdateDate" resultType="java.lang.String" >
+	 <![CDATA[
+		SELECT str_to_date( updateTime ,'%Y-%m-%d %H:%i:%s') as updateTime FROM b2b_goods WHERE 
+	 	updateTime IS NOT NULL AND updateTime <> '' ORDER BY updateTime  LIMIT 0,1
+	]]>
+	</select>
+	
+	   <sql id="searchSxGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}          </if>
+            <if test="@Ognl@isNotEmpty(type)">
+                AND type = #{type}          </if>
+            <if test="@Ognl@isNotEmpty(brandPk)">
+                AND brandPk = #{brandPk}            </if>
+            <if test="@Ognl@isNotEmpty(brandName)">
+                AND brandName = #{brandName}            </if>
+            <if test="@Ognl@isNotEmpty(technologyPk)">
+                AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"technologyPk":', 1),'"technologyPk":"'),''), '"', 1 ) = #{technologyPk}
+            </if>
+            <if test="@Ognl@isNotEmpty(rawMaterialPk)">
+                AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"rawMaterialPk":', 1),'"rawMaterialPk":"'),''), '"', 1 ) = #{rawMaterialPk}
+            </if>
+            <if test="@Ognl@isNotEmpty(rawMaterialParentPk)">
+         		AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"rawMaterialParentPk":', 1),'"rawMaterialParentPk":"'),''), '"', 1 ) = #{rawMaterialParentPk}
+           	</if>
+             <if test="isBlend>0">
+         		AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"isBlend":', 1),'"isBlend":"'),''), '"', 1 ) = #{isBlend}
+             </if>
+            <if test="@Ognl@isNotEmpty(specPk)">
+         		AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"specPk":', 1),'"specPk":"'),''), '"', 1 ) = #{specPk}
+           	</if>
+            <if test="@Ognl@isNotEmpty(materialName)">
+               	AND SUBSTRING_INDEX(REPLACE (goodsInfo,	CONCAT(SUBSTRING_INDEX(goodsInfo, '"materialName":', 1),'"materialName":"'),''), '"', 1 ) LIKE '%${materialName}%'
+	  		</if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}            </if>
+            <if test="@Ognl@isNotEmpty(companyName)">
+                AND companyName like '%${companyName}%'            </if>
+            <if test="@Ognl@isNotEmpty(isUpdown)">
+                AND isUpdown = #{isUpdown}          </if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}          </if>
+            <if test="@Ognl@isNotEmpty(isNewProduct)">
+                AND isNewProduct = #{isNewProduct}            </if>
+             <if test="@Ognl@isNotEmpty(insertStratTime)">
+                AND str_to_date(insertTime,'%Y-%m-%d') >= #{insertStratTime}            </if>
+            <if test="@Ognl@isNotEmpty(insertEndTime)">
+                AND str_to_date(insertTime,'%Y-%m-%d') &lt;= #{insertEndTime}           </if>
+			<if test="@Ognl@isNotEmpty(insertTime)">
+				AND insertTime &lt;= #{insertTime}           </if>
+
+            <if test="@Ognl@isNotEmpty(updateStartTime)">
+                AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}            </if>
+            <if test="@Ognl@isNotEmpty(updateEndTime)">
+                AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}           </if>
+            <if test="@Ognl@isNotEmpty(upStartTime)">
+                AND str_to_date(upTime,'%Y-%m-%d') >= #{upStartTime}            </if>
+            <if test="@Ognl@isNotEmpty(upEndTime)">
+                AND str_to_date(upTime,'%Y-%m-%d') &lt;= #{upEndTime}           </if>
+            <if test="@Ognl@isNotEmpty(storePk)">
+                AND storePk = #{storePk}            </if>
+            <if test="@Ognl@isNotEmpty(storeName)">
+                AND storeName like '%${storeName}%'            </if>
+            <if test="@Ognl@isNotEmpty(meno)">
+                AND meno = #{meno}          </if>
+                   <if test="@Ognl@isNotEmpty(block)">
+                AND block = #{block}          </if>
+        </where>
+    </sql>
+	
+	<select id="searchSxGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_goods
+		<include refid="searchSxGridWhere" />
+	</select>
+	
+	
+	<select id="searchSxGridExt" resultType="cn.cf.dto.B2bGoodsExtDto"
+			parameterType="java.util.Map">
+		SELECT
+		pk,price,tonPrice,salePrice,storePk,companyPk,brandPk,insertTime,
+		isUpdown,
+		(CASE isUpdown
+		WHEN 1 THEN '待上架'
+		WHEN 2 THEN '上架'
+		WHEN 3 THEN '下架'
+		END) isUpdownName,
+        (CASE  type
+        WHEN 'normal' THEN '正常'
+        WHEN 'sale' THEN '特卖'
+        WHEN 'presale' THEN '预售'
+        WHEN 'binding' THEN '拼团'
+        WHEN 'auction' THEN '竞拍'
+        END)  typeName,
+        (CASE  isNewProduct
+        WHEN 0 THEN '显示'
+        WHEN 1 THEN '不显示'
+        END)  isNewProductName,
+		 <choose>
+            <when test="brandNameCol == 'YARN_GOODS_MG_COL_BRANDNAME' ">
+                '*****' AS brandName,
+            </when>
+            <otherwise>
+                brandName,
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="storeNameCol == 'YARN_GOODS_MG_COL_STORENAME'">
+                INSERT(storeName, 3, 5, '*****') AS storeName,
+            </when>
+            <otherwise>
+                storeName,
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="companyNameCol == 'YARN_GOODS_MG_COL_COMPANYNAME'">
+                INSERT(companyName, 3, 5, '*****') AS companyName,
+            </when>
+            <otherwise>
+                companyName,
+            </otherwise>
+        </choose>
+		updateTime,upTime,tareWeight,totalBoxes,totalWeight,
+		type,isDelete,isNewProduct,goodsInfo
+		FROM b2b_goods
+		<include refid="searchSxGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+</mapper>
+

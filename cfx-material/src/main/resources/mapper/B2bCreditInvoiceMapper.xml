@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditInvoiceDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,invoiceCode,invoiceNumber,billingDate,totalAmount,taxRate,totalTax,dataType,invoiceType,state,companyPk,purchaserTaxNo,purchaserName,salesTaxNo,salesTaxName,commodityName,quantity,unitPrice
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_credit_invoice (
+         pk, invoiceCode, invoiceNumber, billingDate, totalAmount, taxRate, totalTax, dataType, invoiceType, state,companyPk, purchaserTaxNo, purchaserName, salesTaxNo, salesTaxName, commodityName, quantity, unitPrice
+        ) VALUES (
+         #{pk}, #{invoiceCode}, #{invoiceNumber}, #{billingDate}, #{totalAmount}, #{taxRate}, #{totalTax},#{dataType}, #{invoiceType}, #{state}, #{companyPk}, #{purchaserTaxNo}, #{purchaserName}, #{salesTaxNo}, #{salesTaxName}, #{commodityName}, #{quantity}, #{unitPrice}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bCreditInvoice">
+    <![CDATA[
+        UPDATE b2b_credit_invoice SET
+	        invoiceCode = #{invoiceCode} , invoiceNumber = #{invoiceNumber} , billingDate = #{billingDate} , totalAmount = #{totalAmount} , taxRate = #{taxRate} , totalTax = #{totalTax} ,dataType = #{dataType}, invoiceType = #{invoiceType} , state = #{state} , companyPk = #{companyPk}, purchaserTaxNo = #{purchaserTaxNo} , purchaserName = #{purchaserName} , salesTaxNo = #{salesTaxNo} , salesTaxName = #{salesTaxName} , commodityName = #{commodityName} , quantity = #{quantity} , unitPrice = #{unitPrice}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bCreditInvoice">
+    <![CDATA[
+        DELETE FROM b2b_credit_invoice WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceCode)">
+				AND invoiceCode = #{invoiceCode}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceNumber)">
+				AND invoiceNumber = #{invoiceNumber}			</if>
+			<if test="@Ognl@isNotEmpty(billingDateBegin)">
+				AND billingDate >= #{billingDateBegin}			</if>
+			<if test="@Ognl@isNotEmpty(billingDateEnd)">
+				AND billingDate &lt;= #{billingDateEnd}			</if>
+			<if test="@Ognl@isNotEmpty(totalAmount)">
+				AND totalAmount = #{totalAmount}			</if>
+			<if test="@Ognl@isNotEmpty(taxRate)">
+				AND taxRate = #{taxRate}			</if>
+			<if test="@Ognl@isNotEmpty(totalTax)">
+				AND totalTax = #{totalTax}			</if>
+			<if test="@Ognl@isNotEmpty(dataType)">
+				AND dataType = #{dataType}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceType)">
+				AND invoiceType = #{invoiceType}			</if>
+			<if test="@Ognl@isNotEmpty(state)">
+				AND state = #{state}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserTaxNo)">
+				AND purchaserTaxNo = #{purchaserTaxNo}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(salesTaxNo)">
+				AND salesTaxNo = #{salesTaxNo}			</if>
+			<if test="@Ognl@isNotEmpty(salesTaxName)">
+				AND salesTaxName = #{salesTaxName}			</if>
+			<if test="@Ognl@isNotEmpty(commodityName)">
+				AND commodityName = #{commodityName}			</if>
+			<if test="@Ognl@isNotEmpty(quantity)">
+				AND quantity = #{quantity}			</if>
+			<if test="@Ognl@isNotEmpty(unitPrice)">
+				AND unitPrice = #{unitPrice}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_credit_invoice
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where pk = #{pk}	</select>
+	<select id="getByInvoiceCode" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where invoiceCode = #{invoiceCode}	</select>
+	<select id="getByInvoiceNumber" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where invoiceNumber = #{invoiceNumber}	</select>
+	<select id="getByInvoiceType" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where invoiceType = #{invoiceType}	</select>
+	<select id="getByPurchaserTaxNo" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where purchaserTaxNo = #{purchaserTaxNo}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where purchaserName = #{purchaserName}	</select>
+	<select id="getBySalesTaxNo" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where salesTaxNo = #{salesTaxNo}	</select>
+	<select id="getBySalesTaxName" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where salesTaxName = #{salesTaxName}	</select>
+	<select id="getByCommodityName" resultType="cn.cf.dto.B2bCreditInvoiceDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_credit_invoice where commodityName = #{commodityName}	</select>
+</mapper>
+

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCompanyDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isDelete,auditStatus,auditSpStatus,insertTime,updateTime,parentPk,provinceName,province,cityName,city,areaName,area,regAddress,contactsTel,contacts,companyType,blUrl,organizationCode,bankName,bankAccount,ecUrl,isVisable,auditTime,auditSpTime,auditPk,auditSpPk,refuseReason,headPortrait,isPerfect,remarks
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditSpStatus)">
+				AND auditSpStatus = #{auditSpStatus}
+			</if>
+
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				AND regAddress = #{regAddress}
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}
+			</if>
+			<if test="@Ognl@isNotEmpty(businessLicense)">
+				AND businessLicense = #{businessLicense}
+			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				AND blUrl = #{blUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ocUrl)">
+				AND ocUrl = #{ocUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}
+			</if>
+			<if test="@Ognl@isNotEmpty(trUrl)">
+				AND trUrl = #{trUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(taxRegistration)">
+				AND taxRegistration = #{taxRegistration}
+			</if>
+			<if test="@Ognl@isNotEmpty(opUrl)">
+				AND opUrl = #{opUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ecUrl)">
+				AND ecUrl = #{ecUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(isPerfect)">
+				AND isPerfect = #{isPerfect}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentChildPk)">
+				AND (pk = #{parentChildPk} or parentPk = #{parentChildPk})
+			</if>
+			<if test="@Ognl@isNotEmpty(uname)">
+				AND pk not in
+				<foreach item="item" index="index" collection="uname" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	
+		</where>
+	</sql>
+
+	<select id="searchCompanyList" resultType="cn.cf.dto.B2bCompanyDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company
+		<include refid="searchGridWhere" />
+		order by insertTime desc
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+	
+	<select id="getCompany" resultType="cn.cf.dto.B2bCompanyDtoEx">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company
+		where pk = #{pk}
+	</select>
+
+
+	<select id="searchCompanyByMember" resultType="cn.cf.dto.B2bCompanyDtoEx">
+		SELECT
+		pk,name,contactsTel,auditSpStatus,insertTime
+		FROM
+		b2b_company
+		WHERE
+		(parentPk = #{pk} OR pk = #{pk} )
+		and isDelete = 1 and isVisable = 1
+		<if test="companyType==1">
+			and auditStatus=2
+		</if>
+		<if test="companyType==2">
+			and auditSpStatus=2
+		</if>
+	</select>
+
+	<select id="getByCustomerPk" resultType="cn.cf.dto.B2bCompanyDto"
+			parameterType="java.lang.String">
+		SELECT
+		c.pk,c.name
+		FROM b2b_company c
+		LEFT JOIN b2b_customer_management cm ON
+		cm.purchaserPk = c.pk	where cm.purchaserPk = #{customerPk}
+	</select>
+	
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_company
+		<include refid="searchGridWhere" />
+	</select>
+	
+</mapper>
+

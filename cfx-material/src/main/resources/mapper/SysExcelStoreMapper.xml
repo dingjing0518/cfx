@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysExcelStoreDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,params,isDeal,insertTime,methodName,url,accountPk,type,paramsName
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_excel_store (
+         pk, name, params, isDeal, insertTime, methodName, url,accountPk,type,paramsName
+        ) VALUES (
+         #{pk}, #{name}, #{params}, #{isDeal}, #{insertTime}, #{methodName}, #{url} ,#{accountPk},#{type},#{paramsName}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysExcelStore">
+    <![CDATA[
+        UPDATE sys_excel_store SET
+	        name = #{name} , params = #{params} , isDeal = #{isDeal} , insertTime = #{insertTime} , methodName = #{methodName} ,
+	         url = #{url},accountPk = #{accountPk},type = #{type},paramsName = #{paramsName}
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.SysExcelStore">
+    <![CDATA[
+        DELETE FROM sys_excel_store WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(params)">
+				AND params = #{params}			</if>
+			<if test="@Ognl@isNotEmpty(isDeal)">
+				AND isDeal = #{isDeal}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(methodName)">
+				AND methodName = #{methodName}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(accountPk)">
+				AND accountPk = #{accountPk}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(paramsName)">
+				AND paramsName = #{paramsName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_excel_store
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store where pk = #{pk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store where name = #{name}	</select>
+	<select id="getByParams" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store where params = #{params}	</select>
+	<select id="getByMethodName" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store where methodName = #{methodName}	</select>
+	<select id="getByUrl" resultType="cn.cf.dto.SysExcelStoreDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_excel_store where url = #{url}	</select>
+</mapper>
+

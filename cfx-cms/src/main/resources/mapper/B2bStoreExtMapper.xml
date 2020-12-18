@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bStoreExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,startTime,endTime,isOpen,customerTel,name,qq,introduce,upperWeight,showPricebfOpen,shopNotices,logoSettings,contacts,contactsTel
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name LIKE '%${name}%'			</if>
+			<if test="@Ognl@isNotEmpty(startTimeBegin)">
+				AND str_to_date(startTime,'%H:%i') >= #{startTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(starteTimeEnd)">
+				AND str_to_date(startTime,'%H:%i') &lt;= #{starteTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endTime)">
+				AND endTime = #{endTime}			</if>
+			<if test="@Ognl@isNotEmpty(isOpen)">
+				AND isOpen = #{isOpen}			</if>
+			<if test="@Ognl@isNotEmpty(customerTel)">
+				AND customerTel = #{customerTel}			</if>
+		</where>
+	</sql>
+	
+	<update id="updateStore" parameterType="cn.cf.dto.B2bStoreExtDto">
+		UPDATE b2b_store
+		<set>
+			<if test="isOpen != null and isOpen != ''">
+				isOpen = #{isOpen},
+			</if>
+			<if test="customerTel != null">
+				customerTel = #{customerTel},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="qq != null">
+				qq = #{qq},
+			</if>
+			<if test="introduce != null">
+				introduce = #{introduce},
+			</if>
+			<if test="upperWeight != null and upperWeight != ''">
+				upperWeight = #{upperWeight},
+			</if>
+			<if test="showPricebfOpen != null and showPricebfOpen != ''">
+				showPricebfOpen = #{showPricebfOpen},
+			</if>
+			<if test="shopNotices != null">
+				shopNotices = #{shopNotices},
+			</if>
+			<if test="logoSettings != null">
+				logoSettings = #{logoSettings},
+			</if>
+			<if test="contacts != null">
+				contacts = #{contacts},
+			</if>
+			<if test="contactsTel != null">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="block != null">
+				block = #{block}
+			</if>
+		</set>
+		where pk = #{pk}
+	</update>
+	
+	
+	
+	<select id="getByCompanyPkExt" resultType="cn.cf.dto.B2bStoreExtDto"
+		parameterType="java.lang.String">
+		SELECT
+		pk,companyPk,startTime,endTime,isOpen,customerTel,name,qq,introduce,
+		upperWeight,showPricebfOpen,shopNotices,logoSettings,contacts,contactsTel
+		FROM b2b_store where companyPk = #{companyPk}
+	</select>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM
+		(select * from b2b_store WHERE 1=1
+		<if test="pk != null and pk != ''">
+			AND pk = #{pk}			</if>
+		<if test="companyPk != null and companyPk != ''">
+			AND companyPk = #{companyPk}			</if>
+		<if test="name != null and name != ''">
+			AND name LIKE '%${name}%'			</if>
+		<if test="startTimeBegin != null and startTimeBegin != ''">
+			AND str_to_date(startTime,'%H:%i') >= #{startTimeBegin}			</if>
+		<if test="starteTimeEnd != null and starteTimeEnd != ''">
+			AND str_to_date(endTime,'%H:%i') &lt;= #{starteTimeEnd}			</if>
+		<if test="isOpen != null">
+			AND isOpen = #{isOpen}			</if>
+		) s
+		INNER JOIN (select pk from b2b_company where isVisable = 1 and isVisable = 1 and auditSpStatus = 2) c ON c.pk = s.companyPk
+
+	</select>
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bStoreExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<choose>
+            <when test="colStoreName == 'MARKET_STORE_COL_STORENAME' or colStoreName ==  'EM_PRO_STOREBIND_COL_STORENAME'">
+               INSERT (s.name, 3, 5, '*****') as name,
+            </when>
+            <otherwise>
+               s.name,
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="colContacts == 'MARKET_STORE_COL_CONTACTS'">
+               INSERT (s.contacts,  1, 1, '*') as contacts,
+            </when>
+            <otherwise>
+              s.contacts,
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="colContactsTel == 'MARKET_STORE_COL_CONTACTSTEL'">
+             INSERT (s.contactsTel, 4, 4, '****') as contactsTel,
+            </when>
+            <otherwise>
+              s.contactsTel,
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="colStoreQQ == 'MARKET_STORE_COL_STOREQQ'">
+             '*****' as qq,
+            </when>
+            <otherwise>
+              s.qq,
+            </otherwise>
+        </choose>
+          <choose>
+            <when test="colStoreLogo == 'MARKET_STORE_COL_STORELOGO'">
+             null  as logoSettings,
+            </when>
+            <otherwise>
+              s.logoSettings,
+            </otherwise>
+        </choose>
+		 
+		s.pk,s.companyPk,s.startTime,s.endTime,
+		s.isOpen,s.customerTel,
+		s.shopNotices,s.introduce,
+		s.upperWeight,
+		s.showPricebfOpen,
+		concat_ws('--',s.startTime,s.endTime) sometimes
+		FROM
+		(select * from b2b_store WHERE 1=1
+		<if test="pk != null and pk != ''">
+			AND pk = #{pk}			</if>
+		<if test="companyPk != null and companyPk != ''">
+			AND companyPk = #{companyPk}			</if>
+		<if test="name != null and name != ''">
+			AND name LIKE '%${name}%'			</if>
+		<if test="startTimeBegin != null and startTimeBegin != ''">
+			AND str_to_date(startTime,'%H:%i') >= #{startTimeBegin}			</if>
+		<if test="starteTimeEnd != null and starteTimeEnd != ''">
+			AND str_to_date(endTime,'%H:%i') &lt;= #{starteTimeEnd}			</if>
+		<if test="isOpen != null">
+			AND isOpen = #{isOpen}			</if>
+		) s
+		INNER JOIN (select pk from b2b_company where isVisable = 1 and isVisable = 1 and auditSpStatus = 2) c ON c.pk = s.companyPk
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	
+	<select id="getMap" resultType="cn.cf.dto.B2bStoreExtDto"
+        parameterType="java.util.Map">
+        SELECT
+          s.name,
+         s.contacts,
+         s.contactsTel,
+         s.qq,
+         s.logoSettings,
+        s.pk,s.companyPk,s.startTime,s.endTime,
+        s.isOpen,s.customerTel,
+        s.shopNotices,s.introduce,
+        s.upperWeight,
+        s.showPricebfOpen,
+        concat_ws('--',s.startTime,s.endTime) sometimes
+        FROM
+        (select * from b2b_store WHERE 1=1
+        <if test="pk != null and pk != ''">
+            AND pk = #{pk}          </if>
+        <if test="companyPk != null and companyPk != ''">
+            AND companyPk = #{companyPk}            </if>
+        <if test="name != null and name != ''">
+            AND name LIKE '%${name}%'           </if>
+        <if test="startTimeBegin != null and startTimeBegin != ''">
+            AND str_to_date(startTime,'%H:%i') >= #{startTimeBegin}         </if>
+        <if test="starteTimeEnd != null and starteTimeEnd != ''">
+            AND str_to_date(endTime,'%H:%i') &lt;= #{starteTimeEnd}         </if>
+        <if test="isOpen != null">
+            AND isOpen = #{isOpen}          </if>
+        ) s
+        INNER JOIN (select pk from b2b_company where isVisable = 1 and isVisable = 1 and auditSpStatus = 2) c ON c.pk = s.companyPk
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    
+    <select id = "getByCompanyBlock"  resultType="cn.cf.dto.B2bStoreDto"
+        parameterType="java.util.Map" >
+         SELECT
+       s.*
+        FROM b2b_store s 
+        inner join b2b_company  c on s.companyPk =c.pk
+        WHERE c.block LIKE '%${block}%'
+    </select>
+    
+    
+</mapper>
+

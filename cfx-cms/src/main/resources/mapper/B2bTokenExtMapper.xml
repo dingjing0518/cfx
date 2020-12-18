@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bTokenExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,appId,appSecret,storePk,storeName,isVisable,isDelete,tokenType,accType
+	    ]]>
+	</sql>
+
+	<update id="updateObj" parameterType="cn.cf.model.B2bToken">
+
+        UPDATE b2b_token
+         <set>
+			<if test="appId != null and appId != ''">
+				appId = #{appId},
+			</if>
+			<if test="appSecret != null and appSecret != ''">
+				appSecret = #{appSecret},
+			</if>
+			<if test="storePk != null and storePk != ''">
+				storePk = #{storePk},
+			</if>
+			<if test="storeName != null and storeName != ''">
+				storeName = #{storeName},
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="accType != null and accType != ''">
+				accType = #{accType},
+			</if>
+			 <if test="tokenType != null and tokenType != ''">
+				 tokenType = #{tokenType}
+		 </if>
+		</set>
+       WHERE
+        	pk = #{pk}
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(appId)">
+				AND appId = #{appId}			</if>
+			<if test="@Ognl@isNotEmpty(appSecret)">
+				AND appSecret = #{appSecret}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(tokenType)">
+				AND tokenType = #{tokenType}			</if>
+			<if test="@Ognl@isNotEmpty(accType)">
+				AND accType = #{accType}			</if>
+
+
+		</where>
+	</sql>
+</mapper>
+

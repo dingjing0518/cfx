@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpMemberDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,logisticsPk,employeeName,employeeNumber
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp_member (
+         pk, memberPk, logisticsPk, employeeName, employeeNumber
+        ) VALUES (
+         #{pk}, #{memberPk}, #{logisticsPk}, #{employeeName}, #{employeeNumber}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LogisticsErpMember">
+    <![CDATA[
+        UPDATE logistics_erp_member SET
+	        memberPk = #{memberPk} , logisticsPk = #{logisticsPk} , employeeName = #{employeeName} , employeeNumber = #{employeeNumber}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LogisticsErpMember">
+    <![CDATA[
+        DELETE FROM logistics_erp_member WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsPk)">
+				AND logisticsPk = #{logisticsPk}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM logistics_erp_member
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where pk = #{pk}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where memberPk = #{memberPk}	</select>
+	<select id="getByLogisticsPk" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where logisticsPk = #{logisticsPk}	</select>
+	<select id="getByEmployeeName" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where employeeName = #{employeeName}	</select>
+	<select id="getByEmployeeNumber" resultType="cn.cf.dto.LogisticsErpMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where employeeNumber = #{employeeNumber}	</select>
+</mapper>
+

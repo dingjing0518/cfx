@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSxCertificateDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+	    <![CDATA[
+		pk,name,storePk,companyPk,companyName,insertTime,isDelete
+	    ]]>
+	</sql>
+
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_sx_certificate (
+         pk,name,storePk,companyPk,companyName,insertTime,isDelete
+        ) VALUES (
+         #{pk}, #{name}, #{storePk}, #{companyPk}, #{companyName}, #{insertTime},#{isDelete}
+        )
+    ]]>
+	</insert>
+
+    <update id="update" parameterType="cn.cf.model.B2bSxCertificate">
+        UPDATE b2b_sx_certificate
+        <set>
+            <if test="name != null">
+                name = #{name} ,
+            </if>
+            <if test="storePk != null">
+                storePk = #{storePk} ,
+            </if>
+            <if test="companyPk != null">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="companyName != null">
+                companyName = #{companyName} ,
+            </if>
+            <if test="insertTime != null">
+                insertTime = #{insertTime} ,
+            </if>
+            <if test="isDelete != null">
+                isDelete = #{isDelete}
+            </if>
+
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+
+    <delete id="delete" parameterType="cn.cf.model.B2bSxCertificate">
+    <![CDATA[
+        DELETE FROM b2b_sx_certificate WHERE
+        pk = #{id}
+    ]]>
+	</delete>
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}			</if>
+            <if test="@Ognl@isNotEmpty(name)">
+                AND name = #{name}			</if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}			</if>
+            <if test="@Ognl@isNotEmpty(storePk)">
+                AND storePk = #{storePk}			</if>
+            <if test="@Ognl@isNotEmpty(companyName)">
+                AND companyName = #{companyName}			</if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}			</if>
+        </where>
+    </sql>
+
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM b2b_sx_certificate
+        <include refid="searchGridWhere" />
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGrid" resultType="cn.cf.dto.B2bSxCertificateDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_sx_certificate
+        <include refid="searchGridWhere" />
+    </select>
+
+    <select id="searchByMap" resultType="cn.cf.dto.B2bSxCertificateDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_sx_certificate
+        <where>
+        <if test="@Ognl@isNotEmpty(pk)">
+            AND pk != #{pk}			</if>
+        <if test="@Ognl@isNotEmpty(name)">
+            AND name = #{name}			</if>
+        <if test="@Ognl@isNotEmpty(companyPk)">
+            AND companyPk = #{companyPk}			</if>
+        </where>
+    </select>
+
+    <select id="searchList" resultType="cn.cf.dto.B2bSxCertificateDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_sx_certificate
+        <include refid="searchGridWhere" />
+        order by insertTime desc
+        <if test="start!= null ">
+            limit ${start},${limit}
+        </if>
+    </select>
+
+    <select id="getCertificate" resultType="cn.cf.dto.B2bSxCertificateDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_sx_certificate where pk = #{pk}	</select>
+
+
+</mapper>
+

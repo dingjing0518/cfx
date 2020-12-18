@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsBankCompanyDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,bankPk,bankName,creditAmount,creditStartTime,creditEndTime,customerNumber,contractNumber,contractAmount,availableAmount
+	    ]]>
+	</sql>
+
+	<delete id="delByCompanyAndBank" >
+    <![CDATA[
+        DELETE FROM b2b_economics_bank_company WHERE
+        companyPk = #{companyPk} and bankPk = #{bankPk}
+    ]]>
+	</delete>
+	
+	<update id="updateByCompanyAndBank">
+		update b2b_economics_bank_company
+		<set>
+		<if test="creditAmount != null">
+			creditAmount = #{creditAmount},
+		</if>
+		<if test="creditStartTime != null ">
+			creditStartTime = #{creditStartTime},
+		</if>
+		<if test="creditEndTime != null">
+			creditEndTime = #{creditEndTime},
+		</if>
+		<if test="customerNumber != null and customerNumber != ''">
+			customerNumber = #{customerNumber},
+		</if>
+		</set>
+		where companyPk = #{companyPk}
+		<if test="bankPk !=null and bankPk !=''">
+			 and bankPk = #{bankPk}
+		</if>
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(creditAmount)">
+				AND creditAmount = #{creditAmount}			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeBegin)">
+				AND creditStartTime >= #{creditStartTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeEnd)">
+				AND creditStartTime &lt;= #{creditStartTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeBegin)">
+				AND creditEndTime >= #{creditEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeEnd)">
+				AND creditEndTime &lt;= #{creditEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(customerNumber)">
+				AND customerNumber = #{customerNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractNumber)">
+				AND contractNumber = #{contractNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractAmount)">
+				AND contractAmount = #{contractAmount}			</if>
+			<if test="@Ognl@isNotEmpty(availableAmount)">
+				AND availableAmount = #{availableAmount}			</if>
+		</where>
+	</sql>
+	<insert id="insertBatch" useGeneratedKeys="true" keyProperty="pk"
+		parameterType="java.util.List">
+		INSERT INTO b2b_economics_bank_company (
+		pk,companyPk,bankPk,bankName,creditAmount,creditStartTime,creditEndTime,
+		customerNumber,contractNumber,agreementNumber,contractAmount,availableAmount,amountType,type
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.pk},#{item.companyPk},#{item.bankPk},#{item.bankName},
+			#{item.creditAmount},#{item.creditStartTime},#{item.creditEndTime},
+			#{item.customerNumber},#{item.contractNumber},#{item.agreementNumber},#{item.contractAmount},#{item.availableAmount},
+			#{item.amountType},#{item.type}
+			)
+		</foreach>
+	</insert>
+</mapper>
+

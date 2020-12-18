@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgCompanyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isDelete,auditStatus,insertTime,updateTime,province,provinceName,city,cityName,area,areaName,contacts,contactsTel,businessLicense,blUrl,isVisable,auditTime,headPortrait
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_company (
+         pk, name, isDelete, auditStatus, insertTime, updateTime, province, provinceName, city, cityName, area, areaName, contacts, contactsTel, businessLicense, blUrl, isVisable, auditTime, headPortrait
+        ) VALUES (
+         #{pk}, #{name}, #{isDelete}, #{auditStatus}, #{insertTime}, #{updateTime}, #{province}, #{provinceName}, #{city}, #{cityName}, #{area}, #{areaName}, #{contacts}, #{contactsTel}, #{businessLicense}, #{blUrl}, #{isVisable}, #{auditTime}, #{headPortrait}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgCompany">
+
+        UPDATE lg_company
+		<set>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="insertTime != null and insertTime != ''">
+				insertTime = #{insertTime},
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				auditStatus = #{auditStatus},
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				updateTime = #{updateTime},
+			</if>
+			<if test="province != null and province != ''">
+				province = #{province},
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="provinceName != null and provinceName != ''">
+				provinceName = #{provinceName},
+			</if>
+			<if test="city != null and city != ''">
+				city = #{city},
+			</if>
+			<if test="cityName != null and cityName != ''">
+				cityName = #{cityName},
+			</if>
+			<if test="area != null and area != ''">
+				area = #{area},
+			</if>
+			<if test="areaName != null and areaName != ''">
+				areaName = #{areaName},
+			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts},
+			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+				contactsTel = #{contactsTel},
+			</if>
+			<if test="businessLicense != null and businessLicense != ''">
+				businessLicense = #{businessLicense},
+			</if>
+			<if test="blUrl != null and blUrl != ''">
+				blUrl = #{blUrl},
+			</if>
+			<if test="auditTime != null and auditTime != ''">
+				auditTime = #{auditTime},
+			</if>
+			<if test="headPortrait != null and headPortrait != ''">
+				headPortrait = #{headPortrait},
+			</if>
+		</set>
+        WHERE 
+        	pk = #{pk}  	        
+
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgCompany">
+    <![CDATA[
+        DELETE FROM lg_company WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(businessLicense)">
+				AND businessLicense = #{businessLicense}			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				AND blUrl = #{blUrl}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				AND headPortrait = #{headPortrait}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_company
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where pk = #{pk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where name = #{name}	 and isDelete = 1 </select>
+	<select id="getByProvince" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where province = #{province}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where provinceName = #{provinceName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where city = #{city}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where cityName = #{cityName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where area = #{area}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where areaName = #{areaName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where contactsTel = #{contactsTel}	</select>
+	<select id="getByBusinessLicense" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where businessLicense = #{businessLicense}	</select>
+	<select id="getByBlUrl" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where blUrl = #{blUrl}	</select>
+	<select id="getByHeadPortrait" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_company where headPortrait = #{headPortrait}	</select>
+</mapper>
+

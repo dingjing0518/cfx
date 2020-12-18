@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCompanyDaoEx">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,auditStatus,auditSpStatus,insertTime,parentPk,provinceName,province,cityName,city,areaName,area,contactsTel,contacts,companyType,businessLicense,blUrl,ocUrl,organizationCode,trUrl,
+		taxRegistration,opUrl,ecUrl,isVisable,auditTime,auditPk,
+		refuseReason,
+		isPerfect,ifnull(headPortrait,"") as headPortrait,remarks
+	    ]]>
+	</sql>
+
+
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_company where name = #{name} and isDelete = 1
+	</select>
+	
+	
+	<select id="getCompanyInfoByMap" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_company where name = #{name} and isDelete = 1
+		 and organizationCode = #{organizationCode}
+	</select>
+</mapper>
+

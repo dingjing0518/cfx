@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,mobile,password,companyPk,companyName,insertTime, auditStatus,isVisable,rolePk,auditTime,auditPk,updateTime,registerSource,headPortrait,employeeName,employeeNumber,parentPk,invitationCode
+	    ]]>
+	</sql>
+
+	 
+
+	  
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile LIKE '%${mobile}%'		</if>
+			<if test="@Ognl@isNotEmpty(password)">
+				AND password = #{password}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPks)">
+				AND companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+		 
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(rolePk)">
+				AND rolePk = #{rolePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(registerSource)">
+				AND registerSource = #{registerSource}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber  like '%${employeeNumber}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName  like '%${employeeName}%' 
+			</if>
+			
+				<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+			
+		</where>
+	</sql>
+
+	 
+ 
+ <select id="searchMemberByOrderForEconomicsGoodsTypeIsOne"   resultType="cn.cf.dto.B2bMemberDtoEx"
+		parameterType="java.util.Map">
+ SELECT
+  m.mobile,
+ o.loanAmount,
+    o.purchaserName as companyName,
+    o.purchaserPk as companyPk,
+  m.pk,
+	CASE
+WHEN o.loanAmount &lt;= 1000000 THEN
+	100
+WHEN 1000000 &lt; o.loanAmount and o.loanAmount &lt;= 2000000 THEN
+	200
+WHEN 2000000 &lt; o.loanAmount and o.loanAmount &lt;= 5000000 THEN
+	300
+WHEN 5000000 &lt; o.loanAmount   THEN
+	500
+ELSE
+	0
+END cardAmount
+FROM
+	b2b_member m
+INNER   JOIN (
+SELECT
+		IFNULL(SUM(loanAmount), 0) AS loanAmount,
+	purchaserName,
+	purchaserPk
+FROM
+	b2b_loan_number
+WHERE
+	loanStatus in (3,5,6)
+AND economicsGoodsType = 1
+AND (
+	TO_DAYS(#{startTime}) &lt;= TO_DAYS(loanStartTime)
+	AND TO_DAYS(loanStartTime) &lt;= TO_DAYS(#{endTime})
+)
+GROUP BY
+	purchaserPk
+) o ON m.companyPk = o.purchaserPk
+where  m.isVisable=1 and m.auditStatus=2
+ 
+ </select>
+ 
+</mapper>
+

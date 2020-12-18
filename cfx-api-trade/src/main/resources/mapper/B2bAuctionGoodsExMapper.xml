@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAuctionGoodsDaoEx">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,goodsPk,auctionPk,activityTime,startingPrice,maximumPrice,startTime,endTime,companyPk,companyName,storePk,storeName,isDelete
+	    ]]>
+	</sql>
+
+	<select id="searchAuctionGoods" parameterType="java.util.Map"
+		resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_auction_goods
+		where
+		goodsPk=#{goodsPk}
+		and isDelete= 1
+ 	<![CDATA[	 
+ 		and activityTime=date_format(now(),'%y-%m-%d') 
+ 		and startTime<=date_format(now(),'%H:%i') and date_format(now(),'%H:%i')<=endTime
+	]]>
+	</select>
+
+	<select id="searchAuctingByGoodsPk" resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		select
+		<include refid="columns" />
+		from b2b_auction_goods
+		where 
+		<![CDATA[
+		(activityTime > curdate() or ( activityTime = curdate() 
+		and DATE_FORMAT(NOW(), '%T') < endTime))
+		]]>
+		AND isDelete = 1
+		and goodsPk = #{goodsPk}
+		ORDER BY activityTime
+		ASC,startTime ASC
+
+	</select>
+
+ 
+
+	<select id="countAuctionGoodsGrid" parameterType="java.util.Map"
+		resultType="int">
+        <![CDATA[ 
+     	SELECT
+			count(1) 
+		FROM
+			b2b_auction_goods a
+		LEFT JOIN b2b_goods b ON a.goodsPk = b.pk
+		LEFT JOIN b2b_goods_brand c ON b.brandPk = c.pk
+		]]>
+		<include refid="searchAuctionGoodsGridWhere"/>
+	</select>
+	
+	<sql id="searchAuctionGoodsGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>	      				
+	     a.isDelete = 1
+		AND b.isUpdown = 2
+		<if test="online!=null">
+			and a.activityTime >= curdate()
+		</if>
+		<if test="@Ognl@isNotEmpty(companyPks)">
+			AND a.companyPk in
+			<foreach item="item" index="index" collection="companyPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="auctionPk != null and auctionPk != ''">
+			AND a.auctionPk IN
+			<foreach item="item" index="index" collection="auctionPk"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="productPk != null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+		 
+		<if test="specPk != null and specPk !=''">
+				<foreach collection="specPk" item="item"  open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"specPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item"  open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+		<if test="gradePk != null and gradePk !=''">
+				<foreach collection="gradePk" item="item"  open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"gradePk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+		<if test="varietiesPk != null and varietiesPk !=''">
+				<foreach collection="varietiesPk" item="item"  open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seedvarietyPk != null and seedvarietyPk !=''">
+				<foreach collection="seedvarietyPk" item="item"  open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seedvarietyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+		<if test="@Ognl@isNotEmpty(specifications)">
+				AND FIND_IN_SET('"specifications":"${specifications}"',goodsInfo)
+			</if>
+		<if test="brandPk != null and brandPk !=''">
+			AND c.brandPk IN
+			<foreach item="item" index="index" collection="brandPk" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="@Ognl@isNotEmpty(batchNumber)">
+			and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+		</if>
+		<if test="acStatus != null and acStatus !=''">
+			<choose>
+				<!-- 未开始 -->
+				<when test="acStatus == 1">
+					<!-- AND a.startTime > DATE_FORMAT(NOW(),'%T') -->
+					and ( ( a.activityTime = date_format(now(), '%y-%m-%d') AND a.startTime >= date_format(now(), '%H:%i') )
+					OR ( a.activityTime > date_format(now(), '%y-%m-%d') ) )
+				</when>
+				<!-- 进行中 -->
+				<when test="acStatus == 2">
+					<!-- <![CDATA[ AND DATE_FORMAT(NOW(),'%T') > a.startTime AND DATE_FORMAT(NOW(),'%T') 
+						< a.endTime ]]> -->
+					and a.activityTime = date_format(now(), '%y-%m-%d')  
+					AND a.startTime	&lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt;=a.endTime
+				</when>
+				<!-- 已结束 -->
+				<when test="acStatus == 3">
+					<!-- AND DATE_FORMAT(NOW(),'%T') > endTime -->
+					and a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i')>a.endTime
+				</when>
+				<!--已过期 -->
+				<!-- <when test="acStatus ==4">
+					and a.activityTime &lt; date_format(now(), '%y-%m-%d')
+				</when> -->
+			</choose>
+		</if>
+		<if test="companyPk != null and companyPk !=''">
+			AND a.companyPk = #{companyPk}
+		</if>
+		<if test="storePk != null and storePk !=''">
+			AND a.storePk = #{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(batchNumber)">
+			and SUBSTRING_INDEX(REPLACE(goodsInfo,CONCAT(SUBSTRING_INDEX(goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			and goodsInfo LIKE  '%${searchKey}%' 
+		</if>
+		<if test="@Ognl@isNotEmpty(activityTimeStart)">
+			AND a.activityTime >= #{activityTimeStart}			
+		</if>
+		<if test="@Ognl@isNotEmpty(activityTimeEnd)">
+			AND a.activityTime &lt;= #{activityTimeEnd}			
+		</if>
+		</where>
+	</sql>
+	
+	
+	
+	<!-- 检查该场次的竞拍活动有没有结束 -->
+	<select id="IsAuctionEffective" resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		select * from b2b_auction_goods where pk = #{pk}
+		AND activityTime = date_format(now(), '%y-%m-%d')
+		AND startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; endTime
+	</select>
+	
+	
+	
+	<!-- ============================================================================================ -->
+
+	<!-- 竞拍中商品 -->
+  	<select id="searchAuctionGoodsGridNew" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		goods.pk AS goodsPk,
+		REPLACE (REPLACE (REPLACE (goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'') as goodsInfo,
+		goods.block,
+		goods.totalWeight,
+		goods.totalBoxes,
+		goods.tonPrice,
+		goods.salePrice,
+		goods.tareWeight,
+		goods.isUpdown,
+		CASE goods.isUpdown
+		WHEN 1 THEN '待上架'
+		WHEN 2 THEN '上架'
+		WHEN 3 THEN '下架'
+		ELSE ''
+		END AS isUpdownName,
+		auction.pk as auctionPk,
+		auction.activityTime,
+		auction.startTime,
+		auction.endTime,
+		CASE
+		WHEN auction.pk is null
+		then 1
+		WHEN (auction.activityTime = date_format(now(), '%y-%m-%d') AND auction.startTime > date_format(now(),'%H:%i')) OR (auction.activityTime > date_format(now(), '%y-%m-%d')) 
+		THEN  2
+		WHEN auction.activityTime = date_format(now(), '%y-%m-%d') AND auction.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; auction.endTime 
+		THEN  3
+		WHEN (auction.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i') &gt;= auction.endTime)  OR date_format(now(), '%y-%m-%d') > auction.activityTime
+		THEN  4
+		END as acStatus
+		FROM
+		b2b_goods goods
+		left JOIN  b2b_auction_goods auction ON auction.goodsPk = goods.pk  and auction.isDelete=1
+		<include refid="searchAuctionGoodsGridWhere3"/>
+		order by  acStatus  ,goods.upTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<!-- 竞拍中商品页签数量 -->
+	<select id="searchAuctionGoodsGridNewCount" resultType="map">
+		SELECT COUNT(1) AS allNum,
+		IFNULL(
+		SUM( CASE acStatus WHEN 1 THEN 1 ELSE 0 END ),0
+		) 
+		AS noOnLineNum,
+		IFNULL(
+		SUM( CASE acStatus WHEN 2 THEN 1 ELSE 0 END),0
+		) 
+		AS noStartNum,
+		IFNULL(
+		SUM(CASE acStatus WHEN 3 THEN 1 ELSE 0 END ),0
+		) 
+		AS underwayNum,
+		IFNULL(
+		SUM( CASE acStatus WHEN 4 THEN 1 ELSE 0 END),0
+		) 
+		AS finishedNum
+		FROM
+		(
+		SELECT
+		CASE
+		WHEN auction.pk IS NULL
+		THEN 1
+		WHEN (auction.activityTime = DATE_FORMAT(NOW(), '%y-%m-%d') AND auction.startTime > DATE_FORMAT(NOW(),'%H:%i')) OR (auction.activityTime > DATE_FORMAT(NOW(), '%y-%m-%d')) 
+		THEN  2
+		WHEN auction.activityTime = DATE_FORMAT(NOW(), '%y-%m-%d') AND auction.startTime &lt;= DATE_FORMAT(NOW(), '%H:%i') AND DATE_FORMAT(NOW(), '%H:%i') &lt; auction.endTime 
+		THEN  3
+		WHEN (auction.activityTime = DATE_FORMAT(NOW(), '%y-%m-%d') AND DATE_FORMAT(NOW(), '%H:%i') &gt;= auction.endTime)  OR DATE_FORMAT(NOW(), '%y-%m-%d') > auction.activityTime
+		THEN  4
+		END AS acStatus
+		FROM
+		b2b_goods goods
+		LEFT JOIN  b2b_auction_goods auction ON auction.goodsPk = goods.pk  AND auction.isDelete=1
+		<include refid="searchAuctionGoodsGridWhere3"/>
+		) temp
+	</select>
+	
+	<select id="countAuctionGoodsGridNew" parameterType="java.util.Map"
+		resultType="int">
+        <![CDATA[ 
+     	SELECT
+			count(1) 
+		FROM
+		b2b_goods goods
+		left JOIN  b2b_auction_goods auction ON auction.goodsPk = goods.pk and auction.isDelete=1
+		]]>
+		<include refid="searchAuctionGoodsGridWhere3" />
+	</select>
+	
+	<sql id="searchAuctionGoodsGridWhere3">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>	      				
+		    and goods.type='auction'
+			<if test="@Ognl@isNotEmpty(acStatus)">
+				<choose>
+					<!-- 全部 -->
+					<when test="acStatus == 0">
+						and (auction.pk is null 
+						OR (( auction.activityTime = date_format(now(), '%y-%m-%d') AND auction.startTime >= date_format(now(), '%H:%i') ) OR ( auction.activityTime > date_format(now(), '%y-%m-%d') ) )
+						OR (auction.activityTime = date_format(now(), '%y-%m-%d')  AND auction.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt;=auction.endTime)
+						OR ((auction.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i')>auction.endTime) OR date_format(now(), '%y-%m-%d') > auction.activityTime)
+						 ) 
+					</when>
+					<!-- 未上线 -->
+					<when test="acStatus == 1">
+						and auction.pk is null
+					</when>
+					<!-- 未开始 -->
+					<when test="acStatus == 2">
+						and (( auction.activityTime = date_format(now(), '%y-%m-%d') AND auction.startTime > date_format(now(), '%H:%i') ) OR ( auction.activityTime > date_format(now(), '%y-%m-%d') ) )
+					</when>
+					<!-- 进行中 -->
+					<when test="acStatus == 3">
+						and auction.activityTime = date_format(now(), '%y-%m-%d')  AND auction.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; auction.endTime
+					</when>
+					<!--已结束 -->
+					<when test="acStatus ==4">
+						and ( (auction.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i')  &gt;= auction.endTime) OR date_format(now(), '%y-%m-%d')> auction.activityTime)
+					</when>
+				</choose>
+			</if>
+			<if test="storePk != null ">
+				and goods.storePk = #{storePk}
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				and goods.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+			<if test="@Ognl@isNotEmpty(activityTimeStart)">
+				and auction.activityTime >= #{activityTimeStart}			
+			</if>
+			<if test="@Ognl@isNotEmpty(activityTimeEnd)">
+				and auction.activityTime &lt;= #{activityTimeEnd}			
+			</if>
+			<if test="productPk != null and productPk !=''">
+				and FIND_IN_SET('"productPk":"${productPk}"',goods.goodsInfo)
+			</if>
+			<if test="varietiesPk != null and varietiesPk !=''">
+				and FIND_IN_SET('"varietiesPk":"${varietiesPk}"',goods.goodsInfo)
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and SUBSTRING_INDEX(REPLACE(goods.goodsInfo,CONCAT(SUBSTRING_INDEX(goods.goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				and FIND_IN_SET('"seriesPk":"${seriesPk}"',goods.goodsInfo)
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(goods.goodsInfo,CONCAT(SUBSTRING_INDEX(goods.goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+			</if>
+			<if test="gradePk != null and gradePk !=''">
+				and FIND_IN_SET('"gradePk":"${gradePk}"',goods.goodsInfo)
+			</if>
+			<if test="packNumber != null and packNumber !=''">
+				and goods.goodsInfo like '%packNumber%${packNumber}%'
+			</if>
+			<if test="distinctNumber != null and distinctNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(goods.goodsInfo,CONCAT(SUBSTRING_INDEX(goods.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 更新部分字段 -->
+	<update id="updateEx" parameterType="cn.cf.model.B2bAuctionGoods">
+		UPDATE b2b_auction_goods
+		<set>
+			<if test="goodsPk != null and goodsPk !=''">
+				goodsPk = #{goodsPk} ,
+			</if>
+			<if test="activityTime != null  ">
+				activityTime = #{activityTime} ,
+			</if>
+			<if test="auctionPk != null and auctionPk !=''">
+				auctionPk = #{auctionPk} ,
+			</if>
+			<if test="startingPrice != null and startingPrice !=''">
+				startingPrice = #{startingPrice} ,
+			</if>
+			<if test="maximumPrice != null and maximumPrice !=''">
+				maximumPrice = #{maximumPrice} ,
+			</if>
+			<if test="minimumBoxes != null and minimumBoxes !=''">
+				minimumBoxes = #{minimumBoxes} ,
+			</if>
+			<if test="startTime != null and startTime !=''">
+				startTime = #{startTime} ,
+			</if>
+			<if test="endTime != null and endTime !=''">
+				endTime = #{endTime} ,
+			</if>
+			<if test="companyPk != null and companyPk !=''">
+				companyPk = #{companyPk} ,
+			</if>
+			<if test="companyName != null and companyName !=''">
+				companyName = #{companyName} ,
+			</if>
+			<if test="storePk != null and storePk !=''">
+				storePk = #{storePk} ,
+			</if>
+			<if test="storeName != null and storeName !=''">
+				storeName = #{storeName} ,
+			</if>
+			<if test="isDelete != null and isDelete !=''">
+				isDelete = #{isDelete} ,
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	
+	<!-- 更新部分字段 -->
+	<update id="downToNormal" parameterType="java.lang.String">
+		UPDATE b2b_auction_goods set  b2b_auction_goods.isDelete=2  where b2b_auction_goods.goodsPk=#{goodsPk}
+	</update>
+	
+	<!-- 代拍-竞拍中商品 -->
+	<select id="searchAuctionGoodsGridNewByMember" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		 REPLACE (REPLACE (REPLACE (b.goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'') as goodsInfo,
+		 b.block,
+		b.totalWeight,
+		b.totalBoxes,
+		b.tonPrice,
+		b.tareWeight,
+		c.brandName,
+		a.goodsPk as goodsPk,a.auctionPk as auctionPk,a.activityTime as activityTime,
+		a.startingPrice as startingPrice,
+		ifnull(a.maximumPrice,a.startingPrice) as maximumPrice,
+		a.pk as pk,
+		a.startTime as startTime,
+		a.endTime as endTime,
+		a.companyPk as companyPk,
+		a.companyName as companyName,
+		a.storePk as storePk,
+		a.storeName as storeName,
+		CASE
+		WHEN  a.activityTime = date_format(now(), '%y-%m-%d')  AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; a.endTime
+		THEN  1
+		WHEN  (a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i')  &gt;= a.endTime)  OR date_format(now(), '%y-%m-%d') >a.activityTime   
+		THEN  2
+		END as acStatus,
+		<!-- 排序字段 -->
+		CASE
+		WHEN  a.activityTime = date_format(now(), '%y-%m-%d')  AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; a.endTime
+		THEN  1
+		WHEN  (a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i')  &gt;= a.endTime)  OR date_format(now(), '%y-%m-%d') >a.activityTime   
+		THEN  2
+		END orderName
+		FROM
+		b2b_auction_goods a
+		inner JOIN  b2b_goods b ON a.goodsPk = b.pk
+		inner JOIN  b2b_goods_brand c ON b.brandPk = c.pk
+		<include refid="searchAuctionGoodsGridWhere2"/>
+		order by orderName asc,b.upTime desc
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+		
+	</select>
+	
+	<select id="countAuctionGoodsGridNewByMember" parameterType="java.util.Map"
+		resultType="int">
+        <![CDATA[ 
+     	SELECT
+			count(1) 
+		FROM
+			b2b_auction_goods a
+		inner JOIN b2b_goods b ON a.goodsPk = b.pk
+		inner JOIN b2b_goods_brand c ON b.brandPk = c.pk
+		]]>
+		<include refid="searchAuctionGoodsGridWhere2" />
+	</select>
+	
+	<sql id="searchAuctionGoodsGridWhere2">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>	      				
+	     a.isDelete = 1
+		 AND b.isUpdown = 2
+		<if test="@Ognl@isNotEmpty(acStatus)">
+			<choose>
+				<!-- 全部 (进行中 已结束)-->
+				<when test="acStatus == 0">
+					and (
+					(a.activityTime = date_format(now(), '%y-%m-%d')  AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; a.endTime)
+					OR
+					(a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i') &gt;= a.endTime)  OR date_format(now(), '%y-%m-%d') >a.activityTime   
+					)
+				</when>
+				<!-- 进行中 -->
+				<when test="acStatus == 1">
+					and a.activityTime = date_format(now(), '%y-%m-%d')  AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt; a.endTime
+				</when>
+				<!-- 已结束 -->
+				<when test="acStatus == 2">
+					and  ((a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i') &gt;= a.endTime) OR date_format(now(), '%y-%m-%d') >a.activityTime)   
+				</when>
+			</choose>
+		</if>
+		<if test="storePk != null ">
+			AND b.storePk = #{storePk}
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+		and b.goodsInfo LIKE  '%${searchKey}%' 
+		</if>
+		</where>
+	</sql>
+	
+	
+	<select id="getAuctionGoodsByLately" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT
+			*
+		FROM
+			(
+				SELECT a.*, b.totalBoxes,b.totalWeight
+				FROM b2b_auction_goods a
+				LEFT JOIN b2b_goods b ON a.goodsPk = b.pk
+				WHERE a.isDelete = 1
+				AND b.isDelete = 1
+				AND b.isUpdown = 2
+				AND a.activityTime = date_format(now(), '%y-%m-%d')
+				AND date_format(now(), '%H:%i') >= a.endTime
+				ORDER BY
+					a.endTime DESC
+			) c
+		GROUP BY
+			c.goodsPk
+	</select>
+	
+	
+	<select id="getAuctionGoodsByLately2" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT * FROM b2b_auction_goods a
+		WHERE a.isDelete = 1
+		AND a.activityTime = date_format(now(), '%y-%m-%d')
+		AND date_format(now(), '%H:%i') >= a.endTime
+		ORDER BY a.endTime DESC
+	</select>
+	
+	<select id="getInfoByAuctionPk" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT 
+			a.*, b.totalWeight,REPLACE (REPLACE (REPLACE (b.goodsInfo, ',', ','),CHAR (13),''),CHAR (10),'') as goodsInfo,
+	b.block,
+	b.totalBoxes,
+	b.tonPrice,
+	b.tareWeight,
+	b.brandName,
+	b.salePrice
+		FROM b2b_auction_goods a
+		INNER JOIN b2b_goods b ON  b.pk=a.goodsPk
+		where a.pk=#{pk}
+		and a.isDelete=1
+	</select>
+	
+	
+	<select id="checkGoodsAuctionStatus" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT a.*,
+		CASE
+		WHEN a.pk is null
+		then 1
+		WHEN (a.activityTime = date_format(now(), '%y-%m-%d') AND a.startTime >= date_format(now(),'%H:%i')) OR (a.activityTime > date_format(now(), '%y-%m-%d')) 
+		THEN  2
+		WHEN a.activityTime = date_format(now(), '%y-%m-%d') AND a.startTime &lt;= date_format(now(), '%H:%i') and date_format(now(), '%H:%i') &lt;=a.endTime 
+		THEN  3
+		WHEN (a.activityTime = date_format(now(), '%y-%m-%d') and date_format(now(), '%H:%i') > a.endTime)  OR date_format(now(), '%y-%m-%d') > a.activityTime
+		THEN  4
+		END as acStatus
+		FROM b2b_auction_goods a
+		WHERE a.`goodsPk`=#{goodsPk}
+		AND a.isDelete=1
+	</select>
+	
+	<update id="deleteByPk" parameterType="java.lang.String">
+		UPDATE b2b_auction_goods set  b2b_auction_goods.isDelete=2  where b2b_auction_goods.pk=#{pk}
+	</update>
+	
+	<select id="getAuctionByGoodsPk" resultType="cn.cf.dto.B2bAuctionGoodsDtoEx">
+		SELECT a.*
+		FROM b2b_auction_goods a
+		WHERE a.`goodsPk`=#{goodsPk}
+		AND a.isDelete=1
+	</select>
+	
+	
+	<select id="searchAuctionByIsStart" resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		SELECT
+			*
+		FROM
+			b2b_auction_goods
+		WHERE
+			activityTime = date_format(now(), '%y-%m-%d')
+		AND date_format(now(), '%H:%i') > endTime
+		AND goodsPk  in (
+			SELECT
+				goodsPk
+			FROM
+				b2b_auction_goods
+			WHERE
+				date_format(now(), '%H:%i') = startTime
+			AND activityTime = date_format(now(), '%y-%m-%d')
+		)
+		AND pk not in (
+			SELECT
+				pk
+			FROM
+				b2b_auction_goods
+			WHERE
+				date_format(now(), '%H:%i') = startTime
+			AND activityTime = date_format(now(), '%y-%m-%d')
+		)
+	</select>
+	
+	<select id="selectOverDateAuction" resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		SELECT * FROM b2b_auction_goods WHERE DATE_FORMAT(NOW(), '%y-%m-%d') > b2b_auction_goods.activityTime
+		AND b2b_auction_goods.isDelete=1
+	</select>
+	
+	<select id="getAuctionGoodsListByGoodsPk" resultType="cn.cf.dto.B2bAuctionGoodsDto">
+		SELECT * FROM b2b_auction_goods 
+		where goodsPk=#{goodsPk}
+		order by  insertTime desc
+	</select>
+	
+	
+<select id="searchAuctingGoods"  resultType="cn.cf.dto.B2bAuctionGoodsDto">
+	<![CDATA[
+		SELECT
+			ag.goodsPk
+		FROM
+			b2b_auction_goods ag
+		LEFT JOIN b2b_auction a ON ag.auctionPk = a.pk
+		WHERE
+			a.isDelete = 1
+		AND a.isVisable = 1
+		AND ag.isDelete = 1
+		AND TIME_TO_SEC(ag.startTime) <= TIME_TO_SEC(now())
+		AND TIME_TO_SEC(ag.endTime) >= TIME_TO_SEC(now())
+		AND ag.activityTime = DATE(now())
+	]]>
+		<if test="pks != null">
+			AND ag.goodsPk IN
+				<foreach item="item" index="index" collection="pks" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>			
+		</if>
+	</select>
+	
+	
+	
+	<update id="deleteByGoodsPk" parameterType="java.lang.String">
+		UPDATE b2b_auction_goods set  b2b_auction_goods.isDelete=2  where b2b_auction_goods.goodsPk=#{goodsPk}
+	</update>
+	
+	
+	
+	
+	
+</mapper>

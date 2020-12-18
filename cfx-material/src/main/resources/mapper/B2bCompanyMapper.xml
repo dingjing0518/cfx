@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCompanyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isDelete,auditStatus,auditSpStatus,insertTime,updateTime,parentPk,provinceName,
+		province,cityName,city,areaName,area,regAddress,contactsTel,contacts,companyType,blUrl,
+		organizationCode,bankName,bankAccount,ecUrl,isVisable,auditTime,auditSpTime,auditPk,auditSpPk,
+		refuseReason,headPortrait,isPerfect,remarks,addMemberPk,block
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_company (
+         pk, name, isDelete, auditStatus, auditSpStatus, insertTime, updateTime, parentPk, provinceName, province, cityName, city, areaName, area,regAddress,contactsTel, contacts, companyType, blUrl, organizationCode, bankName,bankAccount,ecUrl, isVisable, auditTime, auditSpTime, auditPk, auditSpPk, refuseReason, headPortrait, isPerfect, remarks,addMemberPk,infoUpdateTime,enterTime,block
+        ) VALUES (
+         #{pk}, #{name}, #{isDelete}, #{auditStatus}, #{auditSpStatus}, #{insertTime}, #{updateTime}, #{parentPk}, #{provinceName}, #{province}, #{cityName}, #{city}, #{areaName}, #{area}, #{regAddress}, #{contactsTel}, #{contacts}, #{companyType}, #{blUrl}, #{organizationCode}, #{bankName}, #{bankAccount}, #{ecUrl}, #{isVisable}, #{auditTime}, #{auditSpTime}, #{auditPk}, #{auditSpPk}, #{refuseReason}, #{headPortrait}, #{isPerfect}, #{remarks},#{addMemberPk},#{infoUpdateTime} ,#{enterTime} ,#{block}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bCompany">
+        UPDATE b2b_company 
+      <set>
+			<if test="@Ognl@isNotEmpty(name)">
+				 name = #{name},			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				 isDelete = #{isDelete},			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				 auditStatus = #{auditStatus},			</if>
+			<if test="@Ognl@isNotEmpty(auditSpStatus)">
+				 auditSpStatus = #{auditSpStatus},			</if>
+			<if test="@Ognl@isNotEmpty(insertTime)">
+				 insertTime = #{insertTime},			</if>
+			<if test="@Ognl@isNotEmpty(updateTime)">
+				 updateTime = #{updateTime},			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				 parentPk = #{parentPk},			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				 provinceName = #{provinceName},			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				 province = #{province},			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				 cityName = #{cityName},			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				 city = #{city},			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				 areaName = #{areaName},			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				 area = #{area},			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				 regAddress = #{regAddress},			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				 contactsTel = #{contactsTel},			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				 contacts = #{contacts},			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				 companyType = #{companyType},			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				 blUrl = #{blUrl},			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				 organizationCode = #{organizationCode},			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				 bankName = #{bankName},			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				 bankAccount = #{bankAccount},			</if>
+			<if test="@Ognl@isNotEmpty(ecUrl)">
+				 ecUrl = #{ecUrl},			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				 isVisable = #{isVisable},			</if>
+			<if test="@Ognl@isNotEmpty(auditTime)">
+				 auditTime = #{auditTime},			</if>
+			<if test="@Ognl@isNotEmpty(auditSpTime)">
+				 auditSpTime = #{auditSpTime},			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				 auditPk = #{auditPk},			</if>
+			<if test="@Ognl@isNotEmpty(auditSpPk)">
+				 auditSpPk = #{auditSpPk},			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				 refuseReason = #{refuseReason},			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				 headPortrait = #{headPortrait},			</if>
+			<if test="@Ognl@isNotEmpty(isPerfect)">
+				 isPerfect = #{isPerfect},			</if>
+			<if test="@Ognl@isNotEmpty(remarks)">
+				 remarks = #{remarks},			</if>
+			<if test="@Ognl@isNotEmpty(infoUpdateTime)">
+				 infoUpdateTime = #{infoUpdateTime},			</if>
+			<if test="@Ognl@isNotEmpty(enterTime)">
+				 enterTime = #{enterTime}			</if>	 	 
+				  
+      </set>
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bCompany">
+    <![CDATA[
+        DELETE FROM b2b_company WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+
+				AND name like '%${name}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				
+				AND name = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditSpStatus)">
+				AND auditSpStatus = #{auditSpStatus}
+			</if>
+
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				AND regAddress = #{regAddress}
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}
+			</if>
+			<if test="@Ognl@isNotEmpty(businessLicense)">
+				AND businessLicense = #{businessLicense}
+			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				AND blUrl = #{blUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ocUrl)">
+				AND ocUrl = #{ocUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}
+			</if>
+			<if test="@Ognl@isNotEmpty(trUrl)">
+				AND trUrl = #{trUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(taxRegistration)">
+				AND taxRegistration = #{taxRegistration}
+			</if>
+			<if test="@Ognl@isNotEmpty(opUrl)">
+				AND opUrl = #{opUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ecUrl)">
+				AND ecUrl = #{ecUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(isPerfect)">
+				AND isPerfect = #{isPerfect}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentChildPk)">
+				AND (pk = #{parentChildPk} or parentPk = #{parentChildPk})
+			</if>
+			<if test="@Ognl@isNotEmpty(uname)">
+				AND pk not in
+				<foreach item="item" index="index" collection="uname" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	           <if test="@Ognl@isNotEmpty(block)">
+             and     block = #{block}           </if>    
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_company
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where pk = #{pk}	</select>
+	<select id="getByName" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where name = #{name}	</select>
+	<!---查询未删除的公司-->
+	<select id="getCompanyByNameAndIsDelete" resultType="cn.cf.dto.B2bCompanyDto"
+			parameterType="java.lang.String">
+		SELECT
+		<include refid="columns"/>
+		FROM b2b_company where name = #{name} and isDelete=1
+	</select>
+	<select id="getByParentPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where parentPk = #{parentPk}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where provinceName = #{provinceName}	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where province = #{province}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where cityName = #{cityName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where city = #{city}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where areaName = #{areaName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where area = #{area}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where contactsTel = #{contactsTel}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where contacts = #{contacts}	</select>
+	<select id="getByBlUrl" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where blUrl = #{blUrl}	</select>
+	<select id="getByOrganizationCode" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where organizationCode = #{organizationCode}	</select>
+	<select id="getByEcUrl" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where ecUrl = #{ecUrl}	</select>
+	<select id="getByAuditPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where auditPk = #{auditPk}	</select>
+	<select id="getByAuditSpPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where auditSpPk = #{auditSpPk}	</select>
+	<select id="getByRefuseReason" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where refuseReason = #{refuseReason}	</select>
+	<select id="getByHeadPortrait" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where headPortrait = #{headPortrait}	</select>
+	<select id="getByRemarks" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where remarks = #{remarks}	</select>
+</mapper>
+

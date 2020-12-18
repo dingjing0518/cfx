@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,parentPk
+	    ]]>
+	</sql>
+	<select id="getBySeriesName" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec where name = #{name} and parentPk!=-1 AND isDelete=1
+	</select>
+	
+	
+	 <select id="getByNameParent" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec where name = #{name} and parentPk=-1 AND isDelete=1
+	</select>
+	
+	
+	
+	
+	<select id="getByParentPk" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec where parentPk = #{parentPk} AND isDelete=1
+	</select>
+	<select id="getSpec" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec where parentPk = #{parentPk} AND isDelete=1
+		order by sort desc
+	</select>
+	<select id="getSeries" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+	FROM b2b_spec where parentPk != #{parentPk} AND isDelete=1
+	order by
+	sort desc
+	</select>
+		
+</mapper>
+

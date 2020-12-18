@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserPk,supplierPk,orderStatus,orderAmount,actualAmount,insertTime,meno,memberPk,memberName,storeName,storePk,paymentType,paymentName,economicsGoodsType,economicsGoodsName,source,paymentTime,logisticsModelPk,logisticsModelName,purchaseType,isDelete,isDeleteSp,employeeNumber,employeeName,employeePk,completeTime,orderClassify,receivablesTime,isBatches,deliverDetails,otherNumber,purchaserInfo,supplierInfo,addressInfo,ownAmount,block
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderNumber">
+    <![CDATA[
+        INSERT INTO b2b_order (
+         orderNumber, purchaserPk, supplierPk, orderStatus, orderAmount, actualAmount, insertTime, meno, memberPk, memberName, storeName, storePk, paymentType, paymentName, economicsGoodsType, economicsGoodsName, source, paymentTime, logisticsModelPk, logisticsModelName, purchaseType, isDelete, isDeleteSp, employeeNumber, employeeName, employeePk, completeTime, orderClassify, receivablesTime, isBatches, deliverDetails, otherNumber, purchaserInfo, supplierInfo, addressInfo, ownAmount, block
+        ) VALUES (
+         #{orderNumber}, #{purchaserPk}, #{supplierPk}, #{orderStatus}, #{orderAmount}, #{actualAmount}, #{insertTime}, #{meno}, #{memberPk}, #{memberName}, #{storeName}, #{storePk}, #{paymentType}, #{paymentName}, #{economicsGoodsType}, #{economicsGoodsName}, #{source}, #{paymentTime}, #{logisticsModelPk}, #{logisticsModelName}, #{purchaseType}, #{isDelete}, #{isDeleteSp}, #{employeeNumber}, #{employeeName}, #{employeePk}, #{completeTime}, #{orderClassify}, #{receivablesTime}, #{isBatches}, #{deliverDetails}, #{otherNumber}, #{purchaserInfo}, #{supplierInfo}, #{addressInfo}, #{ownAmount}, #{block}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bOrder">
+    <![CDATA[
+        UPDATE b2b_order SET
+	        purchaserPk = #{purchaserPk} , supplierPk = #{supplierPk} , orderStatus = #{orderStatus} , orderAmount = #{orderAmount} , actualAmount = #{actualAmount} , insertTime = #{insertTime} , meno = #{meno} , memberPk = #{memberPk} , memberName = #{memberName} , storeName = #{storeName} , storePk = #{storePk} , paymentType = #{paymentType} , paymentName = #{paymentName} , economicsGoodsType = #{economicsGoodsType} , economicsGoodsName = #{economicsGoodsName} , source = #{source} , paymentTime = #{paymentTime} , logisticsModelPk = #{logisticsModelPk} , logisticsModelName = #{logisticsModelName} , purchaseType = #{purchaseType} , isDelete = #{isDelete} , isDeleteSp = #{isDeleteSp} , employeeNumber = #{employeeNumber} , employeeName = #{employeeName} , employeePk = #{employeePk} , completeTime = #{completeTime} , orderClassify = #{orderClassify} , receivablesTime = #{receivablesTime} , isBatches = #{isBatches} , deliverDetails = #{deliverDetails} , otherNumber = #{otherNumber} , purchaserInfo = #{purchaserInfo} , supplierInfo = #{supplierInfo} , addressInfo = #{addressInfo} , ownAmount = #{ownAmount} , block = #{block}  
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bOrder">
+    <![CDATA[
+        DELETE FROM b2b_order WHERE
+        orderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND orderAmount = #{orderAmount}			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				AND actualAmount = #{actualAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(meno)">
+				AND meno = #{meno}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(paymentType)">
+				AND paymentType = #{paymentType}			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND paymentName = #{paymentName}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsType)">
+				AND economicsGoodsType = #{economicsGoodsType}			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeBegin)">
+				AND paymentTime >= #{paymentTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeEnd)">
+				AND paymentTime &lt;= #{paymentTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelPk)">
+				AND logisticsModelPk = #{logisticsModelPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsModelName)">
+				AND logisticsModelName = #{logisticsModelName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND purchaseType = #{purchaseType}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isDeleteSp)">
+				AND isDeleteSp = #{isDeleteSp}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeBegin)">
+				AND completeTime >= #{completeTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeEnd)">
+				AND completeTime &lt;= #{completeTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(orderClassify)">
+				AND orderClassify = #{orderClassify}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesTimeBegin)">
+				AND receivablesTime >= #{receivablesTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesTimeEnd)">
+				AND receivablesTime &lt;= #{receivablesTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isBatches)">
+				AND isBatches = #{isBatches}			</if>
+			<if test="@Ognl@isNotEmpty(deliverDetails)">
+				AND deliverDetails = #{deliverDetails}			</if>
+			<if test="@Ognl@isNotEmpty(otherNumber)">
+				AND otherNumber = #{otherNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserInfo)">
+				AND purchaserInfo = #{purchaserInfo}			</if>
+			<if test="@Ognl@isNotEmpty(supplierInfo)">
+				AND supplierInfo = #{supplierInfo}			</if>
+			<if test="@Ognl@isNotEmpty(addressInfo)">
+				AND addressInfo = #{addressInfo}			</if>
+			<if test="@Ognl@isNotEmpty(ownAmount)">
+				AND ownAmount = #{ownAmount}			</if>
+			<if test="@Ognl@isNotEmpty(block)">
+				AND block = #{block}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where orderNumber = #{orderNumber}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where purchaserPk = #{purchaserPk}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where supplierPk = #{supplierPk}	</select>
+	<select id="getByMeno" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where meno = #{meno}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where memberName = #{memberName}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where storeName = #{storeName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where storePk = #{storePk}	</select>
+	<select id="getByPaymentName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where paymentName = #{paymentName}	</select>
+	<select id="getByEconomicsGoodsName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where economicsGoodsName = #{economicsGoodsName}	</select>
+	<select id="getByLogisticsModelPk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where logisticsModelPk = #{logisticsModelPk}	</select>
+	<select id="getByLogisticsModelName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where logisticsModelName = #{logisticsModelName}	</select>
+	<select id="getByEmployeeNumber" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where employeeNumber = #{employeeNumber}	</select>
+	<select id="getByEmployeeName" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where employeeName = #{employeeName}	</select>
+	<select id="getByEmployeePk" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where employeePk = #{employeePk}	</select>
+	<select id="getByDeliverDetails" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where deliverDetails = #{deliverDetails}	</select>
+	<select id="getByOtherNumber" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where otherNumber = #{otherNumber}	</select>
+	<select id="getByPurchaserInfo" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where purchaserInfo = #{purchaserInfo}	</select>
+	<select id="getBySupplierInfo" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where supplierInfo = #{supplierInfo}	</select>
+	<select id="getByAddressInfo" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where addressInfo = #{addressInfo}	</select>
+	<select id="getByBlock" resultType="cn.cf.dto.B2bOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_order where block = #{block}	</select>
+</mapper>
+

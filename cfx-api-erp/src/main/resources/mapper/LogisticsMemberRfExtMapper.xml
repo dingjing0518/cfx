@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpMemberExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,logisticsPk,employeeName,employeeNumber
+	    ]]>
+	</sql>
+
+	<insert id="insertLgMemberRf" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp_member (
+         pk, memberPk, logisticsPk, employeeName, employeeNumber
+        ) VALUES (
+         #{pk}, #{memberPk}, #{logisticsPk}, #{employeeName}, #{employeeNumber}        
+        )
+    ]]>
+	</insert>
+	
+	<delete id="deleteByLogisticsPk" parameterType="cn.cf.dto.LogisticsErpMemberDto">
+    <![CDATA[
+        DELETE FROM logistics_erp_member WHERE
+        logisticsPk = #{logisticsPk} 
+    ]]>
+	</delete>
+
+	<update id="updateLgMemberRf" parameterType="cn.cf.dto.LogisticsErpMemberDto">
+        UPDATE logistics_erp_member 
+        <set>
+        	<if test="memberPk != null and memberPk != ''">
+        	memberPk = #{memberPk} ,
+        	</if>
+        	<if test="logisticsPk != null and logisticsPk != ''">
+        	logisticsPk = #{logisticsPk} ,
+        	</if>
+        	<if test="employeeName != null and employeeName != ''">
+        	employeeName = #{employeeName} ,
+        	</if>
+        	<if test="employeeNumber != null and employeeNumber != ''">
+        	employeeNumber = #{employeeNumber}
+        	</if>
+        </set>       
+        WHERE 
+        	pk = #{pk}  	        
+	</update>
+</mapper>
+

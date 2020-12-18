@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCustomerApplyExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,address,status,insertTime,auditTime,isDelete
+	    ]]>
+	</sql>
+
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND b.pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND b.companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND b.companyName LIKE '%${companyName}%'			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND b.contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND b.contactsTel = #{contactsTel}			</if>
+				<if test="@Ognl@isNotEmpty(status)">
+				AND b.status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND str_to_date(b.insertTime,'%Y-%m-%d') >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(b.insertTime,'%Y-%m-%d') &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND str_to_date(b.updateTime,'%Y-%m-%d')  >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND str_to_date(b.updateTime,'%Y-%m-%d') &lt;= #{updateTimeEnd}			</if>
+				<if test="@Ognl@isNotEmpty(assidirPk)">
+				AND b.assidirPk = #{assidirPk}			</if>
+			<if test="@Ognl@isNotEmpty(assidirName)">
+				AND b.assidirName = #{assidirName}			</if>
+			<if test="@Ognl@isNotEmpty(processInstanceId)">
+				AND b.processInstanceId = #{processInstanceId}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND b.isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_bill_customer_apply b
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bBillCustomerApplyExtDto"
+		parameterType="java.util.Map">
+		
+		SELECT
+			b.pk,b.companyPk,
+		      if(${colCompanyName},b.companyName, INSERT (b.companyName, 3, 5, '*****')) as companyName,
+              if(${colContacts}, b.contacts, INSERT (b.contacts,  1, 1, '*')) as contacts,
+              if(${colContactsTel},b.contactsTel, INSERT (b.contactsTel, 4, 4, '****')) as contactsTel,
+		      b.insertTime,b.updateTime,b.status,b.assidirPk,b.assidirName,
+		      b.processInstanceId,b.staticTime,b.approvalTime,
+		      b.goodsName
+		FROM( SELECT
+				b.*,
+			 GROUP_CONCAT(g.goodsName) goodsName
+			FROM
+				b2b_bill_customer_apply b
+			LEFT JOIN b2b_bill_cusgoods_apply g ON g.customerPk = b.pk
+				<include refid="searchGridWhere" />
+			GROUP BY b.pk
+			) b 
+		<if test="orderName != null">
+			order by b.${orderName} ${orderType} 
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	
+	<update id="updateExt" parameterType="cn.cf.dto.B2bBillCustomerApplyExtDto">
+		UPDATE b2b_bill_customer_apply
+		<set>
+			<if test="status != null and status !=''">
+				status = #{status},
+			</if>
+			<if test="approvalTime != null and approvalTime !=''">
+				approvalTime = #{approvalTime},
+			</if>
+			<if test="assidirPk != null and assidirPk !=''">
+				assidirPk = #{assidirPk},
+				
+			</if>
+			<if test="assidirName != null and assidirName !=''">
+				assidirName = #{assidirName},
+			</if>
+			<if test="processInstanceId != null">
+				processInstanceId = #{processInstanceId},
+			</if>
+			<if test="staticTime != null and staticTime !=''">
+				staticTime = #{staticTime},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	
+	    
+    
+    <select id="getByMap" resultType="cn.cf.dto.B2bBillCustomerApplyExtDto"
+		parameterType="java.util.Map">
+		select * from b2b_bill_customer_apply
+		where 1 = 1
+		<if test="pk != null and pk !=''">
+			and pk  = #{pk}
+		</if>
+		
+	</select>
+	
+	
+	
+	
+	
+</mapper>
+

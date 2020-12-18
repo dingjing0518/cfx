@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityPresentExDao">
+
+	<insert id="insertList" parameterType="java.util.List">
+		INSERT INTO b2b_dimensionality_present (
+		pk, rewardPk, companyPk, companyName, contactsTel, dimenCategory,
+		dimenName, dimenType, dimenTypeName, periodType, fibreShellNumber,
+		empiricalValue, isDelete, isVisable, insertTime,
+		updateTime,fibreShellRatio,
+		empiricalRatio,fbGradeRatio,emGradeRatio,memberPk,memberName,type,total,orderNumber,
+		fbShellNumberWeighting,empiricalValueWeighting
+		) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			#{item.pk}, #{item.rewardPk}, #{item.companyPk}, #{item.companyName}, #{item.contactsTel},
+			#{item.dimenCategory},
+			#{item.dimenName}, #{item.dimenType}, #{item.dimenTypeName}, #{item.periodType}, #{item.fibreShellNumber},
+			#{item.empiricalValue}, 1, 1, now(), now(),#{item.fibreShellRatio},
+			#{item.empiricalRatio}, #{item.fbGradeRatio},#{item.emGradeRatio},
+			#{item.memberPk},#{item.memberName},#{item.type},#{item.total},#{item.orderNumber},
+			#{item.fbShellNumberWeighting},#{item.empiricalValueWeighting}
+			)
+		</foreach>
+	</insert>
+
+
+
+</mapper>
+

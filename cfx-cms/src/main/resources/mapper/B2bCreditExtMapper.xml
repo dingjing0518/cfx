@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditExtDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+	  		pk,companyPk,companyName,creditStatus,creditReason,creditContacts,creditContactsTel,creditAddress,creditInsertTime,creditAuditTime,memberPk,isDelete,financePk,financeContacts,source,processInstanceId,virtualPayPassword,creditInfo
+	    ]]>
+    </sql>
+
+    <update id="updateCreditStatus"  parameterType="java.util.Map">
+       UPDATE  b2b_credit
+       <set>
+           <if test="creditStatus != null and creditStatus !=''">
+                creditStatus = #{creditStatus} ,
+            </if>
+                  creditAuditTime=NOW(),
+       </set>
+      WHERE
+        companyPk = #{companyPk}
+    </update>
+    
+    
+    
+    <update id="updateCreditInfo"  parameterType="java.util.Map">
+       UPDATE  b2b_credit
+       <set>
+           <if test="creditStatus != null and creditStatus !=''">
+                creditStatus = #{creditStatus} ,
+            </if>
+            
+            <if test="bank != null and bank !=''">
+                bank = #{bank} ,
+            </if>
+            
+             <if test="bankPk != null and bankPk !=''">
+                bankPk = #{bankPk} ,
+            </if>
+            
+             <if test="financeContacts != null and financeContacts !=''">
+                financeContacts = #{financeContacts} ,
+            </if>
+            
+              <if test="financePk != null and financePk !=''">
+                financePk = #{financePk} ,
+            </if>
+            
+             <if test="source != null and source !=''">
+                source = #{source} ,
+            </if>
+               <if test="creditInsertTime != null and creditInsertTime !=''">
+                creditInsertTime = #{creditInsertTime} ,
+            </if>
+            
+            <if test="creditAuditTime != null ">
+                creditAuditTime = #{creditAuditTime} ,
+            </if>
+            
+            
+            <if test="processInstanceId != null and processInstanceId !=''">
+                processInstanceId = #{processInstanceId} ,
+            </if>
+            
+              
+            <if test="creditContacts != null and creditContacts !=''">
+                creditContacts = #{creditContacts} ,
+            </if>
+              
+            <if test="creditContactsTel != null and creditContactsTel !=''">
+                creditContactsTel = #{creditContactsTel} ,
+            </if>
+            
+            <if test="remarks != null and remarks !=''">
+                creditReason = #{remarks} ,
+            </if>
+       </set>
+      WHERE
+        companyPk = #{companyPk}
+    </update>
+    
+    
+      <update id="updateCreditStatusAndRemarks"  parameterType="java.util.Map">
+       UPDATE  b2b_credit
+       <set>
+           <if test="creditStatus != null and creditStatus !=''">
+                creditStatus = #{creditStatus} ,
+            </if>
+            
+             <if test="remarks != null and remarks !=''">
+                creditReason = #{remarks} ,
+            </if>
+       
+       </set>
+      WHERE
+        companyPk = #{companyPk}
+    </update>
+
+    <update id="update" parameterType="cn.cf.dto.B2bCreditExtDto">
+        UPDATE  b2b_credit
+        <set>
+            <if test="companyPk != null and companyPk !=''">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="companyName != null and companyName !=''">
+                companyName = #{companyName} ,
+            </if>
+            <if test="creditStatus != null and creditStatus !=''">
+                creditStatus = #{creditStatus} ,
+            </if>
+            <if test="creditReason != null">
+                creditReason = #{creditReason} ,
+            </if>
+            <if test="creditContacts != null and creditContacts !=''">
+                creditContacts = #{creditContacts} ,
+            </if>
+            <if test="creditContactsTel != null and creditContactsTel !=''">
+                creditContactsTel = #{creditContactsTel} ,
+            </if>
+            <if test="creditAddress != null and creditAddress !=''">
+                creditAddress = #{creditAddress} ,
+            </if>
+            <if test="creditInsertTime != null and creditInsertTime !=''">
+                creditInsertTime = #{creditInsertTime} ,
+            </if>
+            <if test="creditAuditTime != null and creditAuditTime !=''">
+                creditAuditTime = #{creditAuditTime} ,
+            </if>
+            <if test="memberPk != null and memberPk !=''">
+                memberPk = #{memberPk} ,
+            </if>
+            <if test="isDelete != null and isDelete !=''">
+                isDelete = #{isDelete} ,
+            </if>
+             <if test="creditInfo != null and creditInfo !=''">
+                creditInfo = #{creditInfo} 
+            </if>
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+
+    <update id="creditUpdate" parameterType="java.util.Map">
+        UPDATE  b2b_credit
+        <set>
+            <if test="companyPk != null and companyPk !=''">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="companyName != null and companyName !=''">
+                companyName = #{companyName} ,
+            </if>
+            <if test="creditStatus != null and creditStatus !=''">
+                creditStatus = #{creditStatus} ,
+            </if>
+            <if test="creditReason != null">
+                creditReason = #{creditReason} ,
+            </if>
+            <if test="creditContacts != null and creditContacts !=''">
+                creditContacts = #{creditContacts} ,
+            </if>
+            <if test="creditContactsTel != null and creditContactsTel !=''">
+                creditContactsTel = #{creditContactsTel} ,
+            </if>
+            <if test="creditAddress != null and creditAddress !=''">
+                creditAddress = #{creditAddress} ,
+            </if>
+            <if test="creditInsertTime != null and creditInsertTime !=''">
+                creditInsertTime = #{creditInsertTime} ,
+            </if>
+            <if test="creditAuditTime != '' ">
+                creditAuditTime = #{creditAuditTime} ,
+            </if>
+            <if test="memberPk != null and memberPk !=''">
+                memberPk = #{memberPk} ,
+            </if>
+            <if test="virtualPayPassword != null and virtualPayPassword !=''">
+                virtualPayPassword = #{virtualPayPassword} ,
+            </if>
+           
+            <if test="isDelete != null and isDelete !=''">
+                isDelete = #{isDelete} ,
+            </if>
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+
+    <update id="updateCreditOfBillTax"  parameterType="cn.cf.dto.B2bCreditDto">
+        UPDATE  b2b_credit
+        <set>
+            <if test="delegateCertUrl != null and delegateCertUrl !=''">
+                delegateCertUrl = #{delegateCertUrl} ,
+            </if>
+
+            <if test="taxNature != null">
+                taxNature = #{taxNature} ,
+            </if>
+            <if test="taxAuthorityCode != null and taxAuthorityCode !=''">
+                taxAuthorityCode = #{taxAuthorityCode} ,
+            </if>
+            <if test="taxAuthorityName != null and taxAuthorityName !=''">
+                taxAuthorityName = #{taxAuthorityName} ,
+            </if>
+
+        </set>
+        WHERE
+        pk = #{pk}
+    </update>
+    
+    <delete id="delete" parameterType="cn.cf.model.B2bCredit">
+        <![CDATA[
+        DELETE FROM  b2b_credit WHERE
+        pk = #{id}
+    ]]>
+    </delete>
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}
+            </if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}
+            </if>
+            <if test="@Ognl@isNotEmpty(companyName)">
+                AND companyName like '%${companyName}%'		</if>
+            <if test="@Ognl@isNotEmpty(creditStatus)">
+                AND creditStatus = #{creditStatus}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditPlatfromAmount)">
+                AND creditPlatfromAmount = #{creditPlatfromAmount}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditUsAmount)">
+                AND creditUsAmount = #{creditUsAmount}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditStartTimeBegin)">
+                AND str_to_date(creditStartTime,'%Y-%m-%d') >= #{creditStartTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditStartTimeEnd)">
+                AND str_to_date(creditStartTime,'%Y-%m-%d') &lt;= #{creditStartTimeEnd}			</if>
+
+            <if test="@Ognl@isNotEmpty(creditEndTimeBegin)">
+                AND str_to_date(creditEndTime,'%Y-%m-%d') >= #{creditEndTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditEndTimeEnd)">
+                AND str_to_date(creditEndTime,'%Y-%m-%d') &lt;= #{creditEndTimeEnd}			</if>
+            <if test="@Ognl@isNotEmpty(creditReason)">
+                AND creditReason = #{creditReason}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditContacts)">
+                AND creditContacts like '%${creditContacts}%'			</if>
+            <if test="@Ognl@isNotEmpty(creditContactsTel)">
+                AND creditContactsTel = #{creditContactsTel}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditAddress)">
+                AND creditAddress = #{creditAddress}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditInsertTimeBegin)">
+                AND str_to_date(creditInsertTime,'%Y-%m-%d') >= #{creditInsertTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditInsertTimeEnd)">
+                AND str_to_date(creditInsertTime,'%Y-%m-%d') &lt;= #{creditInsertTimeEnd}			</if>
+            <if test="@Ognl@isNotEmpty(creditAuditTimeBegin)">
+                AND str_to_date(creditAuditTime,'%Y-%m-%d') >= #{creditAuditTimeBegin}
+            </if>
+            <if test="@Ognl@isNotEmpty(creditAuditTimeEnd)">
+                AND str_to_date(creditAuditTime,'%Y-%m-%d') &lt;= #{creditAuditTimeEnd}			</if>
+
+            <if test="@Ognl@isNotEmpty(virtualAccountName)">
+                AND virtualAccountName like '%${virtualAccountName}%'
+            </if>
+            <if test="@Ognl@isNotEmpty(virtualContactName)">
+                AND virtualContactName like '%${virtualContactName}%'
+            </if>
+            <if test="@Ognl@isNotEmpty(virtualStatus)">
+                AND virtualStatus = #{virtualStatus}
+            </if>
+            <if test="@Ognl@isNotEmpty(virtualAccount)">
+                AND virtualAccount like '%${virtualAccount}%'
+            </if>
+
+
+
+
+            <if test="@Ognl@isNotEmpty(virtualInsertStartTime)">
+                AND str_to_date(virtualInsertTime,'%Y-%m-%d') >= #{virtualInsertStartTime}
+            </if>
+            <if test="@Ognl@isNotEmpty(virtualInsertEndTime)">
+                AND str_to_date(virtualInsertTime,'%Y-%m-%d') &lt;= #{virtualInsertEndTime}			</if>
+
+
+        </where>
+    </sql>
+
+    <select id="searchGridCount" parameterType="java.util.Map"
+            resultType="int">
+        SELECT count(*) FROM  b2b_credit
+        <include refid="searchGridWhere" />
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGrid" resultType="cn.cf.dto.B2bCreditExtDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit
+        <include refid="searchGridWhere" />
+        <!-- 待授信 -->
+        <if test="searchType==1">
+            and creditPlatfromAmount is null
+        </if>
+        <!-- 已授信 -->
+        <if test="searchType==2">
+            and creditPlatfromAmount is not null and creditEndTime >
+            NOW()
+        </if>
+        <!-- 已过期 -->
+        <if test="searchType==3">
+            <![CDATA[ and creditEndTime < NOW()]]>
+        </if>
+
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="searchList" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit
+        <include refid="searchGridWhere" />
+    </select>
+    <select id="getByPk" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where pk = #{pk}
+    </select>
+    <select id="getByCompanyPk" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where isDelete = 1 and companyPk = #{companyPk}
+    </select>
+    <select id="getByCreditReason" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where creditReason = #{creditReason}
+    </select>
+    <select id="getByCreditContacts" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where creditContacts = #{creditContacts}
+    </select>
+    <select id="getByCreditContactsTel" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where creditContactsTel = #{creditContactsTel}
+    </select>
+    <select id="getByCreditAddress" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns" />
+        FROM  b2b_credit where creditAddress = #{creditAddress}
+    </select>
+
+    <select id="getCreditExpirationReminder" resultType="cn.cf.dto.B2bCreditDto">
+        SELECT virtualContactPhone,creditEndTime FROM  b2b_credit where
+        DATEDIFF(creditEndTime,NOW()) =2
+    </select>
+
+    <select id="getCreditPhoneByPk" resultType="cn.cf.dto.B2bCreditDto"
+            parameterType="java.lang.String">
+        SELECT
+        m.mobile AS memberPhone
+        FROM
+         b2b_credit c
+        LEFT JOIN  b2b_member m ON c.memberPk = m.pk
+        WHERE
+        c.pk =#{pk}
+
+    </select>
+    
+    
+    
+    
+    <select id="isExist" resultType="int"  parameterType="java.util.Map">
+		select count(1) from b2b_economics_bank_company
+		where 1 = 1
+		<if test="companyPk != null and companyPk !=''">
+			and companyPk != #{companyPk}
+		</if>
+		
+		<if test="bankPk != null and bankPk !=''">
+			and bankPk != #{bankPk}
+		</if>
+	</select>
+	
+	<delete id="deleteByManagRolePk">
+		DELETE from b2b_economics_bank_company where companyPk=#{companyPk}
+	</delete>
+	
+	
+	
+	
+	
+	
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from 
+
+
+(select * from b2b_credit where 1=1 
+
+
+
+ <choose>
+        <when test="creditStatus !=null and creditStatus != ''">
+            and creditStatus=#{creditStatus})as a 
+        </when>
+        <otherwise>
+            and creditStatus=2 or creditStatus=3 or creditStatus=1)as a 
+        </otherwise>
+    </choose>
+
+
+
+left join 
+
+(SELECT
+			a.companyPk,
+			a.companyName,
+			GROUP_CONCAT(b.`name`) AS productNames,
+			a.creditInsertTime,
+			a.`status`
+		FROM
+			b2b_credit_goods a 
+		JOIN b2b_economics_goods b ON a.economicsGoodsPk = b.pk where 1=1 
+		
+		
+		 <choose>
+        <when test="creditStatus !=null and creditStatus != ''">
+           and a.status=#{creditStatus}
+        </when>
+        <otherwise>
+            and a.status=2 or 3
+        </otherwise>
+    </choose>
+		
+		
+		GROUP BY
+			companyPk)m
+on a.companyPk=m.companyPk
+
+<if test="companyName != null and companyName !='' ">
+			where a.companyName LIKE '%${companyName}%'
+		</if>
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bCreditExtDto"
+		parameterType="java.util.Map">
+		select  a.pk,a.companyPk,
+		   if(${colCompanyName},  a.companyName, INSERT (  a.companyName, 3, 5, '*****')) as companyName,
+		   if(${colApplicants},  a.creditContacts, INSERT (  a.creditContacts, 1, 1, '*')) as creditContacts,
+		   if(${colContactsTel},  a.creditContactsTel, INSERT (  a.creditContactsTel, 4, 4, '****')) as creditContactsTel,
+		  a.creditStatus,a.creditReason,
+        a.creditAddress,a.creditInsertTime,a.creditAuditTime,
+        a.memberPk,a.isDelete,a.financePk,a.financeContacts,a.source,a.processInstanceId,a.virtualPayPassword
+     , m.productNames,a.certificateStatus,a.delegateCertUrl,a.taxNature,a.taxAuthorityCode,a.taxAuthorityName
+		from 
+		(select * from b2b_credit where 1=1 
+
+ 	<choose>
+        <when test="creditStatus !=null and creditStatus != ''">
+            and creditStatus=#{creditStatus})as a 
+        </when>
+        <otherwise>
+            and creditStatus=2 or creditStatus=3 or creditStatus=1)as a 
+        </otherwise>
+    </choose>
+	left join 
+	(SELECT
+			a.companyPk,
+			a.companyName,
+			GROUP_CONCAT(a.economicsGoodsName) AS productNames,
+			a.creditInsertTime,
+			a.`status`
+		FROM
+			b2b_credit_goods a 
+		where 1=1 
+		 <choose>
+        <when test="creditStatus !=null and creditStatus != ''">
+          and  a.status=#{creditStatus}
+        </when>
+        <otherwise>
+            and a.status=2 or 3
+        </otherwise>
+   		 </choose>
+			GROUP BY companyPk)m
+		on a.companyPk=m.companyPk
+		<if test="companyName != null and companyName !='' ">
+				where a.companyName LIKE '%${companyName}%'
+		</if>
+ 	 	<if test="orderName != null">
+	            order by ${orderName} ${orderType}
+        </if>
+		<if test="limit != null">
+				limit #{start},#{limit}
+		</if>
+		</select>
+
+        <select id="searchCreditByBankLastDay" resultType="cn.cf.entity.EconCreditBankEntry"
+            parameterType="java.util.Map">
+        SELECT
+				b2b_credit.`source`,
+				group_concat(
+            b2b_economics_bank_company.`type`
+				) AS typeGroup,
+				b2b_credit.`companyPk`
+			FROM
+				`b2b_credit_goods`
+			LEFT JOIN `b2b_credit` ON `b2b_credit_goods`.`creditPk` = `b2b_credit`.`pk`
+			LEFT JOIN b2b_economics_bank_company ON (
+            b2b_economics_bank_company.companyPk = b2b_credit_goods.companyPk
+				AND b2b_economics_bank_company.type = b2b_credit_goods.goodsType
+			)
+			WHERE
+				1 = 1
+			AND b2b_credit.`source` IS NOT NULL
+			AND b2b_credit.companyPk IS NOT NULL
+			AND b2b_economics_bank_company.companyPk IS NOT NULL
+			AND b2b_credit_goods.companyPk IS NOT NULL
+		<choose>
+		<when test="creditStartTime !=null and creditStartTime != ''">
+		and str_to_date(b2b_economics_bank_company.creditStartTime,'%Y-%m-%d') = #{creditStartTime}
+		</when>
+		<otherwise>
+			<if test="startTime != null and startTime != ''">
+				AND str_to_date(b2b_economics_bank_company.creditStartTime,'%Y-%m-%d') >= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND str_to_date(b2b_economics_bank_company.creditStartTime,'%Y-%m-%d') &lt;= #{endTime}
+			</if>
+		</otherwise>
+		</choose>
+	 	<if test="bankPk != null and bankPk != ''">
+			and b2b_economics_bank_company.bankPk = #{bankPk} 
+	 	</if>
+	 	GROUP BY
+			b2b_credit.pk
+    </select>
+    
+    
+    	<insert id="insertCreditInfo" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_credit (
+         pk, companyPk, companyName,  creditStatus,  creditContacts,
+          creditContactsTel,  creditInsertTime, creditAuditTime,
+         isDelete,source,financeContacts,financePk,processInstanceId
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName},  #{creditStatus},   #{creditContacts},
+          #{creditContactsTel},  #{creditInsertTime}, #{creditAuditTime},
+          #{isDelete},#{source},#{financeContacts},#{financePk},#{processInstanceId}
+        )
+    ]]>
+	</insert>
+
+	<update id="updateBankAccountNumber" parameterType="java.util.Map">
+        UPDATE  b2b_credit_goods
+        <set>
+            <if test="bankAccountNumber != null">
+                bankAccountNumber = #{bankAccountNumber} ,
+            </if>
+        </set>
+        WHERE
+        creditPk = #{creditPk}
+        and  bankPk = #{bankPk}
+    </update>
+
+    <select id="getTaxAuthorityCode" resultType="cn.cf.dto.B2bTaxAuthorityDto"
+            parameterType="java.util.Map">
+        SELECT
+        pk,
+        taxAuthorityCode,
+        taxAuthorityName
+        FROM b2b_tax_authority where isDelete = 1
+        <if test="taxAuthorityName != null and taxAuthorityName != ''">
+            AND taxAuthorityName like '%${taxAuthorityName}%'
+        </if>
+        limit 0,1000
+    </select>
+</mapper>
+

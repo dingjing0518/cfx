@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bGradeExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,sort,isDelete,isVisable,insertTime,chineseName
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(chineseName)">
+				AND chineseName = #{chineseName}
+			</if>
+				AND isDelete=1
+		</where>
+	</sql>
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_grade
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bGradeExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_grade
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<update id="updateGrade" parameterType="cn.cf.dto.B2bGradeExtDto">
+		UPDATE b2b_grade
+		<set>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="sort != null and sort != ''">
+				sort = #{sort},
+			</if>
+			<if test="chineseName != null and chineseName != ''">
+				chineseName = #{chineseName},
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	
+	
+	<select id="isExitGrade" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(1)
+		FROM b2b_grade 
+		WHERE
+			isDelete = 1 
+			and name =#{name}
+		
+	</select>
+	
+</mapper>
+

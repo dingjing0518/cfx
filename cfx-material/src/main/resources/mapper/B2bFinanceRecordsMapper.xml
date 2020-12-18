@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bFinanceRecordsDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,supplierPk,supplierName,status,transactionAccount,receivablesAccount,transactionAmount,transactionType,insertTime,transactionAccountName,receivablesAccountName,description,poundage,currentIp,orderNumber,serialNumber,iouNumber,loanEndTime,reason,employeePk,employeeName,employeeNumber
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_finance_records (
+         pk, companyPk, companyName, supplierPk, supplierName, status, transactionAccount, receivablesAccount, transactionAmount, transactionType, insertTime, transactionAccountName, receivablesAccountName, description, poundage, currentIp, orderNumber, serialNumber, iouNumber, loanEndTime, reason, employeePk, employeeName, employeeNumber
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName}, #{supplierPk}, #{supplierName}, #{status}, #{transactionAccount}, #{receivablesAccount}, #{transactionAmount}, #{transactionType}, #{insertTime}, #{transactionAccountName}, #{receivablesAccountName}, #{description}, #{poundage}, #{currentIp}, #{orderNumber}, #{serialNumber}, #{iouNumber}, #{loanEndTime}, #{reason}, #{employeePk}, #{employeeName}, #{employeeNumber}      
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bFinanceRecords">
+    <![CDATA[
+        UPDATE b2b_finance_records SET
+	        companyPk = #{companyPk} , companyName = #{companyName} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , status = #{status} , transactionAccount = #{transactionAccount} , receivablesAccount = #{receivablesAccount} , transactionAmount = #{transactionAmount} , transactionType = #{transactionType} , insertTime = #{insertTime} , transactionAccountName = #{transactionAccountName} , receivablesAccountName = #{receivablesAccountName} , description = #{description} , poundage = #{poundage} , currentIp = #{currentIp} , orderNumber = #{orderNumber} , serialNumber = #{serialNumber} , iouNumber = #{iouNumber} , loanEndTime = #{loanEndTime} , reason = #{reason} , employeePk = #{employeePk} , employeeName = #{employeeName} , employeeNumber = #{employeeNumber}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bFinanceRecords">
+    <![CDATA[
+        DELETE FROM b2b_finance_records WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(transactionAccount)">
+				AND transactionAccount = #{transactionAccount}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccount)">
+				AND receivablesAccount = #{receivablesAccount}			</if>
+			<if test="@Ognl@isNotEmpty(transactionAmount)">
+				AND transactionAmount = #{transactionAmount}			</if>
+			<if test="@Ognl@isNotEmpty(transactionType)">
+				AND transactionType = #{transactionType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(transactionAccountName)">
+				AND transactionAccountName = #{transactionAccountName}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccountName)">
+				AND receivablesAccountName = #{receivablesAccountName}			</if>
+			<if test="@Ognl@isNotEmpty(description)">
+				AND description = #{description}			</if>
+			<if test="@Ognl@isNotEmpty(poundage)">
+				AND poundage = #{poundage}			</if>
+			<if test="@Ognl@isNotEmpty(currentIp)">
+				AND currentIp = #{currentIp}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND serialNumber = #{serialNumber}			</if>
+			<if test="@Ognl@isNotEmpty(iouNumber)">
+				AND iouNumber = #{iouNumber}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeBegin)">
+				AND loanEndTime >= #{loanEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(loanEndTimeEnd)">
+				AND loanEndTime &lt;= #{loanEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(reason)">
+				AND reason = #{reason}			</if>
+			<if test="@Ognl@isNotEmpty(employeePk)">
+				AND employeePk = #{employeePk}			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_finance_records
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where companyName = #{companyName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where supplierName = #{supplierName}	</select>
+	<select id="getByTransactionAccount" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where transactionAccount = #{transactionAccount}	</select>
+	<select id="getByReceivablesAccount" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where receivablesAccount = #{receivablesAccount}	</select>
+	<select id="getByTransactionAccountName" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where transactionAccountName = #{transactionAccountName}	</select>
+	<select id="getByReceivablesAccountName" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where receivablesAccountName = #{receivablesAccountName}	</select>
+	<select id="getByDescription" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where description = #{description}	</select>
+	<select id="getByCurrentIp" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where currentIp = #{currentIp}	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where orderNumber = #{orderNumber}	</select>
+	<select id="getBySerialNumber" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where serialNumber = #{serialNumber}	</select>
+	<select id="getByIouNumber" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where iouNumber = #{iouNumber}	</select>
+	<select id="getByReason" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where reason = #{reason}	</select>
+	<select id="getByEmployeePk" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where employeePk = #{employeePk}	</select>
+	<select id="getByEmployeeName" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where employeeName = #{employeeName}	</select>
+	<select id="getByEmployeeNumber" resultType="cn.cf.dto.B2bFinanceRecordsDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_finance_records where employeeNumber = #{employeeNumber}	</select>
+</mapper>
+

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsBankCompanyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,bankPk,bankName,creditAmount,creditStartTime,creditEndTime,customerNumber,contractNumber,agreementNumber,contractAmount,availableAmount,amountType,type
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_economics_bank_company (
+         pk, companyPk, bankPk, bankName, creditAmount, creditStartTime, creditEndTime, customerNumber, contractNumber, agreementNumber, contractAmount, availableAmount, amountType, type
+        ) VALUES (
+         #{pk}, #{companyPk}, #{bankPk}, #{bankName}, #{creditAmount}, #{creditStartTime}, #{creditEndTime}, #{customerNumber}, #{contractNumber}, #{agreementNumber}, #{contractAmount}, #{availableAmount}, #{amountType}, #{type}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bEconomicsBankCompany">
+    <![CDATA[
+        UPDATE b2b_economics_bank_company SET
+	        companyPk = #{companyPk} , bankPk = #{bankPk} , bankName = #{bankName} , creditAmount = #{creditAmount} , creditStartTime = #{creditStartTime} , creditEndTime = #{creditEndTime} , customerNumber = #{customerNumber} , contractNumber = #{contractNumber} , agreementNumber = #{agreementNumber} , contractAmount = #{contractAmount} , availableAmount = #{availableAmount} , amountType = #{amountType} , type = #{type}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bEconomicsBankCompany">
+    <![CDATA[
+        DELETE FROM b2b_economics_bank_company WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(creditAmount)">
+				AND creditAmount = #{creditAmount}			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeBegin)">
+				AND creditStartTime >= #{creditStartTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeEnd)">
+				AND creditStartTime &lt;= #{creditStartTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeBegin)">
+				AND creditEndTime >= #{creditEndTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeEnd)">
+				AND creditEndTime &lt;= #{creditEndTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(customerNumber)">
+				AND customerNumber = #{customerNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractNumber)">
+				AND contractNumber = #{contractNumber}			</if>
+			<if test="@Ognl@isNotEmpty(agreementNumber)">
+				AND agreementNumber = #{agreementNumber}			</if>
+			<if test="@Ognl@isNotEmpty(contractAmount)">
+				AND contractAmount = #{contractAmount}			</if>
+			<if test="@Ognl@isNotEmpty(availableAmount)">
+				AND availableAmount = #{availableAmount}			</if>
+			<if test="@Ognl@isNotEmpty(amountType)">
+				AND amountType = #{amountType}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_economics_bank_company
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where companyPk = #{companyPk}	</select>
+	<select id="getByBankPk" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where bankPk = #{bankPk}	</select>
+	<select id="getByBankName" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where bankName = #{bankName}	</select>
+	<select id="getByCustomerNumber" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where customerNumber = #{customerNumber}	</select>
+	<select id="getByContractNumber" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where contractNumber = #{contractNumber}	</select>
+	<select id="getByAgreementNumber" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where agreementNumber = #{agreementNumber}	</select>
+	<select id="getByAmountType" resultType="cn.cf.dto.B2bEconomicsBankCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_economics_bank_company where amountType = #{amountType}	</select>
+</mapper>
+

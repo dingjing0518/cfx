@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bEconomicsCustomerGoodsExDao">
+
+	<delete id="deleteByB2bEconomicsCustomerPk" parameterType="java.lang.String">
+    <![CDATA[
+        DELETE FROM b2b_economics_customer_goods WHERE
+        economicsCustomerPk = #{b2bEconomicsCustomerPk} 
+    ]]>
+	</delete>
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into b2b_economics_customer_goods
+		( pk, economicsGoodsPk, economicsGoodsName, goodsType,
+		 suggestAmount, bankPk, bankName, effectStartTime,
+		  effectEndTime, economicsCustomerPk,sevenRate,totalRate,bankRate,term
+		)
+		values
+		<foreach collection="list" item="i" index="index" separator=",">
+			( #{i.pk}, #{i.economicsGoodsPk}, #{i.economicsGoodsName}, #{i.goodsType},
+			#{i.suggestAmount}, #{i.bankPk}, #{i.bankName},
+			#{i.effectStartTime}, #{i.effectEndTime}, #{i.economicsCustomerPk},
+			#{i.sevenRate}, #{i.totalRate}, #{i.bankRate},
+			#{i.term}
+			)
+		</foreach>
+	</insert>
+
+	<update id="updateBatch" parameterType="java.util.List">
+		update b2b_economics_customer_goods
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="bankPk =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.bankPk != null">
+					when pk=#{i.pk}
+					then #{i.bankPk}
+				</if>
+				</foreach>
+			</trim>
+			<trim prefix=" bankName =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.bankName != null">
+					when pk=#{i.pk}
+					then #{i.bankName}
+				</if>
+				</foreach>
+			</trim>
+			
+			<trim prefix=" suggestAmount =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.suggestAmount != null">
+					when pk=#{i.pk}
+					then #{i.suggestAmount}
+				</if>
+				</foreach>
+			</trim>
+			
+			<trim prefix=" effectStartTime =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.effectStartTime != null">
+					when pk=#{i.pk}
+					then #{i.effectStartTime}
+				</if>
+				</foreach>
+			</trim>
+			
+			<trim prefix=" effectEndTime =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.effectEndTime != null">
+					when pk=#{i.pk}
+					then #{i.effectEndTime}
+				</if>
+				</foreach>
+			</trim>
+			<trim prefix=" bankRate =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.bankRate != null">
+					when pk=#{i.pk}
+					then #{i.bankRate}
+				</if>
+				</foreach>
+			</trim>
+			<trim prefix=" sevenRate =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.sevenRate != null">
+					when pk=#{i.pk}
+					then #{i.sevenRate}
+				</if>
+				</foreach>
+			</trim>
+			<trim prefix=" totalRate =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.totalRate != null">
+					when pk=#{i.pk}
+					then #{i.totalRate}
+				</if>
+				</foreach>
+			</trim>
+			<trim prefix=" term =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+				<if test="i.term != null">
+					when pk=#{i.pk}
+					then #{i.term}
+				</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or"   item="i" index="index">
+			pk=#{i.pk}
+		</foreach>
+	</update>
+	
+
+
+
+
+<select id="searchListOrderByBankPk" resultType="cn.cf.dto.B2bEconomicsCustomerGoodsDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_economics_customer_goods
+		where economicsCustomerPk = #{economicsCustomerPk}
+		order by bankPk, goodsType desc
+	</select>
+
+
+
+	
+	
+</mapper>
+

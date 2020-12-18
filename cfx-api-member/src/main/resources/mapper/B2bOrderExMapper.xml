@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOrderDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserName,purchaserPk,supplierName,supplierPk,orderStatus,orderAmount,actualAmount,loanAmount,insertTime,address,contacts,contactsTel,meno,provinceName,cityName,areaName,townName,memberPk,memberName,storeName,storePk,paymentPk,paymentName,source,paymentTime,repaymentTime,loanStatus,bankPk,bankName,logisticsModelPk,logisticsModelName,invoicePk,invoiceName,invoiceTaxidNumber,invoiceRegPhone,invoiceBankAccount,invoiceBankName,invoiceRegAddress,purchaseType,loanStartTime,loanEndTime,contractNumber,iouNumber,principal,interest,penalty,compound,isDelete,isDeleteSp,employeeNumber,employeeName,employeePk,accountedTime,accountedStatus,signingCompany,economicsGoodsPk,economicsGoodsName
+	    ]]>
+	</sql>
+
+	<!-- 查询再一定时间范围内累计成交采购商家数 -->
+	<select id="selectTotalPurCountInPeriodTime" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`supplierPk`=#{supplierPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		GROUP BY b2b_order.`purchaserPk`
+		) temp
+	</select>
+	
+	<!-- 查询再一定时间范围内累计成交供应商家数 -->
+	<select id="selectTotalSupCountInPeriodTime" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		<!-- SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		GROUP BY b2b_order.`supplierPk`
+		) temp -->
+		
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` >=  DATE_FORMAT(date_add(#{periodTimeStart}, interval 1 day),'%Y-%m-%d')    
+		AND b2b_order.`completeTime` &lt;=  DATE_FORMAT(date_add(#{periodTimeStart}, interval #{periodTime} day),'%Y-%m-%d')     
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+		
+	</select>
+
+
+	<!-- 查询再一定时间范围内累计成交供应商家数（排除本次订单） -->
+	<select id="checkLastTotalSupCountInPeriodTime" resultType="Integer" >
+		<!-- SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		and b2b_order.orderNumber !=#{orderNumber}
+		GROUP BY b2b_order.`supplierPk`
+		) temp -->
+		
+		
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` >=  DATE_FORMAT(date_add(#{periodTimeStart}, interval 1 day),'%Y-%m-%d')    
+		AND b2b_order.`completeTime` &lt;=  DATE_FORMAT(date_add(#{periodTimeStart}, interval #{periodTime} day),'%Y-%m-%d')
+		and b2b_order.orderNumber !=#{orderNumber}
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+		
+	</select>
+	
+	
+	
+	<!-- 查询某个业务员在一定时间范围内  白条订单  累计成交供应商家数 -->
+ 	<!-- <select id="selectTotalSupCountInPeriodTimeFor1" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		INNER JOIN b2b_economics_goods ON b2b_economics_goods.`pk` = b2b_order.`economicsGoodsPk`
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		AND b2b_economics_goods.`goodsType`=1
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+	</select> -->
+	
+	<!-- 查询某个业务员在一定时间范围内 白条订单 累计成交供应商家数 （除了当前订单） -->
+	<!-- <select id="selectBeforeTotalSupCountInPeriodTimeFor1" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		INNER JOIN b2b_economics_goods ON b2b_economics_goods.`pk` = b2b_order.`economicsGoodsPk`
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		AND b2b_economics_goods.`goodsType`=1
+		AND b2b_order.orderNumber !=#{orderNumber}
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+	</select> -->
+	
+	<!-- 一个业务员一定时间内"线下支付"订单累计成交的供应商家数 -->
+	<!-- <select id="selectTotalSupCountInPeriodTimeFor2" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		INNER JOIN b2b_payment ON b2b_payment.`pk` = b2b_order.`paymentPk`
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		AND b2b_payment.`type`=1
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+	</select> -->
+
+	<!-- 一个业务员一定时间内"线下支付"订单累计成交的供应商家数 （除了当前订单）-->
+	<!-- <select id="selectBeforeTotalSupCountInPeriodTimeFor2" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		INNER JOIN b2b_payment ON b2b_payment.`pk` = b2b_order.`paymentPk`
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` > DATE_SUB(NOW(),INTERVAL #{periodTime} DAY)
+		AND b2b_payment.`type`=1
+		AND b2b_order.orderNumber !=#{orderNumber}
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+	</select> -->
+
+
+	
+	
+
+</mapper>
+

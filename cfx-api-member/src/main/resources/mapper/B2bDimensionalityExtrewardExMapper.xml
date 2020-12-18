@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityExtrewardDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,dimenCategory,dimenName,dimenType,dimenTypeName,periodType,periodTime,fibreShellNumber,empiricalValue,numberTimes,conditionType,util,detail,timesDetail,isDelete,isVisable,insertTime,updateTime
+	    ]]>
+	</sql>
+
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND periodType = #{periodType}			</if>
+			<if test="@Ognl@isNotEmpty(periodTime)">
+				AND periodTime = #{periodTime}			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND fibreShellNumber = #{fibreShellNumber}			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND empiricalValue = #{empiricalValue}			</if>
+			<if test="@Ognl@isNotEmpty(numberTimes)">
+				AND numberTimes = #{numberTimes}			</if>
+			<if test="@Ognl@isNotEmpty(conditionType)">
+				AND conditionType = #{conditionType}			</if>
+			<if test="@Ognl@isNotEmpty(util)">
+				AND util = #{util}			</if>
+			<if test="@Ognl@isNotEmpty(detail)">
+				AND detail = #{detail}			</if>
+			<if test="@Ognl@isNotEmpty(timesDetail)">
+				AND timesDetail = #{timesDetail}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+		</where>
+	</sql>
+
+	<select id="searchListEx" resultType="cn.cf.dto.B2bDimensionalityExtrewardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_extreward
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<!-- 根据维度类别查询所有额外奖励维度 -->
+	<select id="getExtrewardByDimenCategory" resultType="cn.cf.dto.B2bDimensionalityExtrewardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_extreward
+		where 
+		b2b_dimensionality_extreward.dimenCategory=#{dimenCategory}
+		and b2b_dimensionality_extreward.isDelete=1 
+		and b2b_dimensionality_extreward.isVisable=1
+	</select>
+	
+</mapper>
+

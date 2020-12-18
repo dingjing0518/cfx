@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysCompanyBankcardDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,creditPk,bankAccount,bankName,bankNo,status
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(creditPk)">
+				AND creditPk = #{creditPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(bankNo)">
+				AND bankNo = #{bankNo}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+		</where>
+	</sql>
+ 
+	<select id="getCompanyBankcard" resultType="cn.cf.dto.SysCompanyBankcardDto">
+		SELECT
+			s.*
+		FROM
+			sys_company_bankcard s
+		WHERE
+			s.companyPk = #{companyPk}
+	</select>
+
+
+</mapper>
+

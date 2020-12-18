@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="cn.cf.dao.B2bGoodsDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,price,tonPrice,salePrice,storePk,storeName,companyPk,companyName,brandPk,brandName,insertTime,isUpdown,updateTime,upTime,tareWeight,totalBoxes,totalWeight,type,isDelete,isNewProduct,block,goodsInfo,pk1,pk2,pk3,pk4,pk5
+     ]]>
+	</sql>
+	
+	<update id="updateEx" parameterType="cn.cf.dto.B2bGoodsDto">
+		UPDATE b2b_goods
+		<set>
+			<if test="isDelete>0">
+				isDelete =#{isDelete},
+			</if>
+			<if test="price !=null">
+				price = #{price},
+			</if>
+			<if test="salePrice !=null">
+				salePrice = #{salePrice},
+			</if>
+			<if test="tonPrice !=null">
+				tonPrice = #{tonPrice},
+			</if>
+			<if test="companyPk!=null and companyPk!=''">
+				companyPk =#{companyPk},
+			</if>
+			<if test="companyName!=null and companyName!=''">
+				companyName = #{companyName},
+			</if>
+			<if test="brandPk!=null and brandPk!=''">
+				brandPk =#{brandPk},
+			</if>
+			<if test="brandName!=null and brandName!=''">
+				brandName = #{brandName},
+			</if>
+			<if test="isUpdown!=null and isUpdown!=''">
+				isUpdown = #{isUpdown},
+				upTime =now(),
+			</if>
+			<if test="updateTime!=null ">
+				updateTime = now(),
+			</if>
+			<if test="tareWeight!=null  ">
+				tareWeight = #{tareWeight},
+			</if>
+			<if test="totalBoxes!=null ">
+				totalBoxes = #{totalBoxes},
+			</if>
+			<if test="totalWeight!=null ">
+				totalWeight = #{totalWeight},
+			</if>
+			<if test="type!=null and type!=''">
+				type = #{type},
+			</if>
+			<if test="isNewProduct != null">
+				isNewProduct=#{isNewProduct},
+			</if>
+			<if test="block!=null and block!=''">
+				block = #{block},
+			</if>
+			<if test="goodsInfo!=null and goodsInfo!=''">
+				goodsInfo = #{goodsInfo},
+			</if>
+			<if test="pk1!=null and pk1!=''">
+				pk1 = #{pk1},
+			</if>
+			<if test="pk2!=null and pk2!=''">
+				pk2 = #{pk2},
+			</if>
+			<if test="pk3!=null and pk3!=''">
+				pk3 = #{pk3},
+			</if>
+			<if test="pk4!=null and pk4!=''">
+				pk4 = #{pk4},
+			</if>
+			updateTime = sysdate()
+		</set>
+		where pk = #{pk}
+	</update>
+	
+	
+	<update id="updateDataZero" parameterType="java.util.Map">
+		UPDATE b2b_goods
+		<set>
+			<if test="clearKuCun==true">
+				totalBoxes=0 ,totalWeight=0 ,
+			</if>
+			<if test="clearUpdown == true ">
+				isUpdown = 3 ,
+			</if>
+			<if test="clearPrice ==true">
+				price = 0.00 ,tonPrice=0.00,salePrice=0.00,
+			</if>
+			<if test="clearIsNewPrice ==true">
+				isNewProduct = 0,
+			</if>
+		</set>
+		WHERE storePk=#{storePk}
+	</update>
+	
+	
+   <select id="searchGoodsIs" resultType="cn.cf.dto.B2bGoodsDto">
+		SELECT * FROM b2b_goods
+		WHERE
+		pk1 = #{pk1}
+		<if test="pk3 != null and pk3 !=''">
+			AND pk3 = #{pk3}
+		</if>
+		<if test="pk3 == null or pk3 ==''">
+			AND (pk3 is null or pk3 ='')
+		</if>
+		<if test="pk2 !=null and pk2 !=''">
+			AND pk2 = #{pk2}
+		</if>
+		<if test="pk2 ==null or pk2 ==''">
+			AND (pk2 is null or pk2 = '')
+		</if>
+		<if test="pk4 !=null and pk4 !=''">
+			AND pk4 =#{pk4}
+		</if>
+		<if test="pk4 ==null or pk4 ==''">
+			AND (pk4 is null or pk4 = '')
+		</if>
+		AND storePk=#{storePk} and isDelete = 1
+	</select>
+	
+	
+	<!-- 批量更新商品库存 -->
+	<update id="updateWeightBatch" parameterType="java.util.List">
+		update b2b_goods
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="totalWeight =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk} 
+					and pk = #{i.pk}
+					then #{i.totalWeight}
+				</foreach>
+			</trim>
+			<trim prefix=" totalBoxes =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.totalBoxes}
+				</foreach>
+			</trim>
+			<trim prefix="tareWeight =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.tareWeight}
+				</foreach>
+			</trim>
+			<trim prefix=" updateTime =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then now()
+				</foreach>
+			</trim>
+			<trim prefix=" goodsInfo =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.goodsInfo != null">
+						when storePk=#{i.storePk}
+						and pk = #{i.pk}
+						then #{i.goodsInfo}
+					</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			storePk=#{i.storePk}
+			and pk = #{i.pk}
+			<if test="i.isUpDown != null">
+				and isUpDown != #{i.isUpDown}
+			</if>
+		</foreach>
+	</update>
+	
+	
+	<!-- 批量更新商品价格 -->
+	<update id="updatePriceBatch" parameterType="java.util.List">
+		update b2b_goods
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="price =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.price}
+				</foreach>
+			</trim>
+			<trim prefix="tonPrice =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.tonPrice}
+				</foreach>
+			</trim>
+			<trim prefix="salePrice =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.salePrice}
+				</foreach>
+			</trim>
+			<trim prefix="goodsInfo =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then #{i.goodsInfo}
+				</foreach>
+			</trim>
+			<trim prefix="updateTime =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					and pk = #{i.pk}
+					then now()
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			storePk=#{i.storePk}
+			and pk = #{i.pk}
+			<if test="i.isUpDown != null and i.isUpDown != ''">
+				and isUpDown != #{i.isUpDown}
+			</if>
+		</foreach>
+	</update>
+	
+	
+	<!-- 批量更新商品是否隐藏 -->
+	<update id="updateIsNewProduct" parameterType="java.util.List">
+		update b2b_goods
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" isNewProduct =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when storePk=#{i.storePk}
+					<if test="i.batchNumber != null and i.batchNumber != ''">
+						and pk1 = #{i.batchNumber}
+					</if>
+					<if test="i.packNumber != null and i.packNumber != ''">
+						and pk4 = #{i.packNumber}
+					</if>
+					<if test="i.gradeName != null and i.gradeName != ''">
+						and pk3 = #{i.gradeName}
+					</if>
+					<if test="i.distinctNumber != null and i.distinctNumber != ''">
+						and pk2 = #{i.distinctNumber}
+					</if>
+					then #{i.isNewProduct}
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			storePk=#{i.storePk}
+					<if test="i.batchNumber != null and i.batchNumber != ''">
+						and pk1 = #{i.batchNumber}
+					</if>
+					<if test="i.packNumber != null and i.packNumber != ''">
+						and pk4 = #{i.packNumber}
+					</if>
+					<if test="i.gradeName != null and i.gradeName != ''">
+						and pk3 = #{i.gradeName}
+					</if>
+					<if test="i.distinctNumber != null and i.distinctNumber != ''">
+						and pk2 = #{i.distinctNumber}
+					</if>
+		</foreach>
+	</update>
+	
+	
+	<!-- 批量更新竞拍商品 -->
+	<update id="updateGoodsAuctionBatch" parameterType="java.util.List">
+		update b2b_goods
+		<trim prefix="set" suffixOverrides=",">
+			 <trim prefix=" type =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.type != null ">
+					when pk=#{i.pk}
+					then #{i.type}
+					</if>
+				</foreach>
+			</trim> 
+			<trim prefix=" price = case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.price != null ">
+					when pk=#{i.pk}
+					then #{i.price}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix=" salePrice =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.salePrice != null ">
+					when pk=#{i.pk}
+					then #{i.salePrice}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="tonPrice =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.tonPrice != null ">
+					when pk=#{i.pk}
+					then #{i.tonPrice}
+					</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			pk=#{i.pk}
+		</foreach>
+	</update>
+	
+	
+	<update id="updateGoodsType" parameterType="java.util.List">
+		update b2b_goods
+		<trim prefix="set" suffixOverrides=",">
+			 <trim prefix=" type =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when pk=#{i.goodsPk}
+					then 'binding'
+				</foreach>
+			</trim> 
+			<trim prefix=" isUpdown =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when pk=#{i.goodsPk}
+					then 2
+				</foreach>
+			</trim> 
+			<trim prefix=" updateTime =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when pk=#{i.goodsPk}
+					then sysdate() 
+				</foreach>
+			</trim> 
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			pk=#{i.goodsPk}
+		</foreach>
+	</update>
+	
+	
+	<insert id="insertEx" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_goods (
+         pk,price,tonPrice,salePrice,storePk,storeName,companyPk,companyName,
+         brandPk,brandName,insertTime,isUpdown,updateTime,upTime,tareWeight,totalBoxes,
+         totalWeight,type,isDelete,isNewProduct,block,goodsInfo,pk1,pk2,pk3,pk4 
+        ) VALUES (
+         #{pk}, #{price}, #{tonPrice}, #{salePrice}, #{storePk}, #{storeName}, #{companyPk}, #{companyName}, 
+         #{brandPk}, #{brandName}, #{insertTime},#{isUpdown}, #{updateTime}, #{upTime},#{tareWeight}, #{totalBoxes},
+         #{totalWeight}, #{type}, #{isDelete}, #{isNewProduct},#{block},#{goodsInfo},#{pk1},#{pk2},#{pk3},#{pk4}
+        )
+    ]]>
+	</insert>
+	
+	<update id="updateNewGoodsType">
+		update b2b_goods set updateTime = NOW(),type = #{newType}
+		where storePk = #{storePk} and type = #{oldType}
+	</update>
+	
+	
+	 <select id="searchGoodsList"  resultType="cn.cf.dto.B2bGoodsDtoEx">
+		SELECT * FROM b2b_goods
+		WHERE
+		pk1 = #{pk1}
+		<if test="pk3 != null and pk3 !=''">
+			AND pk3 = #{pk3}
+		</if>
+		<if test="pk2 !=null and pk2 !=''">
+			AND pk2 = #{pk2}
+		</if>
+		<if test="pk4 !=null and pk4 !=''">
+			AND pk4 =#{pk4}
+		</if>
+		AND storePk=#{storePk} and isDelete = 1
+	</select>
+	
+	<update id="updateShowByStorePk">
+		update b2b_goods set isNewProduct = 1
+		where storePk = #{storePk}
+	</update>
+</mapper>
+

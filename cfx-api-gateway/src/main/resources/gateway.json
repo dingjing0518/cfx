@@ -1,0 +1,70 @@
+{
+	"list": [ {
+		"id": "2",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/member/**",
+		"url": "http://localhost:9093"
+	}, {
+		"id": "3",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/shop/**",
+		"url": "http://localhost:9091"
+	}, {
+		"id": "4",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/logistics/**",
+		"url": "http://localhost:9094"
+	},{
+		"id": "5",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/economics/**",
+		"url": "http://localhost:9095"
+	},{
+		"id": "6",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/shop2erp/**",
+		"url": "http://localhost:9096"
+	},{
+		"id": "7",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/erp/**",
+		"url": "http://localhost:9096"
+	},{
+		"id": "8",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/accessToken",
+		"url": "http://localhost:9096"
+	},{
+		"id": "9",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/cf_api/erp/**",
+		"url": "http://localhost:9096"
+	},{
+		"id": "10",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/trade/**",
+		"url": "http://localhost:9092"
+	},{
+		"id": "11",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/lottery/**",
+		"url": "http://localhost:9097"
+	},{
+		"id": "12",
+		"stripPrefix": false,
+		"enabled": true,
+		"path": "/sx/**",
+		"url": "http://localhost:9098"
+	}
+	]
+}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecHotDaoEx">
+
+	<select id="searchSepcHotGroup" resultType="cn.cf.entity.SpecHot">
+		SELECT block
+		<if test="groupName != null and groupName  !=''">
+			<if test="groupName =='first'">
+				,firstLevelPk , firstLevelName	,secondLevelPk, secondLevelName ,thirdLevelPk , thirdLevelName 
+			</if>
+			<if test="groupName =='second'">
+				,linkUrl,firstLevelPk , firstLevelName	,secondLevelPk, secondLevelName ,thirdLevelPk , thirdLevelName ,fourthLevelPk , fourthLevelName 
+			</if>
+		</if>
+		from b2b_spec_hot
+		WHERE
+		STATUS = 1
+		AND isDelete = 1
+		<if test="block != null and block !=''">
+			AND block = #{block}
+		</if>
+		<if test="groupName != null and groupName  !=''">
+			<if test="groupName =='second'">
+				<if test="firstLevelPk != null and firstLevelPk  !=''">
+				AND firstLevelPk = #{firstLevelPk} 
+				</if>
+					<if test="secondLevelPk != null and secondLevelPk  !=''">
+				AND secondLevelPk = #{secondLevelPk}
+				</if>
+				<if test="thirdLevelPk != null and thirdLevelPk  !=''">
+				AND thirdLevelPk = #{thirdLevelPk}
+				</if>
+			</if>
+		</if>
+		group by block
+		<if test="groupName != null and groupName  !=''">
+			<if test="groupName =='first'">
+				,firstLevelPk, firstLevelName,secondLevelPk, secondLevelName	,thirdLevelPk, thirdLevelName
+			</if>
+			<if test="groupName =='second'">
+				,linkUrl,firstLevelPk, firstLevelName,secondLevelPk, secondLevelName	,thirdLevelPk, thirdLevelName,fourthLevelPk, fourthLevelName
+			</if>
+		</if>
+		order by sort desc
+	</select>
+</mapper>
+

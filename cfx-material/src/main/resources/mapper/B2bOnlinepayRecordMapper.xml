@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bOnlinepayRecordDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,status,serialNumber,purchaserPk,purchaserName,supplierName,supplierPk,orderAmount,
+		insertTime,receivablesAccount,receivablesAccountName,onlinePayGoodsPk,
+		onlinePayGoodsName,shotName,returnUrl
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderNumber">
+    <![CDATA[
+        INSERT INTO b2b_onlinepay_record (
+         orderNumber, status, serialNumber, purchaserPk, purchaserName, supplierName, supplierPk, orderAmount,
+         insertTime, receivablesAccount, receivablesAccountName, onlinePayGoodsPk, onlinePayGoodsName,
+         shotName,returnUrl
+        ) VALUES (
+         #{orderNumber}, #{status}, #{serialNumber}, #{purchaserPk}, #{purchaserName}, #{supplierName},
+         #{supplierPk}, #{orderAmount}, #{insertTime}, #{receivablesAccount}, #{receivablesAccountName},
+         #{onlinePayGoodsPk}, #{onlinePayGoodsName}, #{shotName} ,#{returnUrl}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bOnlinepayRecord">
+    <![CDATA[
+        UPDATE b2b_onlinepay_record SET
+	        status = #{status} , serialNumber = #{serialNumber} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} ,
+	         supplierName = #{supplierName} , supplierPk = #{supplierPk} , orderAmount = #{orderAmount} , insertTime = #{insertTime} ,
+	          receivablesAccount = #{receivablesAccount} , receivablesAccountName = #{receivablesAccountName} ,
+	          onlinePayGoodsPk = #{onlinePayGoodsPk} , onlinePayGoodsName = #{onlinePayGoodsName} , shotName = #{shotName} ,returnUrl = #{returnUrl}
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bOnlinepayRecord">
+    <![CDATA[
+        DELETE FROM b2b_onlinepay_record WHERE
+        orderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND serialNumber = #{serialNumber}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderAmount)">
+				AND orderAmount = #{orderAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccount)">
+				AND receivablesAccount = #{receivablesAccount}			</if>
+			<if test="@Ognl@isNotEmpty(receivablesAccountName)">
+				AND receivablesAccountName = #{receivablesAccountName}			</if>
+			<if test="@Ognl@isNotEmpty(onlinePayGoodsPk)">
+				AND onlinePayGoodsPk = #{onlinePayGoodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(onlinePayGoodsName)">
+				AND onlinePayGoodsName = #{onlinePayGoodsName}			</if>
+			<if test="@Ognl@isNotEmpty(shotName)">
+				AND shotName = #{shotName}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_onlinepay_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where orderNumber = #{orderNumber}	</select>
+	<select id="getBySerialNumber" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where serialNumber = #{serialNumber}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where purchaserName = #{purchaserName}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where supplierName = #{supplierName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where supplierPk = #{supplierPk}	</select>
+	<select id="getByReceivablesAccount" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where receivablesAccount = #{receivablesAccount}	</select>
+	<select id="getByReceivablesAccountName" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where receivablesAccountName = #{receivablesAccountName}	</select>
+	<select id="getByOnlinePayGoodsPk" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where onlinePayGoodsPk = #{onlinePayGoodsPk}	</select>
+	<select id="getByOnlinePayGoodsName" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where onlinePayGoodsName = #{onlinePayGoodsName}	</select>
+	<select id="getByShotName" resultType="cn.cf.dto.B2bOnlinepayRecordDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_onlinepay_record where shotName = #{shotName}	</select>
+</mapper>
+

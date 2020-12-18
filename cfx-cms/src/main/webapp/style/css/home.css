@@ -1,0 +1,49 @@
+#containerscale{
+	width:903px;
+	margin-left:50px;
+	margin:0 auto;
+	margin-top:170px;
+}
+.imgscale{
+	float:left;
+	-webkit-transition-duration: 0.5s;
+	-moz-transition-duration: 0.5s;
+	-o-transition-duration: 0.5s;
+	-ms-transition-duration: 0.5s;
+	width:300px;
+	height:200px;
+	display:block;
+	text-align:center;
+    margin-right:1px;
+    margin-bottom:1px;
+	}
+    
+.btn{float:left;position:relative;width:300px;height:200px;margin-right:1px;margin-bottom:1px;border:none;outline:none;letter-spacing:.2em;font-weight:bold;cursor:pointer;overflow:hidden;user-select:none;color:#fff;}
+.bbg1{}
+.ripple {position:absolute;background:rgba(0,0,0,.15);border-radius:100%;transform:scale(0);pointer-events:none;}
+.ripple.show {animation:ripple .75s ease-out;}
+@keyframes ripple {to {transform:scale(2);opacity:0;}}
+.page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.active>a:hover>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.active>a>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.current>a:hover>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-menu li.current>a>i, .page-header .page-header-menu .hor-menu .navbar-nav>li .dropdown-submenu>a:after{
+    color:#32c5d2;
+}
+@media screen  and (min-width: 1920px) and (max-width: 2560px){      
+    #containerscale{margin-top:200px;}
+}
+@media screen and (min-width: 1600px) and (max-width: 1920px){      
+    #containerscale{margin-top:200px;}
+}
+@media screen and (min-width: 1500px) and (max-width: 1600px){      
+    #containerscale{margin-top:150px;}
+}
+@media screen and (min-width: 1440px) and (max-width: 1500px){      
+    #containerscale{margin-top:150px;}
+}
+@media screen and (min-width: 1400px) and (max-width: 1440px){      
+    #containerscale{margin-top:130px;}
+}
+@media screen and (min-width: 1366px) and (max-width: 1440px){      
+    #containerscale{margin-top:120px;}
+}
+@media screen and (min-width: 1200px) and (max-width: 1336px){      
+    #containerscale{margin-top:100px;}
+}

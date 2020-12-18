@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,orderPk,parentPk,orderStatus,isMatched,originalTotalFreight,presentTotalFreight,insertTime,updateTime,orderTime,logisticsCompanyPk,logisticsCompanyName,arrivedTimeStart,arrivedTimeEnd,fromAddressPk,fromCompanyName,fromAddress,fromContacts,fromContactsTel,fromProvincePk,fromProvinceName,fromCityPk,fromCityName,fromAreaPk,fromAreaName,fromTownPk,fromTownName,toAddressPk,toCompanyPk,toCompanyName,toAddress,toContacts,toContactsTel,toProvincePk,toProvinceName,toCityPk,toCityName,toAreaPk,toAreaName,toTownPk,toTownName,supplierInvoicePk,supplierInvoiceStatus,memberInvoicePk,memberInvoiceStatus,driver,driverPk,driverContact,carPk,carPlate,source,member,memberPk,abnormalRemark,remark,deliveryNumber,deliveryTime,signTime,isAbnormal,isConfirmed,paymentPk,paymentName,paymentTime,finishedTime,financialTime,purchaserName,purchaserPk,supplierName,supplierPk,invoicePk,invoiceName,invoiceTaxidNumber,invoiceRegPhone,invoiceBankAccount,invoiceBankName,invoiceProvinceName,invoiceCityName,invoiceAreaName,invoiceRegAddress,linePricePk,basisLinePrice,settleWeight,isSettleFreight,mandatePk,mandateUrl,orderNumber2
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_delivery_order (
+         pk, orderPk, parentPk, orderStatus, isMatched, originalTotalFreight, presentTotalFreight, insertTime, updateTime, orderTime, logisticsCompanyPk, logisticsCompanyName, arrivedTimeStart, arrivedTimeEnd, fromAddressPk, fromCompanyName, fromAddress, fromContacts, fromContactsTel, fromProvincePk, fromProvinceName, fromCityPk, fromCityName, fromAreaPk, fromAreaName, fromTownPk, fromTownName, toAddressPk, toCompanyPk, toCompanyName, toAddress, toContacts, toContactsTel, toProvincePk, toProvinceName, toCityPk, toCityName, toAreaPk, toAreaName, toTownPk, toTownName, supplierInvoicePk, supplierInvoiceStatus, memberInvoicePk, memberInvoiceStatus, driver, driverPk, driverContact, carPk, carPlate, source, member, memberPk, abnormalRemark, remark, deliveryNumber, deliveryTime, signTime, isAbnormal, isConfirmed, paymentPk, paymentName, paymentTime, finishedTime, financialTime, purchaserName, purchaserPk, supplierName, supplierPk,invoicePk, invoiceName, invoiceTaxidNumber, invoiceRegPhone, invoiceBankAccount, invoiceBankName, invoiceProvinceName, invoiceCityName, invoiceAreaName, invoiceRegAddress, linePricePk, basisLinePrice, settleWeight, isSettleFreight, mandatePk, mandateUrl, orderNumber2
+        ) VALUES (
+         #{pk}, #{orderPk}, #{parentPk}, #{orderStatus}, #{isMatched}, #{originalTotalFreight}, #{presentTotalFreight}, #{insertTime}, #{updateTime}, #{orderTime}, #{logisticsCompanyPk}, #{logisticsCompanyName}, #{arrivedTimeStart}, #{arrivedTimeEnd}, #{fromAddressPk}, #{fromCompanyName}, #{fromAddress}, #{fromContacts}, #{fromContactsTel}, #{fromProvincePk}, #{fromProvinceName}, #{fromCityPk}, #{fromCityName}, #{fromAreaPk}, #{fromAreaName}, #{fromTownPk}, #{fromTownName}, #{toAddressPk}, #{toCompanyPk}, #{toCompanyName}, #{toAddress}, #{toContacts}, #{toContactsTel}, #{toProvincePk}, #{toProvinceName}, #{toCityPk}, #{toCityName}, #{toAreaPk}, #{toAreaName}, #{toTownPk}, #{toTownName}, #{supplierInvoicePk}, #{supplierInvoiceStatus}, #{memberInvoicePk}, #{memberInvoiceStatus}, #{driver}, #{driverPk}, #{driverContact}, #{carPk}, #{carPlate}, #{source}, #{member}, #{memberPk}, #{abnormalRemark}, #{remark}, #{deliveryNumber}, #{deliveryTime}, #{signTime}, #{isAbnormal}, #{isConfirmed}, #{paymentPk}, #{paymentName}, #{paymentTime}, #{finishedTime}, #{financialTime}, #{purchaserName}, #{purchaserPk}, #{supplierName}, #{supplierPk}, #{invoicePk}, #{invoiceName}, #{invoiceTaxidNumber}, #{invoiceRegPhone}, #{invoiceBankAccount}, #{invoiceBankName}, #{invoiceProvinceName}, #{invoiceCityName}, #{invoiceAreaName}, #{invoiceRegAddress}, #{linePricePk}, #{basisLinePrice}, #{settleWeight}, #{isSettleFreight}, #{mandatePk}, #{mandateUrl}, #{orderNumber2}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LgDeliveryOrder">
+    <![CDATA[
+        UPDATE lg_delivery_order SET
+	        orderPk = #{orderPk} , parentPk = #{parentPk} , orderStatus = #{orderStatus} , isMatched = #{isMatched} , originalTotalFreight = #{originalTotalFreight} , presentTotalFreight = #{presentTotalFreight} , insertTime = #{insertTime} , updateTime = #{updateTime} , orderTime = #{orderTime} , logisticsCompanyPk = #{logisticsCompanyPk} , logisticsCompanyName = #{logisticsCompanyName} , arrivedTimeStart = #{arrivedTimeStart} , arrivedTimeEnd = #{arrivedTimeEnd} , fromAddressPk = #{fromAddressPk} , fromCompanyName = #{fromCompanyName} , fromAddress = #{fromAddress} , fromContacts = #{fromContacts} , fromContactsTel = #{fromContactsTel} , fromProvincePk = #{fromProvincePk} , fromProvinceName = #{fromProvinceName} , fromCityPk = #{fromCityPk} , fromCityName = #{fromCityName} , fromAreaPk = #{fromAreaPk} , fromAreaName = #{fromAreaName} , fromTownPk = #{fromTownPk} , fromTownName = #{fromTownName} , toAddressPk = #{toAddressPk} , toCompanyPk = #{toCompanyPk} , toCompanyName = #{toCompanyName} , toAddress = #{toAddress} , toContacts = #{toContacts} , toContactsTel = #{toContactsTel} , toProvincePk = #{toProvincePk} , toProvinceName = #{toProvinceName} , toCityPk = #{toCityPk} , toCityName = #{toCityName} , toAreaPk = #{toAreaPk} , toAreaName = #{toAreaName} , toTownPk = #{toTownPk} , toTownName = #{toTownName} , supplierInvoicePk = #{supplierInvoicePk} , supplierInvoiceStatus = #{supplierInvoiceStatus} , memberInvoicePk = #{memberInvoicePk} , memberInvoiceStatus = #{memberInvoiceStatus} , driver = #{driver} , driverPk = #{driverPk} , driverContact = #{driverContact} , carPk = #{carPk} , carPlate = #{carPlate} , source = #{source} , member = #{member} , memberPk = #{memberPk} , abnormalRemark = #{abnormalRemark} , remark = #{remark} , deliveryNumber = #{deliveryNumber} , deliveryTime = #{deliveryTime} , signTime = #{signTime} , isAbnormal = #{isAbnormal} , isConfirmed = #{isConfirmed} , paymentPk = #{paymentPk} , paymentName = #{paymentName} , paymentTime = #{paymentTime} , finishedTime = #{finishedTime} , financialTime = #{financialTime} , purchaserName = #{purchaserName} , purchaserPk = #{purchaserPk} , supplierName = #{supplierName} , supplierPk = #{supplierPk}, invoicePk = #{invoicePk} , invoiceName = #{invoiceName} , invoiceTaxidNumber = #{invoiceTaxidNumber} , invoiceRegPhone = #{invoiceRegPhone} , invoiceBankAccount = #{invoiceBankAccount} , invoiceBankName = #{invoiceBankName} , invoiceProvinceName = #{invoiceProvinceName} , invoiceCityName = #{invoiceCityName} , invoiceAreaName = #{invoiceAreaName} , invoiceRegAddress = #{invoiceRegAddress} , linePricePk = #{linePricePk} , basisLinePrice = #{basisLinePrice} , settleWeight = #{settleWeight} , isSettleFreight = #{isSettleFreight} , mandatePk = #{mandatePk} , mandateUrl = #{mandateUrl} , orderNumber2 = #{orderNumber2}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LgDeliveryOrder">
+    <![CDATA[
+        DELETE FROM lg_delivery_order WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(orderPk)">
+				AND orderPk = #{orderPk}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}			</if>
+			<if test="@Ognl@isNotEmpty(isMatched)">
+				AND isMatched = #{isMatched}			</if>
+			<if test="@Ognl@isNotEmpty(originalTotalFreight)">
+				AND originalTotalFreight = #{originalTotalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(presentTotalFreight)">
+				AND presentTotalFreight = #{presentTotalFreight}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(orderTimeBegin)">
+				AND orderTime >= #{orderTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(orderTimeEnd)">
+				AND orderTime &lt;= #{orderTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsCompanyPk)">
+				AND logisticsCompanyPk = #{logisticsCompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(logisticsCompanyName)">
+				AND logisticsCompanyName = #{logisticsCompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(arrivedTimeStartBegin)">
+				AND arrivedTimeStart >= #{arrivedTimeStartBegin}			</if>
+			<if test="@Ognl@isNotEmpty(arrivedTimeStartEnd)">
+				AND arrivedTimeStart &lt;= #{arrivedTimeStartEnd}			</if>
+			<if test="@Ognl@isNotEmpty(arrivedTimeEndBegin)">
+				AND arrivedTimeEnd >= #{arrivedTimeEndBegin}			</if>
+			<if test="@Ognl@isNotEmpty(arrivedTimeEndEnd)">
+				AND arrivedTimeEnd &lt;= #{arrivedTimeEndEnd}			</if>
+			<if test="@Ognl@isNotEmpty(fromAddressPk)">
+				AND fromAddressPk = #{fromAddressPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromCompanyName)">
+				AND fromCompanyName = #{fromCompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(fromAddress)">
+				AND fromAddress = #{fromAddress}			</if>
+			<if test="@Ognl@isNotEmpty(fromContacts)">
+				AND fromContacts = #{fromContacts}			</if>
+			<if test="@Ognl@isNotEmpty(fromContactsTel)">
+				AND fromContactsTel = #{fromContactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(fromProvincePk)">
+				AND fromProvincePk = #{fromProvincePk}			</if>
+			<if test="@Ognl@isNotEmpty(fromProvinceName)">
+				AND fromProvinceName = #{fromProvinceName}			</if>
+			<if test="@Ognl@isNotEmpty(fromCityPk)">
+				AND fromCityPk = #{fromCityPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromCityName)">
+				AND fromCityName = #{fromCityName}			</if>
+			<if test="@Ognl@isNotEmpty(fromAreaPk)">
+				AND fromAreaPk = #{fromAreaPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromAreaName)">
+				AND fromAreaName = #{fromAreaName}			</if>
+			<if test="@Ognl@isNotEmpty(fromTownPk)">
+				AND fromTownPk = #{fromTownPk}			</if>
+			<if test="@Ognl@isNotEmpty(fromTownName)">
+				AND fromTownName = #{fromTownName}			</if>
+			<if test="@Ognl@isNotEmpty(toAddressPk)">
+				AND toAddressPk = #{toAddressPk}			</if>
+			<if test="@Ognl@isNotEmpty(toCompanyPk)">
+				AND toCompanyPk = #{toCompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(toCompanyName)">
+				AND toCompanyName = #{toCompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(toAddress)">
+				AND toAddress = #{toAddress}			</if>
+			<if test="@Ognl@isNotEmpty(toContacts)">
+				AND toContacts = #{toContacts}			</if>
+			<if test="@Ognl@isNotEmpty(toContactsTel)">
+				AND toContactsTel = #{toContactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(toProvincePk)">
+				AND toProvincePk = #{toProvincePk}			</if>
+			<if test="@Ognl@isNotEmpty(toProvinceName)">
+				AND toProvinceName = #{toProvinceName}			</if>
+			<if test="@Ognl@isNotEmpty(toCityPk)">
+				AND toCityPk = #{toCityPk}			</if>
+			<if test="@Ognl@isNotEmpty(toCityName)">
+				AND toCityName = #{toCityName}			</if>
+			<if test="@Ognl@isNotEmpty(toAreaPk)">
+				AND toAreaPk = #{toAreaPk}			</if>
+			<if test="@Ognl@isNotEmpty(toAreaName)">
+				AND toAreaName = #{toAreaName}			</if>
+			<if test="@Ognl@isNotEmpty(toTownPk)">
+				AND toTownPk = #{toTownPk}			</if>
+			<if test="@Ognl@isNotEmpty(toTownName)">
+				AND toTownName = #{toTownName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierInvoicePk)">
+				AND supplierInvoicePk = #{supplierInvoicePk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierInvoiceStatus)">
+				AND supplierInvoiceStatus = #{supplierInvoiceStatus}			</if>
+			<if test="@Ognl@isNotEmpty(memberInvoicePk)">
+				AND memberInvoicePk = #{memberInvoicePk}			</if>
+			<if test="@Ognl@isNotEmpty(memberInvoiceStatus)">
+				AND memberInvoiceStatus = #{memberInvoiceStatus}			</if>
+			<if test="@Ognl@isNotEmpty(driver)">
+				AND driver = #{driver}			</if>
+			<if test="@Ognl@isNotEmpty(driverPk)">
+				AND driverPk = #{driverPk}			</if>
+			<if test="@Ognl@isNotEmpty(driverContact)">
+				AND driverContact = #{driverContact}			</if>
+			<if test="@Ognl@isNotEmpty(carPk)">
+				AND carPk = #{carPk}			</if>
+			<if test="@Ognl@isNotEmpty(carPlate)">
+				AND carPlate = #{carPlate}			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(abnormalRemark)">
+				AND abnormalRemark = #{abnormalRemark}			</if>
+			<if test="@Ognl@isNotEmpty(remark)">
+				AND remark = #{remark}			</if>
+			<if test="@Ognl@isNotEmpty(deliveryNumber)">
+				AND deliveryNumber = #{deliveryNumber}			</if>
+			<if test="@Ognl@isNotEmpty(deliveryTimeBegin)">
+				AND deliveryTime >= #{deliveryTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(deliveryTimeEnd)">
+				AND deliveryTime &lt;= #{deliveryTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(signTimeBegin)">
+				AND signTime >= #{signTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(signTimeEnd)">
+				AND signTime &lt;= #{signTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isAbnormal)">
+				AND isAbnormal = #{isAbnormal}			</if>
+			<if test="@Ognl@isNotEmpty(isConfirmed)">
+				AND isConfirmed = #{isConfirmed}			</if>
+			<if test="@Ognl@isNotEmpty(paymentPk)">
+				AND paymentPk = #{paymentPk}			</if>
+			<if test="@Ognl@isNotEmpty(paymentName)">
+				AND paymentName = #{paymentName}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeBegin)">
+				AND paymentTime >= #{paymentTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(paymentTimeEnd)">
+				AND paymentTime &lt;= #{paymentTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(finishedTimeBegin)">
+				AND finishedTime >= #{finishedTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(finishedTimeEnd)">
+				AND finishedTime &lt;= #{finishedTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(financialTimeBegin)">
+				AND financialTime >= #{financialTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(financialTimeEnd)">
+				AND financialTime &lt;= #{financialTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(invoicePk)">
+				AND invoicePk = #{invoicePk}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceName)">
+				AND invoiceName = #{invoiceName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceTaxidNumber)">
+				AND invoiceTaxidNumber = #{invoiceTaxidNumber}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceRegPhone)">
+				AND invoiceRegPhone = #{invoiceRegPhone}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceBankAccount)">
+				AND invoiceBankAccount = #{invoiceBankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceBankName)">
+				AND invoiceBankName = #{invoiceBankName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceProvinceName)">
+				AND invoiceProvinceName = #{invoiceProvinceName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceCityName)">
+				AND invoiceCityName = #{invoiceCityName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceAreaName)">
+				AND invoiceAreaName = #{invoiceAreaName}			</if>
+			<if test="@Ognl@isNotEmpty(invoiceRegAddress)">
+				AND invoiceRegAddress = #{invoiceRegAddress}			</if>
+			<if test="@Ognl@isNotEmpty(linePricePk)">
+				AND linePricePk = #{linePricePk}			</if>
+			<if test="@Ognl@isNotEmpty(basisLinePrice)">
+				AND basisLinePrice = #{basisLinePrice}			</if>
+			<if test="@Ognl@isNotEmpty(settleWeight)">
+				AND settleWeight = #{settleWeight}			</if>
+			<if test="@Ognl@isNotEmpty(isSettleFreight)">
+				AND isSettleFreight = #{isSettleFreight}			</if>
+			<if test="@Ognl@isNotEmpty(mandatePk)">
+				AND mandatePk = #{mandatePk}			</if>
+			<if test="@Ognl@isNotEmpty(mandateUrl)">
+				AND mandateUrl = #{mandateUrl}			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber2)">
+				AND orderNumber2 = #{orderNumber2}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM lg_delivery_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where pk = #{pk}	</select>
+	<select id="getByOrderPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where orderPk = #{orderPk}	</select>
+	<select id="getByParentPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where parentPk = #{parentPk}	</select>
+	<select id="getByLogisticsCompanyPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where logisticsCompanyPk = #{logisticsCompanyPk}	</select>
+	<select id="getByLogisticsCompanyName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where logisticsCompanyName = #{logisticsCompanyName}	</select>
+	<select id="getByFromAddressPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromAddressPk = #{fromAddressPk}	</select>
+	<select id="getByFromCompanyName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromCompanyName = #{fromCompanyName}	</select>
+	<select id="getByFromAddress" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromAddress = #{fromAddress}	</select>
+	<select id="getByFromContacts" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromContacts = #{fromContacts}	</select>
+	<select id="getByFromContactsTel" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromContactsTel = #{fromContactsTel}	</select>
+	<select id="getByFromProvincePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromProvincePk = #{fromProvincePk}	</select>
+	<select id="getByFromProvinceName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromProvinceName = #{fromProvinceName}	</select>
+	<select id="getByFromCityPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromCityPk = #{fromCityPk}	</select>
+	<select id="getByFromCityName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromCityName = #{fromCityName}	</select>
+	<select id="getByFromAreaPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromAreaPk = #{fromAreaPk}	</select>
+	<select id="getByFromAreaName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromAreaName = #{fromAreaName}	</select>
+	<select id="getByFromTownPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromTownPk = #{fromTownPk}	</select>
+	<select id="getByFromTownName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where fromTownName = #{fromTownName}	</select>
+	<select id="getByToAddressPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toAddressPk = #{toAddressPk}	</select>
+	<select id="getByToCompanyPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toCompanyPk = #{toCompanyPk}	</select>
+	<select id="getByToCompanyName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toCompanyName = #{toCompanyName}	</select>
+	<select id="getByToAddress" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toAddress = #{toAddress}	</select>
+	<select id="getByToContacts" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toContacts = #{toContacts}	</select>
+	<select id="getByToContactsTel" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toContactsTel = #{toContactsTel}	</select>
+	<select id="getByToProvincePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toProvincePk = #{toProvincePk}	</select>
+	<select id="getByToProvinceName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toProvinceName = #{toProvinceName}	</select>
+	<select id="getByToCityPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toCityPk = #{toCityPk}	</select>
+	<select id="getByToCityName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toCityName = #{toCityName}	</select>
+	<select id="getByToAreaPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toAreaPk = #{toAreaPk}	</select>
+	<select id="getByToAreaName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toAreaName = #{toAreaName}	</select>
+	<select id="getByToTownPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toTownPk = #{toTownPk}	</select>
+	<select id="getByToTownName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where toTownName = #{toTownName}	</select>
+	<select id="getBySupplierInvoicePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where supplierInvoicePk = #{supplierInvoicePk}	</select>
+	<select id="getByMemberInvoicePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where memberInvoicePk = #{memberInvoicePk}	</select>
+	<select id="getByDriver" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where driver = #{driver}	</select>
+	<select id="getByDriverPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where driverPk = #{driverPk}	</select>
+	<select id="getByDriverContact" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where driverContact = #{driverContact}	</select>
+	<select id="getByCarPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where carPk = #{carPk}	</select>
+	<select id="getByCarPlate" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where carPlate = #{carPlate}	</select>
+	<select id="getByMember" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where member = #{member}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where memberPk = #{memberPk}	</select>
+	<select id="getByAbnormalRemark" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where abnormalRemark = #{abnormalRemark}	</select>
+	<select id="getByRemark" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where remark = #{remark}	</select>
+	<select id="getByDeliveryNumber" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where deliveryNumber = #{deliveryNumber}	</select>
+	<select id="getByPaymentPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where paymentPk = #{paymentPk}	</select>
+	<select id="getByPaymentName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where paymentName = #{paymentName}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where purchaserName = #{purchaserName}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where purchaserPk = #{purchaserPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where supplierName = #{supplierName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where supplierPk = #{supplierPk}	</select>
+	<select id="getByInvoicePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoicePk = #{invoicePk}	</select>
+	<select id="getByInvoiceName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceName = #{invoiceName}	</select>
+	<select id="getByInvoiceTaxidNumber" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceTaxidNumber = #{invoiceTaxidNumber}	</select>
+	<select id="getByInvoiceRegPhone" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceRegPhone = #{invoiceRegPhone}	</select>
+	<select id="getByInvoiceBankAccount" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceBankAccount = #{invoiceBankAccount}	</select>
+	<select id="getByInvoiceBankName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceBankName = #{invoiceBankName}	</select>
+	<select id="getByInvoiceProvinceName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceProvinceName = #{invoiceProvinceName}	</select>
+	<select id="getByInvoiceCityName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceCityName = #{invoiceCityName}	</select>
+	<select id="getByInvoiceAreaName" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceAreaName = #{invoiceAreaName}	</select>
+	<select id="getByInvoiceRegAddress" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where invoiceRegAddress = #{invoiceRegAddress}	</select>
+	<select id="getByLinePricePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where linePricePk = #{linePricePk}	</select>
+	<select id="getByMandatePk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where mandatePk = #{mandatePk}	</select>
+	<select id="getByMandateUrl" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where mandateUrl = #{mandateUrl}	</select>
+	<select id="getByOrderNumber2" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM lg_delivery_order where orderNumber2 = #{orderNumber2}	</select>
+		
+	
+</mapper>
+

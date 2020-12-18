@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,mobile,password,companyPk,companyName,insertTime,auditStatus,isVisable,rolePk,auditTime,
+		auditPk,updateTime,registerSource,invitationCode,beInvitedCode,loginTime,headPortrait,
+		refuseReason,employeeNumber,employeeName,parentPk,level,experience,shell,feedTime
+	    ]]>
+	</sql>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+				<if test="auditStatus >0" >
+          			and m.auditStatus = #{auditStatus}
+      			</if>
+
+      			<if test="level!=null and level !=''">
+					and m.level = #{level}
+				</if>
+				<if test="levelName!=null and levelName !=''">
+					and m.levelName like '%${levelName}%'
+				</if>
+      			
+      			
+      			
+      			<if test="feedStartTime!=null and feedStartTime !=''">
+					<![CDATA[ and str_to_date(m.feedTime, '%Y-%m-%d') >= #{feedStartTime} ]]>
+				</if>
+				<if test="feedEndTime!=null and feedEndTime !=''">
+					<![CDATA[ and str_to_date(m.feedTime, '%Y-%m-%d') <= #{feedEndTime} ]]>
+				</if>
+      			
+				<if test="isVisable!=null and isVisable !=''">
+					and m.isVisable = #{isVisable}
+				</if>
+				<if test="companyName!=null and companyName !=''">
+					and m.companyName like '%${companyName}%'
+				</if>
+				<if test="mobile!=null and mobile !=''">
+					and m.mobile  like '%${mobile}%'
+				</if>
+				<if test="employeeName!=null and employeeName !=''">
+					and m.employeeName  like '%${employeeName}%'
+				</if>
+				<if test="employeeNumber!=null and employeeNumber !=''">
+					and m.employeeNumber  like '%${employeeNumber}%'
+				</if>
+				<if test="insertStartTime!=null and insertStartTime !=''">
+					<![CDATA[ and str_to_date(m.insertTime, '%Y-%m-%d') >= #{insertStartTime} ]]>
+				</if>
+				<if test="insertEndTime!=null and insertEndTime !=''">
+					<![CDATA[ and str_to_date(m.insertTime, '%Y-%m-%d') <= #{insertEndTime} ]]>
+				</if>
+				<if test="insertTime!=null and insertTime !=''">
+					<![CDATA[ and m.insertTime <= #{insertTime} ]]>
+				</if>
+				<if test="updateStartTime!=null and updateStartTime !=''">
+					<![CDATA[ and str_to_date(m.updateTime, '%Y-%m-%d') >= #{updateStartTime} ]]>
+				</if>
+				<if test="updateEndTime!=null and updateEndTime !=''">
+					<![CDATA[ and str_to_date(m.updateTime, '%Y-%m-%d') <= #{updateEndTime} ]]>
+				</if>
+				<if test="auditStartTime!=null and auditStartTime !=''">
+					<![CDATA[ and str_to_date(m.auditTime, '%Y-%m-%d') >= #{auditStartTime} ]]>
+				</if>
+				<if test="auditEndTime!=null and auditEndTime !=''">
+					<![CDATA[ and str_to_date(m.auditTime, '%Y-%m-%d') <= #{auditEndTime} ]]>
+				</if>
+				<if test="registerSource !=null and registerSource !=''">
+					and m.registerSource = #{registerSource}
+				</if>
+		</where>
+	</sql>
+	<delete id="delB2bMemberComponyByPk" parameterType="java.lang.String">
+    <![CDATA[
+        delete FROM b2b_customer_salesman where memberPk = #{memberPk}
+    ]]>
+	</delete>
+	<select id="searchB2bMemberList" parameterType="java.util.Map" 	resultType="cn.cf.dto.B2bMemberExtDto">
+	SELECT
+		m.pk AS pk,
+		m.companyPk AS companyPk,
+		m.auditStatus AS auditStatus,
+		m.isVisable AS isVisable,(
+			CASE m.auditStatus
+			WHEN 1 THEN
+				'待审核'
+			WHEN 2 THEN
+				'审核通过'
+			WHEN 3 THEN
+				'审核不通过'
+			END
+		) auditStatusName,
+		(CASE m.isVisable WHEN 1 THEN '启用' WHEN 2 THEN '禁用' END) isVisableName,
+		m.insertTime AS insertTime,
+		m.updateTime AS updateTime,
+		m.auditTime AS auditTime,
+		m.rolePk AS rolePk,
+		IFNULL(m.registerSource, '') AS registerSource,
+		<choose>
+			<when test="memberTelCol == 'OPER_CM_MEMBER_COL_TEL'">
+				INSERT(m.MOBILE, 4, 4, '****')  AS mobile,
+			</when>
+			<when test="memberTelCol == 'MARKET_CM_MEMBER_COL_TEL'">
+				INSERT(m.MOBILE, 4, 4, '****')  AS mobile,
+			</when>
+			<otherwise>
+				m.MOBILE AS mobile,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyNameCol == 'OPER_CM_MEMBER_COL_COMPANYNAME'">
+				INSERT(m.companyName, 3, 5, '*****') AS companyName,
+			</when>
+			<when test="companyNameCol == 'MARKET_CM_MEMBER_COL_COMPANYNAME'">
+				INSERT(m.companyName, 3, 5, '*****') AS companyName,
+			</when>
+			<otherwise>
+				m.companyName AS companyName,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="memberAccCol == 'OPER_CM_MEMBER_COL_MEMBERACC'">
+				'*****' AS employeeNumber,
+			</when>
+			<when test="memberAccCol == 'MARKET_CM_MEMBER_COL_MEMBERACC'">
+				'*****' AS employeeNumber,
+			</when>
+			<otherwise>
+				m.employeeNumber AS employeeNumber,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="memberNameCol == 'OPER_CM_MEMBER_COL_MEMBERNAME'">
+				INSERT(m.employeeName, 1, 1, '*') AS employeeName,
+			</when>
+			<when test="memberNameCol == 'MARKET_CM_MEMBER_COL_MEMBERNAME'">
+				INSERT(m.employeeName, 1, 1, '*') AS employeeName,
+			</when>
+			<otherwise>
+				m.employeeName AS employeeName,
+			</otherwise>
+		</choose>
+		m.level AS level,m.experience AS experience,m.shell AS shell,
+		m.levelName,m.feedTime
+
+	FROM
+		b2b_member m
+		
+	<include refid="searchGridWhere" />
+	<if test="orderName != null">
+			order by ${orderName} ${orderType}
+	</if>
+	<if test="limit != null">
+			limit #{start}, #{limit}
+	</if>
+  </select>
+  <select id="searchB2bMemberCounts" parameterType="java.util.Map" 	resultType="int">
+  	SELECT
+		count(1)
+	FROM
+		b2b_member m
+	<include refid="searchGridWhere" />
+  </select>
+  <update id="updateMemberByCompanyPk" parameterType="java.util.Map">
+        	UPDATE b2b_member
+		<set>
+        	<if test="auditStatus != null and auditStatus !=''">
+        		auditStatus = #{auditStatus},
+        	</if>
+        	<if test="isVisable != null and isVisable !=''">
+        		 isVisable = #{isVisable}
+        	</if>
+        	<if test="companyName != null and companyName !=''">
+        		 companyName = #{companyName}
+        	</if>
+		</set>
+				where companyPk = #{companyPk}
+		</update>
+  
+  	<select id="getByPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where pk = #{pk}
+	</select>
+	
+	<update id="update" parameterType="cn.cf.model.B2bMember">
+		UPDATE b2b_member
+		<set>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="companyPk != null ">
+				companyPk = #{companyPk},
+			</if>
+			<if test="companyName != null ">
+				companyName = #{companyName},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				auditStatus = #{auditStatus},
+				auditPk = #{auditPk},
+				auditTime =now(),
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="updateTime != null ">
+				updateTime = #{updateTime},
+			</if>
+			<if test="registerSource != null and registerSource != ''">
+				registerSource = #{registerSource},
+			</if>
+			<if test="invitationCode != null and invitationCode != ''">
+				invitationCode = #{invitationCode},
+			</if>
+			<if test="beInvitedCode != null and beInvitedCode != ''">
+				beInvitedCode = #{beInvitedCode},
+			</if>
+			<if test="headPortrait != null and headPortrait != ''">
+				headPortrait = #{headPortrait},
+			</if>
+			<if test="refuseReason!=null and refuseReason!=''">
+				refuseReason=#{refuseReason},
+			</if>
+			<if test="employeeNumber != null ">
+				employeeNumber = #{employeeNumber},
+			</if>
+			<if test="employeeName!=null  ">
+				employeeName=#{employeeName},
+			</if>
+			<if test="parentPk!=null ">
+				parentPk=#{parentPk},
+			</if>
+			<if test="level != null and level != '' ">
+				level=#{level},
+			</if>
+			<if test="experience != null ">
+				experience = #{experience},
+			</if>
+			<if test="feedTime != null ">
+				feedTime = #{feedTime},
+			</if>
+			<if test="shell != null ">
+				shell=#{shell}
+			</if>
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+	
+	<select id="searchMemberByEmployeeNumber" resultType="cn.cf.dto.B2bMemberExtDto">
+
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		WHERE m.companyPk = #{companyPk} AND m.employeeNumber=#{employeeNumber} 
+	</select>
+	
+	<select id="getMemberByAdminList" parameterType="java.util.Map" resultType="cn.cf.dto.B2bMemberExtDto">
+  		SELECT
+			m.pk,
+		<choose>
+			<when test="sAdminShowMobile == 'OPER_CM_PURCHASER_COL_SETADMINMOBILE'">
+				INSERT (m.mobile, 4, 4, '****') as mobile,
+			</when>
+			<when test="sAdminShowMobile == 'OPER_CM_SUPPLIER_COL_SETADMINMOBILE'">
+				INSERT (m.mobile, 4, 4, '****') as mobile,
+			</when>
+			<when test="sAdminShowMobile == 'MARKET_CM_PURCHASER_COL_SETADMINMOBILE'">
+				INSERT (m.mobile, 4, 4, '****') as mobile,
+			</when>
+			<when test="sAdminShowMobile == 'MARKET_CM_SUPPLIER_COL_SETADMINMOBILE'">
+				INSERT (m.mobile, 4, 4, '****') as mobile,
+			</when>
+			<otherwise>
+				m.mobile,
+			</otherwise>
+		</choose>
+		mr.rolePk rolePk,group_concat(r.companyType separator ';') AS companyTypeArr,
+			group_concat(mr.rolePk separator ';') AS rolePkArr
+		FROM
+			b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk = r.pk
+		where 1= 1 
+			and m.companyPk = #{companyPk}
+				<if test="mobile!=null and  mobile!=''">
+			and	m.mobile like '%${mobile}%'
+			</if>
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY
+			m.pk 
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+  </select>
+
+	<select id="memberCountByInvitationCode" resultType="int">
+		select count(*) from b2b_member where invitationCode = #{invitationCode}
+	</select>
+  
+  <select id="getMemberByAdminCount" parameterType="java.util.Map"
+		resultType="int">
+		
+		SELECT
+			COUNT(DISTINCT m.mobile)
+		FROM
+			b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk = r.pk
+		where 1= 1 
+			and m.companyPk = #{companyPk}
+			<if test="mobile!=null and  mobile!=''">
+			and	m.mobile like '%${mobile}%'
+			</if>
+		and m.auditStatus=2
+		and m.isVisable=1
+  </select>
+
+
+
+	<select id="searchMemberByCompanyPkAndTelAndName" parameterType="java.util.Map"
+			resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		<include refid="columns" />
+		FROM  b2b_member WHERE
+			isVisable = 1
+		<if test="companyPk != null and companyPk != ''">
+			AND companyPk = #{companyPk}
+		</if>
+		<if test="companyName != null and companyName != ''">
+			AND companyName = #{companyName}
+		</if>
+		<if test="mobile != null and mobile!= ''">
+			AND mobile = #{mobile}
+		</if>
+	</select>
+	<select id="searchAdminByCompanyPk" parameterType="java.lang.String" 	resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr on m.pk=mr.memberPk
+		LEFT JOIN b2b_role r ON  mr.rolePk=r.pk
+		WHERE
+		r.companyType = 0
+		AND m.companyPk =  #{companyPk}
+		GROUP BY m.pk
+
+	</select>
+
+	<select id="getByRoleAndCompanyPk" resultType="cn.cf.dto.B2bMemberDto">
+
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN sys_sms_role sr ON mr.rolePk = sr.rolePk
+		LEFT JOIN sys_sms_template st on sr.smsName=st.`name`
+		WHERE
+		st.name=#{name}
+		AND m.companyPk = #{companyPk}
+		GROUP BY m.pk
+	</select>
+
+
+	<select id="searchAdminsByCompanyPk" resultType="cn.cf.dto.B2bMemberDto">
+
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr on m.pk=mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk=r.pk
+		WHERE
+		r.companyType = 0
+		AND m.auditStatus = 2
+		AND m.isVisable=1
+		AND m.companyPk = #{companyPk}
+		GROUP BY m.pk
+	</select>
+
+
+
+	<select id="searchAdminsByStorePK" parameterType="java.lang.String"
+			resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk = r.pk
+		WHERE
+		r.companyType = 0
+		AND m.companyPk = (
+		SELECT
+		companyPk
+		FROM
+		b2b_store
+		WHERE
+		pk = #{storePk}
+		)
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY
+		m.pk
+
+	</select>
+
+
+
+
+
+	<select id="searchAdminByStorePK" parameterType="java.lang.String"
+			resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk = r.pk
+		WHERE
+		r.companyType = 0
+		AND m.companyPk = (
+		SELECT
+		companyPk
+		FROM
+		b2b_store
+		WHERE
+		pk = #{storePk}
+		)
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY
+		m.pk
+	</select>
+	
+	<select id = "searchOriginalDate"   resultType="java.lang.String" >
+		SELECT str_to_date(insertTime, '%Y-%m-%d') as date  FROM b2b_member ORDER BY insertTime  LIMIT 0,1
+	</select>
+	
+	<select id = "searchOriginalEnterTime"  resultType="java.lang.String" >
+	<![CDATA[
+	SELECT
+	str_to_date(enterTime, '%Y-%m-%d') AS date
+	FROM b2b_company 
+	WHERE  enterTime IS NOT NULL  AND enterTime <> '' 
+	ORDER BY  enterTime  LIMIT 0, 1
+	]]>
+	</select>
+	
+	<select id = "searchOriginalAuditTime"  resultType="java.lang.String" >
+	<![CDATA[
+	SELECT
+	str_to_date(auditTime, '%Y-%m-%d') AS date
+	FROM b2b_company 
+	WHERE  auditTime IS NOT NULL  AND auditTime <> '' 
+	ORDER BY  auditTime  LIMIT 0, 1
+	]]>
+	</select>
+	
+	<select id = "searchOriginalAuditSpTime"  resultType="java.lang.String" >
+	<![CDATA[
+	SELECT
+	str_to_date(auditSpTime, '%Y-%m-%d') AS date
+	FROM b2b_company 
+	WHERE  auditSpTime IS NOT NULL  AND auditSpTime <> '' 
+	ORDER BY  auditSpTime  LIMIT 0, 1
+	]]>
+	</select>
+
+	<select id = "searchOriginalInsertTime"  resultType="java.lang.String" >
+	<![CDATA[
+	SELECT
+	str_to_date(insertTime, '%Y-%m-%d') AS date
+	FROM b2b_company 
+	WHERE  insertTime IS NOT NULL  AND insertTime <> '' 
+	ORDER BY  insertTime  LIMIT 0, 1
+	]]>
+	</select>
+
+</mapper>
+

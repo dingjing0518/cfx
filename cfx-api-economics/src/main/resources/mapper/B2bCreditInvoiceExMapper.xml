@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditInvoiceDaoEx">
+
+
+	<!-- 根据条件删除 -->
+	<select id="deleteEx" resultType="java.lang.Integer">
+		DELETE FROM b2b_credit_invoice WHERE b2b_credit_invoice.`companyPk`=#{companyPk} and b2b_credit_invoice.`dataType`=#{dataType}
+		AND b2b_credit_invoice.billingDate &gt;= #{startDate} AND  b2b_credit_invoice.billingDate &lt;= #{endDate}
+	</select>
+    
+    
+</mapper>
+

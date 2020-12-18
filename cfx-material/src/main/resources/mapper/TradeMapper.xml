@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.TradeDao">
+
+		<select id="getByOrderNumber" resultType="cn.cf.entity.B2bOrderDtoMa">
+	SELECT
+		*
+		FROM b2b_order 
+		where orderNumber = #{orderNumber}
+	</select>
+	
+	<select id="getByContractNo" resultType="cn.cf.entity.B2bContractDtoMa">
+	SELECT
+		*
+		FROM b2b_contract 
+		where contractNo = #{contractNo}
+	</select>
+	
+	<select id="searchOrderGoodsList" resultType="cn.cf.entity.B2bOrderGoodsDtoMa"
+		parameterType="java.lang.String">
+		SELECT
+		o.*
+		FROM b2b_order_goods o
+		where 
+		orderNumber = #{orderNumber}
+		<!-- 此标识区分是否已经全部发货 -->	
+		<if test="flag != null">
+			and  o.afterWeight - o.weightShipped  >0
+		</if>
+		<if test="cancel != null">
+			and  o.orderStatus != -1
+		</if>
+		<if test="block!=null and block!='' ">
+		and o.block=#{block}
+		</if>
+		order by o.goodsPk desc
+	</select>
+	
+	
+	<update id="updateOrder" parameterType="cn.cf.model.B2bOrder">
+		
+        UPDATE b2b_order 
+		<set>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				 orderStatus = #{orderStatus},			
+			</if>
+				 paymentType = #{paymentType},		
+				 paymentName = #{paymentName},			
+				 paymentTime = #{paymentTime},
+				 economicsGoodsType = #{economicsGoodsType},	
+				 economicsGoodsName = #{economicsGoodsName},		
+				<if test="supplierInfo != null and supplierInfo !=''">
+					supplierInfo = #{supplierInfo},
+				</if>
+				<if test="ownAmount != null">
+					ownAmount = #{ownAmount}	
+				</if>	
+		</set>
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+	</update>
+	
+	<update id="updateChildOrderStatus">
+		update b2b_order_goods
+		set orderStatus = #{orderStatus}
+		where orderNumber = #{orderNumber}
+		and orderStatus !=-1
+	</update>
+	
+	<update id="updateContract">
+		update b2b_contract
+		<set>
+			<if test="contractStatus != null">
+				contractStatus = #{contractStatus},
+			</if>			
+				paymentName = #{paymentName},
+				paymentType = #{paymentType},
+				paymentTime = #{paymentTime},
+				economicsGoodsName = #{economicsGoodsName},
+				economicsGoodsType = #{economicsGoodsType},
+			<if test="supplierInfo != null and supplierInfo !=''">
+				supplierInfo = #{supplierInfo},
+			</if>
+			<if test="ownAmount != null">
+				ownAmount = #{ownAmount}	
+			</if>
+		</set>
+		where contractNo = #{contractNo}
+	</update>
+	
+		<update id="updateContractGoods">
+		update b2b_contract_goods
+		<set>
+			<if test="boxes != null">
+				boxes = #{boxes},
+			</if>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="freight != null">
+				freight = #{freight},
+			</if>
+			 
+			<if test="contractPrice != null">
+				contractPrice = #{contractPrice},
+			</if>
+			<if test="contractPrice != null">
+				contractPrice = #{contractPrice},
+			</if>
+			<if test="discount != null">
+				discount = #{discount},
+			</if>
+			<if test="isDelete != null">
+				isDelete = #{isDelete},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="weightShipped != null">
+				weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null">
+				boxesShipped = #{boxesShipped},
+			</if>
+			<if test="contractStatus != null">
+				contractStatus = #{contractStatus},
+			</if>
+		</set>
+		where contractNo = #{contractNo}
+	</update>
+	
+		<select id="getContractToOrder" resultType="cn.cf.entity.B2bOrderDtoMa">
+		select 
+			contractNo  as orderNumber,
+			contractStatus  as orderStatus,
+			purchaserPk,
+			purchaserInfo,
+			supplierPk,
+			supplierInfo,
+			orderAmount,
+			totalAmount as actualAmount,
+			employeePk,
+			salesman as employeeName,
+			salesmanNumber as employeeNumber,
+			insertTime,source,storePk,storeName,
+			member as memberName    
+		from b2b_contract where contractNo = #{contractNo} 
+	</select>
+	
+		<select id="getContractGoodsToOrder" resultType="cn.cf.entity.B2bOrderGoodsDtoMa">
+		SELECT
+			goodsType,
+			boxes as afterBoxes,
+			weight as afterWeight,
+			basicPrice as originalPrice,
+			contractPrice as presentPrice,
+			goodsInfo,
+			block
+		FROM
+			b2b_contract_goods
+		WHERE
+			contractNo = #{contractNo}
+	
+	</select>
+	
+	<select id="searchPayment" resultType="cn.cf.dto.B2bPaymentDto">
+		select * from b2b_payment where type = #{type}
+	</select>
+	
+		<update id="updateOrderGoods">
+		update b2b_order_goods
+		<set>
+			<if test="presentPrice != null">
+				presentPrice = #{presentPrice},
+			</if>
+			<if test="presentFreight != null">
+				presentFreight = #{presentFreight},
+			</if>
+			<if test="presentTotalFreight != null">
+				presentTotalFreight = #{presentTotalFreight},
+			</if>
+			<if test="weightShipped != null">
+				weightShipped = #{weightShipped},
+			</if>
+			<if test="boxesShipped != null">
+				boxesShipped = #{boxesShipped},
+			</if>
+			<if test="orderStatus != null">
+				orderStatus = #{orderStatus},
+			</if>
+			<if test="afterBoxes != null">
+				afterBoxes = #{afterBoxes},
+			</if>
+			<if test="afterWeight != null">
+				afterWeight = #{afterWeight},
+			</if>
+		</set>
+		where childOrderNumber = #{childOrderNumber}
+	</update>
+</mapper>

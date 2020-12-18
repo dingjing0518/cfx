@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.ManageAccountExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,account,password,name,email,isDelete,insertTime,rolePk,mobile,isVisable
+	    ]]>
+	</sql>
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(account)">
+				AND account = #{account}
+			</if>
+			<if test="@Ognl@isNotEmpty(password)">
+				AND password = #{password}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(email)">
+				AND email = #{email}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(rolePk)">
+				AND rolePk = #{rolePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+		</where>
+	</sql>
+
+	
+	<select id="getManageAccountByLoginName" parameterType="java.lang.String"
+		resultType="cn.cf.dto.ManageAccountExtDto">
+		select
+		<include refid="columns" />
+		from manage_account where account = #{account} and isDelete = 1 and isVisable = 1;
+	</select>
+	
+	<update id="updateIsVisableOrDelete" parameterType="cn.cf.model.ManageAccount">
+		UPDATE manage_account
+		<set>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+	<update id="updatePassword">
+		update  manage_account set `password`=#{password} where pk=#{pk}
+	</update>
+
+	<update id="updateManageAccount" parameterType="cn.cf.model.ManageAccount">
+		UPDATE manage_account
+		<set>
+			<if test="account != null and account != ''">
+				account = #{account},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="email != null and email != ''">
+				email = #{email},
+			</if>
+			<if test="rolePk != null and rolePk != ''">
+				rolePk = #{rolePk},
+			</if>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+	<update id="rePassword">
+		update manage_account set password = MD5('123456') where pk=#{pk}
+	</update>
+	
+	<select id="searchAccounts" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from manage_account where isDelete=1
+
+	</select>
+	
+	<select id="getAllAccountList" parameterType="java.util.Map"
+		resultType="cn.cf.dto.ManageAccountDto">
+		
+		select * from manage_account where 1=1 and isDelete = 1 and isVisable = 1 and account!='admin'
+	</select>
+
+	<select id="getAccountsByRolePk" parameterType="java.lang.String"
+			resultType="cn.cf.dto.ManageAccountDto">
+		select
+		<include refid="columns" />
+		from manage_account
+		where isDelete = 1 and isVisable = 1 and rolePk= #{rolePk}
+	</select>
+
+	<select id="searchAccountList" parameterType="java.util.Map"
+		resultType="cn.cf.dto.ManageAccountDto">
+		SELECT a.pk as pk, a.account as account,a.`name` as name,a.mobile as
+		mobile, a.email as email,a.isDelete as isDelete, a.rolePk as rolePk
+		,r.`name` AS roleName ,a.isVisable as isVisable,a.insertTime AS insertTime from  manage_account
+		a
+		LEFT JOIN manage_role r on a.rolePk=r.pk
+		where a.isDelete=1
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start}, #{limit}
+		</if>
+	</select>
+	
+		<select id="getOnlineAccount" resultType="cn.cf.entity.ManageAccount">
+		SELECT
+		m.pk,
+		m.NAME
+		FROM
+		manage_account m
+		WHERE
+		(
+		SELECT
+		count(1)
+		FROM
+		marketing_personnel p
+		WHERE
+		m.pk= p.accountPk  AND p.isdelete=1
+		) = 0
+		and m.isDelete = 1
+		AND m.isVisable = 1
+		AND m.name!= "admin"
+	</select>
+
+</mapper>
+

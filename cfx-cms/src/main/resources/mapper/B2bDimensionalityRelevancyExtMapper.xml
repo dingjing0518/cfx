@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityRelevancyExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,dimenCategory,dimenName,dimenType,dimenTypeName,isDelete,isVisable,insertTime,updateTime,linkUrl
+	    ]]>
+	</sql>
+	<update id="updateDimenRe" parameterType="cn.cf.dto.B2bDimensionalityRelevancyExtDto">
+		UPDATE b2b_dimensionality_relevancy
+		<set>
+		<if test="dimenCategory != null and dimenCategory != ''">
+			dimenCategory = #{dimenCategory},
+		</if>
+		<if test="dimenName != null and dimenName != ''">
+			dimenName = #{dimenName},
+		</if>
+		<if test="dimenType != null and dimenType != ''">
+			dimenType = #{dimenType},
+		</if>
+		<if test="dimenTypeName != null and dimenTypeName != ''">
+			dimenTypeName = #{dimenTypeName},
+		</if>
+		<if test="isDelete != null and isDelete != ''">
+			isDelete = #{isDelete},
+		</if>
+		<if test="isVisable != null and isVisable != ''">
+			isVisable = #{isVisable},
+		</if>
+		<if test="linkUrl != null and linkUrl != ''">
+			linkUrl = #{linkUrl},
+		</if>
+			updateTime = NOW()
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime, '%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime, '%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+			<if test="@Ognl@isNotEmpty(linkUrl)">
+				AND linkUrl = #{linkUrl}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_dimensionality_relevancy
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bDimensionalityRelevancyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType} 
+		</if>
+		<if test="limit != null">
+			limit  #{start}, #{limit}
+		</if>
+	</select>
+	
+	<select id="isExistName" resultType="cn.cf.dto.B2bDimensionalityRelevancyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where isDelete=1 and pk !=#{pk} and dimenName = #{dimenName} and dimenTypeName = #{dimenTypeName}
+		</select>
+		
+		
+		<select id="getCategoryNamePk" resultType="cn.cf.dto.B2bDimensionalityRelevancyExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_relevancy where isDelete=1 and dimenCategory =#{dimenCategory} and dimenType = #{dimenType}
+		</select>
+		
+		
+</mapper>
+

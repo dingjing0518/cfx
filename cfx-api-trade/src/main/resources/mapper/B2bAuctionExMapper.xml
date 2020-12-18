@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bAuctionDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,auctionName,insertTime,updateTime,startTime,endTime,isDelete,isVisable,sort,storePk
+	    ]]>
+	</sql>
+
+	<!-- 更新部分字段 -->
+	<update id="updateEx" parameterType="cn.cf.model.B2bAuction">
+		UPDATE b2b_auction
+		<set>
+			<if test="auctionName != null and auctionName !=''">
+				auctionName = #{auctionName} ,
+			</if>
+			<if test="insertTime != null  ">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="updateTime != null ">
+				updateTime = #{updateTime} ,
+			</if>
+			<if test="startTime != null and startTime !=''">
+				startTime = #{startTime} ,
+			</if>
+			<if test="endTime != null and endTime !=''">
+				endTime = #{endTime} ,
+			</if>
+			<if test="isDelete != null and isDelete !=''">
+				isDelete = #{isDelete} ,
+			</if>
+			<if test="isVisable != null and isVisable !=''">
+				isVisable = #{isVisable} ,
+			</if>
+			<if test="sort != null and sort !=''">
+				sort = #{sort} ,
+			</if>
+			<if test="storePk != null and storePk !=''">
+				storePk = #{storePk} ,
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+
+
+	<!-- 存在性验证 -->
+	<select id="searchEntity" parameterType="cn.cf.dto.B2bAuctionDto"
+		resultType="int">
+		select count(1) from b2b_auction where 1=1
+		<if test="@Ognl@isNotEmpty(pk)">
+			AND pk != #{pk}
+		</if>
+		<if test="@Ognl@isNotEmpty(startTime)">
+			AND startTime = #{startTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(endTime)">
+			AND endTime = #{endTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(storePk)">
+			AND storePk = #{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(isDelete)">
+			AND isDelete = #{isDelete}
+		</if>
+	</select>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(auctionName)">
+				AND auctionName = #{auctionName}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="updateTimeBegin !=null and updateTimeBegin !=''">
+                and updateTime &gt;=CONCAT(#{updateTimeBegin},' 00:00:00')
+            </if>
+            <if test="updateTimeEnd !=null and updateTimeEnd !=''">
+                and updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+            </if>	
+			<if test="@Ognl@isNotEmpty(startTime)">
+				AND startTime = #{startTime}			</if>
+			<if test="@Ognl@isNotEmpty(endTime)">
+				AND endTime = #{endTime}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+		</where>
+	</sql>
+
+	<!-- 竞拍场次管理页签数量 -->
+	<select id="searchAuctionListCount" resultType="map">
+		SELECT COUNT(1) AS allNum,
+		IFNULL(
+		SUM(
+		CASE isVisable
+		WHEN 1 THEN 1 ELSE 0 END
+		),
+		0
+		) 
+		AS visableNum,
+		IFNULL(
+		SUM(
+		CASE isVisable
+		WHEN 2
+		THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS forbiddenNum
+		FROM
+		b2b_auction 
+		<include refid="searchGridWhere" />
+	</select>
+
+
+</mapper>
+

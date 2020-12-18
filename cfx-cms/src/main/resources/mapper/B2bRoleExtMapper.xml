@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bRoleExtDao">
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,isDelete,isVisable,sort,companyType
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}			</if>
+		</where>
+	</sql>
+		<select id="searchGridExt" resultType="cn.cf.dto.B2bRoleExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_role
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start != null">
+		limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="getRoleList" resultType="cn.cf.dto.B2bRoleExtDto">
+		SELECT
+			r.pk,
+			r. NAME,
+			IFNULL(m.rolePk ,-1) AS isRole,r.companyType
+		FROM
+			b2b_role r
+		LEFT JOIN (
+			SELECT
+				mr.rolePk
+			FROM
+				b2b_member_role mr
+			LEFT JOIN b2b_member m ON mr.memberPk = m.pk
+			WHERE
+				m.pk = #{memberPk}
+		) m ON r.pk = m.rolePk 
+		where r.isDelete = 1 and 
+		r.isVisable = 1 and r.companyType != 0
+		<if test="start != null">
+		limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="getRoleCount" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			b2b_role r
+		LEFT JOIN (
+			SELECT
+				mr.rolePk
+			FROM
+				b2b_member_role mr
+			LEFT JOIN b2b_member m ON mr.memberPk = m.pk
+			WHERE
+				m.pk = #{memberPk}
+		) m ON r.pk = m.rolePk 
+		where r.isDelete = 1 and 
+		r.isVisable = 1 and r.companyType != 0
+	</select>
+	
+	<delete id="delMemberRole">
+		delete from b2b_member_role where memberPk = #{memberPk}
+	</delete>
+	
+	<insert id="insertMemberRole">
+		insert into b2b_member_role (pk,memberPk,rolePk) values(#{pk},#{memberPk},#{rolePk})
+	</insert>
+	<delete id="delMemberRoleByMemberPkAndRolePk" parameterType="java.util.Map">
+		delete from b2b_member_role where memberPk = #{memberPk} and rolePk = #{rolePk}
+	</delete>
+	
+	<select id="searchRoleBymemberPk" resultType="cn.cf.dto.B2bRoleExtDto">
+		select r.pk,r.name,r.companyType from b2b_member_role mr left join  b2b_role r on mr.rolePk = r.pk
+		where mr.memberPk = #{memberPk} AND r.isDelete=1 and mr.rolePk is not null and mr.rolePk != '' 
+		GROUP BY  r.pk
+	</select>
+	<select id="searchRoleAdmin" resultType="cn.cf.dto.B2bRoleExtDto">
+		select  pk,name,insertTime,isDelete,isVisable,sort,companyType 
+		from b2b_role where isDelete = 1 AND companyType = 0
+	</select>
+	
+	
+	<select id="getRoleListBySms" resultType="cn.cf.dto.B2bRoleExtDto">
+		SELECT
+	r.pk,
+	r. NAME,
+	IFNULL(st.rolePk ,- 1) AS isRole,
+	r.companyType
+FROM
+	b2b_role r
+LEFT JOIN (
+	SELECT
+		sr.rolePk
+	FROM
+		sys_sms_role sr
+	LEFT JOIN sys_sms_template st ON sr.smsName = st.`name`
+	WHERE
+		st.`name`  = #{smsName}
+) st ON r.pk = st.rolePk
+WHERE
+	r.isDelete = 1
+AND r.isVisable = 1 and (r.companyType =#{companyType} or r.companyType=0)
+GROUP BY
+r.pk
+		<if test="start != null">
+		limit #{start},#{limit}
+		</if>
+	</select>
+	
+		<select id="getRoleCountBySms" resultType="int">
+			SELECT
+			count(1)
+		FROM
+			b2b_role r
+		LEFT JOIN (
+			SELECT
+				sr.rolePk
+			FROM
+				sys_sms_role sr
+			LEFT JOIN sys_sms_template st ON sr.smsName = st.`name`
+			WHERE
+					st.`name`  = #{smsName}
+		) st ON r.pk = st.rolePk
+		WHERE
+			r.isDelete = 1
+		AND r.isVisable = 1 and (r.companyType =#{companyType} or r.companyType=0)
+		 
+	</select>
+	
+	<select id="getRoleByMember" parameterType="java.util.Map" resultType="cn.cf.dto.B2bRoleDto" >
+	SELECT  r.pk  ,r.name ,r.companyType  FROM b2b_member_role m  LEFT JOIN b2b_role r  ON r.pk = m.rolePk 
+	WHERE r.isDelete = 1  and r.isVisable = 1 AND m.memberPk =#{memberPk}
+	</select>
+	
+	
+	<select id="searchRoles" parameterType="java.util.Map" resultType="cn.cf.dto.B2bRoleDto" >
+    SELECT
+        <include refid="columns" />
+        FROM b2b_role
+       where  isDelete= 1 
+       and isVisable = 1 
+       <if test="companyType  == 1 ">
+       and companyType in (1,3)
+       </if>
+        <if test="companyType  == 2 ">
+       and companyType in (2,4)
+       </if>
+    </select>
+	
+	
+</mapper>
+

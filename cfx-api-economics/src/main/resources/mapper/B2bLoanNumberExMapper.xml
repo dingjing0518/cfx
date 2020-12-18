@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLoanNumberDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,loanNumber,contractNumber,bankPk,bankName,loanStatus,loanAmount,loanStartTime,loanEndTime,repaymentTime,principal,interest,penalty,compound,economicsGoodsName,economicsGoodsType,purchaserPk,purchaserName,supplierPk,supplierName,organizationCode,customerNumber,totalRate,bankRate,sevenRate,repaidInterest,repaidSerCharge
+	    ]]>
+	</sql>
+
+	
+	<select id="searchLoanNumberDtoByRepayment" resultType="cn.cf.dto.B2bLoanNumberDtoEx"
+		>
+		SELECT
+		o.*,(o.loanAmount - o.principal) as otherAmount
+		FROM b2b_loan_number o
+		where (loanStatus =3 or loanStatus = 6)
+		<if test="status != null and status != '' ">
+			 and  (DATEDIFF(loanEndTime,NOW()) = 2 or DATEDIFF(loanEndTime,NOW()) = 0)
+		</if>
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		>
+	SELECT
+		*
+		FROM b2b_loan_number
+		where orderNumber=#{orderNumber}
+	
+	</select>
+	
+	<update id="updateByOrderNumber">
+		UPDATE b2b_loan_number 
+        <set>
+        	<if test="loanNumber != null ">
+        		loanNumber = #{loanNumber} ,
+        	</if>
+        	<if test="contractNumber != null ">
+        		contractNumber = #{contractNumber} ,
+        	</if>
+        	<if test="bankPk != null ">
+        		bankPk = #{bankPk} ,
+        	</if>
+        	<if test="bankName != null ">
+        		bankName = #{bankName} ,
+        	</if>
+        	<if test="loanStatus != null ">
+        		loanStatus = #{loanStatus} ,
+        	</if>
+        	<if test="loanAmount != null ">
+        		loanAmount = #{loanAmount} ,
+        	</if>
+        	<if test="loanStartTime != null ">
+        		loanStartTime = #{loanStartTime} ,
+        	</if>
+        	<if test="loanEndTime != null ">
+        		loanEndTime = #{loanEndTime} ,
+        	</if>
+        	<if test="repaymentTime != null ">
+        		repaymentTime = #{repaymentTime} ,
+        	</if>
+        	<if test="principal != null ">
+        		principal = #{principal} ,
+        	</if>
+        	<if test="interest != null ">
+        		interest = #{interest} ,
+        	</if>
+        	<if test="penalty != null ">
+        		penalty = #{penalty} ,
+        	</if>
+        	<if test="compound != null ">
+        		 compound = #{compound} ,
+        	</if>
+        	<if test="economicsGoodsName != null ">
+        		economicsGoodsName = #{economicsGoodsName} ,
+        	</if>
+        	<if test="economicsGoodsType != null ">
+        		 economicsGoodsType = #{economicsGoodsType} ,
+        	</if>
+        	<if test="purchaserPk != null ">
+        		 purchaserPk = #{purchaserPk} ,
+        	</if>
+        	<if test="purchaserName != null ">
+        		  purchaserName = #{purchaserName} ,
+        	</if>
+        	<if test="supplierPk != null ">
+        		 supplierPk = #{supplierPk} ,
+        	</if>
+        	<if test="supplierName != null ">
+        		 supplierName = #{supplierName} ,
+        	</if>
+        	<if test="organizationCode != null ">
+        		 organizationCode = #{organizationCode} ,
+        	</if>
+        	<if test="customerNumber != null ">
+        		customerNumber = #{customerNumber} ,
+        	</if>
+        	<if test="loanAccount != null ">
+        		loanAccount = #{loanAccount} ,
+        	</if>
+        	<if test="repaidInterest != null ">
+        		repaidInterest = #{repaidInterest} ,
+        	</if>
+        	<if test="repaidSerCharge != null ">
+        		repaidSerCharge = #{repaidSerCharge} ,
+        	</if>
+        	<if test="bankRate != null ">
+        		bankRate = #{bankRate} ,
+        	</if>
+        </set>
+        WHERE 
+        	orderNumber = #{orderNumber}
+	
+	</update>
+	
+	<select id="searchSumLoan" resultType="double">
+		select ifnull(sum(loanAmount - principal),0) from b2b_loan_number where (loanStatus = 3 or loanStatus = 6)
+		<if test="purchaserPk != null">
+			and purchaserPk = #{purchaserPk}
+		</if>
+		<if test="economicsGoodsType != null">
+			and economicsGoodsType = #{economicsGoodsType}
+		</if>
+	</select>
+</mapper>
+

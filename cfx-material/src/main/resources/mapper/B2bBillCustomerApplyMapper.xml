@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCustomerApplyDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,address,status,insertTime,isDelete,assidirPk,assidirName,processInstanceId,staticTime,approvalTime
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_bill_customer_apply (
+         pk, companyPk, companyName, contacts, contactsTel, address, status, insertTime, isDelete, assidirPk, assidirName, processInstanceId, staticTime, approvalTime
+        ) VALUES (
+         #{pk}, #{companyPk}, #{companyName}, #{contacts}, #{contactsTel}, #{address}, #{status}, #{insertTime}, #{isDelete}, #{assidirPk}, #{assidirName}, #{processInstanceId}, #{staticTime}, #{approvalTime}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bBillCustomerApply">
+    <![CDATA[
+        UPDATE b2b_bill_customer_apply SET
+	        companyPk = #{companyPk} , companyName = #{companyName} , contacts = #{contacts} , contactsTel = #{contactsTel} , address = #{address} , status = #{status} , insertTime = #{insertTime} , isDelete = #{isDelete} , assidirPk = #{assidirPk} , assidirName = #{assidirName} , processInstanceId = #{processInstanceId} , staticTime = #{staticTime} , approvalTime = #{approvalTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bBillCustomerApply">
+    <![CDATA[
+        DELETE FROM b2b_bill_customer_apply WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(assidirPk)">
+				AND assidirPk = #{assidirPk}			</if>
+			<if test="@Ognl@isNotEmpty(assidirName)">
+				AND assidirName = #{assidirName}			</if>
+			<if test="@Ognl@isNotEmpty(processInstanceId)">
+				AND processInstanceId = #{processInstanceId}			</if>
+			<if test="@Ognl@isNotEmpty(staticTimeBegin)">
+				AND staticTime >= #{staticTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(staticTimeEnd)">
+				AND staticTime &lt;= #{staticTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(approvalTimeBegin)">
+				AND approvalTime >= #{approvalTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(approvalTimeEnd)">
+				AND approvalTime &lt;= #{approvalTimeEnd}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_bill_customer_apply
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where pk = #{pk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where companyName = #{companyName}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where contacts = #{contacts}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where contactsTel = #{contactsTel}	</select>
+	<select id="getByAddress" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where address = #{address}	</select>
+	<select id="getByAssidirPk" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where assidirPk = #{assidirPk}	</select>
+	<select id="getByAssidirName" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where assidirName = #{assidirName}	</select>
+	<select id="getByProcessInstanceId" resultType="cn.cf.dto.B2bBillCustomerApplyDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_customer_apply where processInstanceId = #{processInstanceId}	</select>
+</mapper>
+

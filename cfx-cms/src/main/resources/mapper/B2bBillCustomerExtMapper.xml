@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCustomerExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,companyName,contacts,contactsTel,address,status,insertTime,auditTime,isDelete
+	    ]]>
+	</sql>
+
+	<update id="updateObj" parameterType="cn.cf.dto.B2bBillCustomerExtDto">
+        UPDATE b2b_bill_customer
+        <set>
+			<if test="companyPk != null and companyPk != ''">
+				companyPk = #{companyPk} ,
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName = #{companyName} ,
+			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts} ,
+			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+				contactsTel = #{contactsTel} ,
+			</if>
+			<if test="address != null and address != ''">
+				address = #{address} ,
+			</if>
+			
+			<if test="status != null and status != ''">
+				status = #{status} ,
+			</if>
+			
+			<if test="insertTime != null and insertTime != ''">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="auditTime != null and auditTime != ''">
+				auditTime = #{auditTime} ,
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete}
+			</if>
+		</set>
+        WHERE 
+        	pk = #{pk}
+	</update>
+
+<update id="updateExt" parameterType="cn.cf.model.B2bBillCustomer">
+        UPDATE b2b_bill_customer
+        <set>
+			<if test="companyPk != null and companyPk != ''">
+				companyPk = #{companyPk} ,
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName = #{companyName} ,
+			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts} ,
+			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+				contactsTel = #{contactsTel} ,
+			</if>
+			<if test="address != null and address != ''">
+				address = #{address} ,
+			</if>
+			
+			<if test="status != null and status != ''">
+				status = #{status} ,
+			</if>
+			
+			<if test="insertTime != null and insertTime != ''">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="auditTime != null and auditTime != ''">
+				auditTime = #{auditTime} ,
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete}
+			</if>
+		</set>
+        WHERE 
+        	pk = #{pk}
+	</update>
+	
+	<update id="updateStatusByCompanyPk" parameterType="cn.cf.dto.B2bBillCustomerExtDto">
+		UPDATE b2b_bill_customer
+		<set>
+		  <if test="status != null and status != ''">
+			status = #{status}
+		  </if>
+		</set>
+		WHERE
+		companyPk = #{companyPk}
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+			count(1)
+		FROM
+			(SELECT
+			cu.pk
+			FROM
+			(select pk,companyPk from b2b_bill_customer
+			<include refid="searchGridWhere"/>
+			) cu
+			LEFT JOIN b2b_bill_cusgoods cug ON cug.companyPk = cu.companyPk
+			GROUP BY cu.pk
+		) tables
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bBillCustomerExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		  *
+		FROM
+			(
+			SELECT
+			cu.pk,cu.companyPk,cu.address,cu.status,cu.insertTime,cu.auditTime,cu.isDelete,
+			if(${colCompanyName},  cu.companyName, INSERT (  cu.companyName, 3, 5, '*****')) as companyName,
+			if(${colApplicants},  cu.contacts, INSERT (  cu.contacts, 1, 1, '*')) as contacts,
+			if(${colContactsTel}, cu.contactsTel, INSERT ( cu.contactsTel, 4, 4, '****')) as contactsTel,
+			GROUP_CONCAT(cug.goodsName) goodsName
+			FROM
+			(select * from b2b_bill_customer
+			<include refid="searchGridWhere" />
+			) cu
+			LEFT JOIN b2b_bill_cusgoods cug ON cug.companyPk = cu.companyPk
+			GROUP BY cu.pk
+			<if test="orderName != null">
+				order by cu.${orderName} ${orderType}
+			</if>
+			<if test="limit != null">
+				limit #{start},#{limit}
+			</if>
+			) tables
+	</select>
+
+</mapper>
+

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityRewardExtDao">
+
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+        pk,dimenCategory,dimenName,dimenType,dimenTypeName,periodType,fibreShellNumber,
+        empiricalValue,isDelete,isVisable,fibreShellRatio,empiricalRatio,insertTime,updateTime,
+        ((ifnull( fibreShellNumber ,0 ))*(ifnull(fibreShellRatio,0.0))) fbShellNumberWeighting,
+        ((ifnull( empiricalValue ,0 ))*(ifnull(empiricalRatio,0.0))) empiricalValueWeighting
+        ]]>
+    </sql>
+    <update id="updateDimenReward" parameterType="cn.cf.dto.B2bDimensionalityRewardExtDto">
+        UPDATE b2b_dimensionality_reward
+        <set>
+        <if test="dimenCategory != null and dimenCategory != ''">
+            dimenCategory = #{dimenCategory},
+        </if>
+        <if test="dimenName != null and dimenName != ''">
+            dimenName = #{dimenName},
+        </if>
+        <if test="dimenType != null and dimenType != ''">
+            dimenType = #{dimenType},
+        </if>
+        <if test="dimenTypeName != null and dimenTypeName != ''">
+            dimenTypeName = #{dimenTypeName},
+        </if>
+        <if test="periodType != null and periodType != ''">
+            periodType = #{periodType},
+        </if>
+        <if test="fibreShellNumber >-1 and fibreShellNumber != null">
+            fibreShellNumber = #{fibreShellNumber},
+        </if>
+        <if test="empiricalValue >-1 and empiricalValue != null">
+            empiricalValue = #{empiricalValue},
+        </if>
+        <if test="fibreShellRatio != null and fibreShellRatio != ''">
+            fibreShellRatio = #{fibreShellRatio},
+        </if>
+        <if test="empiricalRatio != null and empiricalRatio != ''">
+            empiricalRatio = #{empiricalRatio},
+        </if>
+        <if test="isDelete != null and isDelete != ''">
+            isDelete = #{isDelete},
+        </if>
+        <if test="isVisable != null and isVisable != ''">
+            isVisable = #{isVisable},
+        </if>
+            updateTime = NOW()
+        </set>
+        WHERE pk = #{pk}
+    </update>
+    
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}          </if>
+            <if test="@Ognl@isNotEmpty(dimenCategory)">
+                AND dimenCategory = #{dimenCategory}            </if>
+            <if test="@Ognl@isNotEmpty(dimenName)">
+                AND dimenName = #{dimenName}            </if>
+            <if test="@Ognl@isNotEmpty(dimenType)">
+                AND dimenType = #{dimenType}            </if>
+            <if test="@Ognl@isNotEmpty(dimenTypeName)">
+                AND dimenTypeName = #{dimenTypeName}            </if>
+            <if test="@Ognl@isNotEmpty(periodType)">
+                AND periodType = #{periodType}          </if>
+            <if test="@Ognl@isNotEmpty(fibreShellNumber)">
+                AND fibreShellNumber = #{fibreShellNumber}          </if>
+            <if test="@Ognl@isNotEmpty(empiricalValue)">
+                AND empiricalValue = #{empiricalValue}          </if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}          </if>
+            <if test="@Ognl@isNotEmpty(isVisable)">
+                AND isVisable = #{isVisable}            </if>
+            <if test="@Ognl@isNotEmpty(fibreShellRatio)">
+                AND fibreShellRatio = #{fibreShellRatio}            </if>
+            <if test="@Ognl@isNotEmpty(empiricalRatio)">
+                AND empiricalRatio = #{empiricalRatio}          </if>
+            <if test="@Ognl@isNotEmpty(insertTimeBegin)">
+                AND insertTime >= #{insertTimeBegin}            </if>
+            <if test="@Ognl@isNotEmpty(insertTimeEnd)">
+                AND insertTime &lt;= #{insertTimeEnd}           </if>
+            <if test="@Ognl@isNotEmpty(updateStartTime)">
+                AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}            </if>
+            <if test="@Ognl@isNotEmpty(updateEndTime)">
+                AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}           </if>
+        </where>
+    </sql>
+
+
+    <select id="searchGridExtCount" parameterType="java.util.Map"
+        resultType="int">
+    select count(*) from (  select  pk
+            from b2b_dimensionality_reward
+        <include refid="searchGridWhere" />
+        group by dimenCategory,dimenType ) t
+    </select>
+
+    <!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+        三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+    <select id="searchGridExt" resultType="cn.cf.dto.B2bDimensionalityRewardExtDto"
+        parameterType="java.util.Map">
+
+        select  
+            <include refid="columns" />
+        from b2b_dimensionality_reward
+            <include refid="searchGridWhere" />
+        group by dimenCategory,dimenType 
+        <if test="orderName != null">
+            order by ${orderName} ${orderType} 
+        </if>
+        <if test="limit != null">
+            limit  #{start}, #{limit}
+        </if>
+    </select>
+    
+    <select id="isExistName" resultType="cn.cf.dto.B2bDimensionalityRewardExtDto"
+        parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_dimensionality_reward where isDelete=1 and pk !=#{pk} and dimenName = #{dimenName} 
+            and dimenTypeName = #{dimenTypeName}
+        <if test="periodType != null and periodType != ''">
+            and periodType = #{periodType}
+        </if>
+        <if test="fibreShellNumber != null and fibreShellNumber != ''">
+            and fibreShellNumber = #{fibreShellNumber}
+        </if>
+        <if test="empiricalValue != null and empiricalValue != ''">
+            and empiricalValue = #{empiricalValue}
+        </if> 
+        <if test="fibreShellRatio != null and fibreShellRatio != ''">
+            and fibreShellRatio = #{fibreShellRatio}
+        </if> 
+        <if test="empiricalRatio != null and empiricalRatio != ''">
+            and empiricalRatio = #{empiricalRatio}
+        </if>    
+        </select>
+
+
+
+
+    <update id="batchDel" >
+        UPDATE b2b_dimensionality_reward
+        set isVisable=2
+        WHERE dimenCategory = #{dimenCategory}
+    </update>
+    
+    <!-- 逻辑删除奖励维度 -->
+    <update id="logicDelete">
+        UPDATE b2b_dimensionality_reward
+        set isDelete=2
+        WHERE pk = #{pk}
+    </update>
+    
+    
+</mapper>
+

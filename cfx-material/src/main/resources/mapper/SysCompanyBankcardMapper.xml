@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysCompanyBankcardDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,bankAccount,bankName,bankNo,ecbankPk,ecbankName,bankclscode
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO sys_company_bankcard (
+         pk, companyPk, bankAccount, bankName, bankNo,ecbankPk,ecbankName,bankclscode
+        ) VALUES (
+         #{pk}, #{companyPk}, #{bankAccount}, #{bankName}, #{bankNo}, #{ecbankPk}, #{ecbankName}, #{bankclscode}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.SysCompanyBankcard">
+    <![CDATA[
+        UPDATE sys_company_bankcard SET
+	        companyPk = #{companyPk} , bankAccount = #{bankAccount} , bankName = #{bankName} , bankNo = #{bankNo}, bankclscode = #{bankclscode}
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.SysCompanyBankcard">
+    <![CDATA[
+        DELETE FROM sys_company_bankcard WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(bankNo)">
+				AND bankNo = #{bankNo}			</if>
+			<if test="@Ognl@isNotEmpty(bankclscode)">
+				AND bankclscode = #{bankclscode}			</if>
+
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_company_bankcard
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard where pk = #{pk}	</select>
+	<select id="getByCreditPk" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard where creditPk = #{creditPk}	</select>
+	<select id="getByBankAccount" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard where bankAccount = #{bankAccount}	</select>
+	<select id="getByBankName" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard where bankName = #{bankName}	</select>
+	<select id="getByBankNo" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM sys_company_bankcard where bankNo = #{bankNo}	</select>
+</mapper>
+

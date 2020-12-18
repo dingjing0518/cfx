@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSxCertificateDaoEx">
+    <sql id="columns">
+	    <![CDATA[
+		pk,name,storePk,companyPk,companyName,insertTime,isDelete
+	    ]]>
+	</sql>
+
+    <sql id="searchGridWhere">
+        <!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+        <where>
+            <if test="@Ognl@isNotEmpty(pk)">
+                AND pk = #{pk}			</if>
+            <if test="@Ognl@isNotEmpty(name)">
+                AND name = #{name}			</if>
+            <if test="@Ognl@isNotEmpty(companyPk)">
+                AND companyPk = #{companyPk}			</if>
+            <if test="@Ognl@isNotEmpty(storePk)">
+                AND storePk = #{storePk}			</if>
+            <if test="@Ognl@isNotEmpty(companyName)">
+                AND companyName = #{companyName}			</if>
+            <if test="@Ognl@isNotEmpty(isDelete)">
+                AND isDelete = #{isDelete}			</if>
+        </where>
+    </sql>
+
+
+
+    <select id="searchList" resultType="cn.cf.dto.B2bSxCertificateDtoEx"
+            parameterType="java.util.Map">
+        SELECT
+        <include refid="columns" />
+        FROM b2b_sx_certificate
+        <include refid="searchGridWhere" />
+        order by insertTime desc
+        <if test="start!= null ">
+            limit ${start},${limit}
+        </if>
+    </select>
+
+
+
+</mapper>
+

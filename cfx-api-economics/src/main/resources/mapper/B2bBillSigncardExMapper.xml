@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillSigncardDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,companyPk,bankAccount,bankName,bankNo,ecbankPk,ecbankName,bankclscode,status
+	    ]]>
+	</sql>
+
+	<update id="updateByDto">
+		update b2b_bill_signcard 
+		<set>
+			 status = #{status}
+		</set>
+		where 1 = 1
+		<if test="null != pk">
+			and pk = #{pk}
+		</if>
+		<if test="null != bankNo">
+			and bankNo = #{bankNo}
+		</if>
+		<if test="null != bankAccount">
+			and bankAccount = #{bankAccount}
+		</if>
+		<if test="null != companyPk">
+			and companyPk = #{companyPk}
+		</if>
+	</update>
+</mapper>
+

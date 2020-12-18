@@ -1,0 +1,168 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.ManageAuthorityExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,parentPk,name,type,displayName,url,sort,isDelete,image,isBtn
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(displayName)">
+				AND displayName = #{displayName}			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(image)">
+				AND image = #{image}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM manage_authority
+		<include refid="searchGridWhere" />
+	</select>
+
+	<select id="isAuthorityCount" parameterType="java.lang.String"
+			resultType="int">
+		SELECT count(1) FROM manage_role_authority
+		where 1=1
+		<if test="rolePk != null and rolePk != ''">
+			AND rolePk = #{rolePk}
+		</if>
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.ManageAuthorityDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM manage_authority
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="getManageAuthorityByAccount" parameterType="java.util.Map"
+		resultType="cn.cf.dto.ManageAuthorityDto">
+		select
+		<include refid="columns" />
+		from manage_authority where isDelete=1
+		<if test="isBtn == 0">
+			and isBtn = 0
+		</if> 
+		  <if test="parentPk != null and ''!=parentPk">  
+            and parentPk = #{parentPk,jdbcType=VARCHAR}  
+        </if> 
+         <if test="rolePk != null and ''!=rolePk">  
+            and pk in (select authorityPk from manage_role_authority where rolePk=#{rolePk,jdbcType=VARCHAR}  )
+        </if> 
+        <if test="noPk != null and ''!=noPk">  
+            and pk != #{noPk,jdbcType=VARCHAR}  
+       	 </if>
+          <if test="type != null">  
+            and type > #{type,jdbcType=INTEGER}  
+        </if> 
+       
+       
+		order by sort 
+
+	</select>
+
+	<select id="getListName" resultType="java.lang.String">
+	 SELECT
+			NAME
+		FROM
+			manage_authority
+		WHERE
+			isDelete = 1
+		AND isBtn = 3
+	</select>
+	
+	<select id="getBtnManageAuthorityByRolePk" resultType="cn.cf.dto.ManageAuthorityDto">
+		SELECT
+			ma.*
+		FROM
+			manage_authority ma
+			LEFT JOIN manage_role_authority mra ON ma.pk = mra.authorityPk
+		WHERE
+			ma.`isBtn` = 1 
+			<if test="rolePk != null and rolePk !=''">
+				and mra.rolePk = #{rolePk}
+			</if>
+			<if test="name != null and name !=''">
+				and ma.name = #{name}
+			</if>
+		GROUP BY ma.pk
+	</select>
+
+
+	<select id="getColManageAuthorityByRolePk" parameterType="java.lang.String" resultType="cn.cf.dto.ManageAuthorityDto">
+		SELECT
+			<include refid="columns" />
+		FROM
+			manage_authority
+		where
+			isBtn = 3
+			and isDelete =1
+		<if test="rolePk != null and rolePk !=''">
+			and pk in (select authorityPk from manage_role_authority where rolePk = #{rolePk})
+		</if>
+	</select>
+
+	<select id="getBtnByPartentPk" resultType="cn.cf.entity.BtnTree">
+		SELECT
+		pk,
+		NAME,
+		displayName,
+		parentPk,
+		isBtn
+		FROM
+		manage_authority
+		WHERE
+		isDelete = 1
+		<if test="parentPk != null and parentPk !=''">
+		AND parentPk = #{parentPk}
+		</if>
+		<if test="rolePk != null and rolePk !=''">
+			AND pk IN (SELECT authorityPk FROM manage_role_authority where rolePk = #{rolePk})
+		</if>
+	</select>
+
+	<select id="getManageAuthorityByRolePk" parameterType="java.lang.String"
+			resultType="cn.cf.dto.ManageAuthorityDto">
+		select
+		<include refid="columns" />
+		from manage_authority where   pk in (select authorityPk from manage_role_authority where rolePk=#{rolePk,jdbcType=VARCHAR} )
+
+	</select>
+
+
+
+	<delete id="deleteByManagRolePk" parameterType="cn.cf.model.ManageRoleAuthority">
+		DELETE from manage_role_authority where rolePk=#{rolePk}
+	</delete>
+
+	<insert id="insertMaRoAu" parameterType="cn.cf.model.ManageRoleAuthority">
+		insert into manage_role_authority (pk,rolePk,authorityPk) VALUE (#{pk},#{rolePk},#{authorityPk})
+	</insert>
+</mapper>
+

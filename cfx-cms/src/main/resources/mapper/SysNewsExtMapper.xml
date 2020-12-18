@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysNewsExtDao">
+	
+
+		<select id="getNewsByPk" resultType="cn.cf.dto.SysNewsExtDto" parameterType="java.util.Map">
+		select
+		n.PK AS pk,
+		n.title AS title,
+		n.insertTime AS insertTime,
+		n.isDelete AS
+		isDelete,
+		n.isVisable AS isVisable,
+		n.content AS content,
+		n.recommend AS
+		recommend,
+		n.top AS top,
+		n.keyword AS keyword,
+		n.newAbstrsct AS
+		newAbstrsct,
+		n.url AS url,
+		n.estimatedTime AS estimatedTime,
+		n.status
+		AS status,
+		n.recommendPosition AS recommendPosition,
+ 		n.newSource AS newSource,
+ 		sc.parentId AS catePID,
+		CASE sc.parentId
+		WHEN 1 THEN
+		"电商系统"
+		WHEN 2 THEN
+		"物流系统"
+		WHEN 3 THEN
+		"金融系统"
+		END AS catePIDName,
+		sc.pk AS
+		categoryPk,
+		sc.name as categoryName,
+		cn.pk as newsCategoryPk
+		FROM
+		sys_news n
+		LEFT JOIN
+		sys_news_category cn ON n.pk = cn.newsPk
+		LEFT JOIN sys_category
+		sc ON cn.categoryPk = sc.PK
+		WHERE
+		n.pk = #{pk}
+		<if test="block != null and block != ''">
+			and block = #{block}
+		</if>
+		GROUP BY n.pk
+	</select>	
+	
+	
+	
+</mapper>
+

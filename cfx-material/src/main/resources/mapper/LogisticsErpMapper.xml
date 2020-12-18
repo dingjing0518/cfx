@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,provinceName,province,cityName,city,areaName,area,town,townName,plantPk,plantName,isDelete,status,storePk,lowPrice,name,lgCompanyPk,lgCompanyName,memo
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp (
+         pk, name,lgCompanyPk,lgCompanyName,provinceName, province, cityName, city, areaName, area, town, townName, plantPk, plantName, isDelete, status,storePk,lowPrice ,memo
+ 
+        ) VALUES (
+         #{pk},#{name},#{lgCompanyPk},#{lgCompanyName}, #{provinceName}, #{province}, #{cityName}, #{city}, #{areaName}, #{area}, #{town}, #{townName}, #{plantPk}, #{plantName}, 1, 1,#{storePk},#{lowPrice} ,memo
+ 
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.LogisticsErp">
+		UPDATE logistics_erp
+		<set>
+			<if test="name !=null">
+				name = #{name} ,
+			</if>
+			<if test="lgCompanyPk !=null">
+				lgCompanyPk = #{lgCompanyPk} ,
+				lgCompanyName = #{lgCompanyName} ,
+			</if>
+
+			<if test="province !=null">
+				province = #{province} ,
+				provinceName = #{provinceName} ,
+			</if>
+			<if test="city !=null">
+			cityName = #{cityName} , city = #{city} , 
+			</if>
+			<if test="area !=null">
+			areaName = #{areaName} , area = #{area} ,
+			</if>
+			<if test="town !=null">
+			 town = #{town} ,
+	         townName = #{townName} ,
+			</if>
+			<if test="plantPk !=null">
+			plantPk = #{plantPk} , plantName = #{plantName} ,
+			</if>
+			<if test="isDelete !=null">
+			 isDelete = #{isDelete} , 
+			</if>
+				<if test="status !=null">
+			 status = #{status} , 
+			</if>
+			<if test="lowPrice !=null">
+			 lowPrice = #{lowPrice} , 
+			</if>
+			 
+			<if test="memo !=null">
+			 memo = #{memo} , 
+			</if>
+		</set>
+  WHERE 
+        	pk = #{pk}  	 
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.LogisticsErp">
+    <![CDATA[
+        DELETE FROM logistics_erp WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}
+			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}
+			</if>
+			<if test="@Ognl@isNotEmpty(plantPk)">
+				AND plantPk = #{plantPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(plantName)">
+				AND plantName = #{plantName}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(lowPrice)">
+				AND lowPrice = #{lowPrice}
+			</if>
+			 
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM logistics_erp
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where pk = #{pk}
+	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where provinceName = #{provinceName}
+	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where province = #{province}
+	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where cityName = #{cityName}
+	</select>
+	<select id="getByCity" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where city = #{city}
+	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where areaName = #{areaName}
+	</select>
+	<select id="getByArea" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where area = #{area}
+	</select>
+	<select id="getByTown" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where town = #{town}
+	</select>
+	<select id="getByTownName" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where townName = #{townName}
+	</select>
+	<select id="getByPlantPk" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where plantPk = #{plantPk}
+	</select>
+	<select id="getByPlantName" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where plantName = #{plantName}
+	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.LogisticsErpDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where storePk = #{storePk}
+	</select>
+</mapper>
+

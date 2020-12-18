@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBindOrderDaoEx">
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,bindPk,purchaserPk, actualAmount,insertTime,meno,memberPk,memberName,storeName,storePk,source,logisticsModelPk,logisticsModelName,purchaseType,status,bindProductId,purchaserInfo, addressInfo,goodsJson 
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(bindPk)">
+				AND bindPk = #{bindPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(actualAmount)">
+				AND actualAmount = #{actualAmount}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				and TO_DAYS( insertTime ) >=TO_DAYS(#{insertTimeBegin})
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				and TO_DAYS( insertTime ) &lt;=TO_DAYS(#{insertTimeEnd})
+			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}
+			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(source)">
+				AND source = #{source}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND purchaseType = #{purchaseType}
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="status != null and status !=''">
+				<choose>
+					<when test="status == 1">
+						and status=1
+					</when>
+					<when test="status == 2">
+						and status=2
+					</when>
+					<when test="status == -1">
+						and status=-1
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	
+	<insert id="insertBatch" useGeneratedKeys="true" keyProperty="orderNumber" parameterType="java.util.List">
+		INSERT INTO b2b_bind_order (
+		orderNumber,bindPk,purchaserPk,actualAmount,
+		insertTime,meno,memberPk,memberName,storeName,
+		storePk,source,logisticsModelPk,logisticsModelName,purchaseType,
+		status,bindProductId,purchaserInfo,addressInfo,goodsJson
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.orderNumber},#{item.bindPk},#{item.purchaserPk},#{item.actualAmount},
+			#{item.insertTime},#{item.meno},#{item.memberPk},#{item.memberName},#{item.storeName},
+			#{item.storePk},#{item.source},#{item.logisticsModelPk},#{item.logisticsModelName},#{item.purchaseType},
+			#{item.status},#{item.bindProductId},#{item.purchaserInfo},#{item.addressInfo},#{item.goodsJson}
+			)
+		</foreach>
+	</insert>
+	
+	<update id="updateBindOrder">
+		update b2b_bind_order set status = #{status}
+		where
+		orderNumber = #{orderNumber}
+	</update>
+
+	
+	<update id="updateStatus">
+		update b2b_bind_order set status = -1
+		where
+		bindPk=#{bindPk} and status=1
+	</update>
+
+	<update id="updateOverdue">
+		update b2b_bind_order set status = -1
+		where status = 1
+	</update>
+
+	<select id="searchBindToOrder" resultType="cn.cf.dto.B2bBindOrderDtoEx">
+		select a.orderNumber
+		from b2b_bind_order a left join b2b_bind b on a.bindPk
+		= b.pk
+		where
+		b.status = 1 and a.status = 1 
+	</select>
+
+	<select id="searchB2bBindOrderList" resultType="cn.cf.dto.B2bBindOrderDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		c.contactsTel as contactsTel, bo.*
+		FROM b2b_bind_order bo left
+		join b2b_company c on bo.purchaserPk=c.pk
+		where 1=1
+		<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+			and TO_DAYS( bo.insertTime ) >=TO_DAYS(#{insertTimeBegin})
+		</if>
+		<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+			and TO_DAYS( bo.insertTime )
+			&lt;=TO_DAYS(#{insertTimeEnd})
+		</if>
+		<if test="@Ognl@isNotEmpty(storePk)">
+			AND bo.storePk = #{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(orderNumber)">
+			AND bo.orderNumber = #{orderNumber}
+		</if>
+		<if test="@Ognl@isNotEmpty(status)">
+			AND bo.status = #{status}
+		</if>
+		<if test="purchaserName != null and purchaserName !=''">
+			AND bo.purchaserInfo like '%purchaserName%${purchaserName}%'
+		</if>
+		<if test="contactsTel != null and contactsTel !=''">
+			AND bo.purchaserInfo like '%contactsTel%${contactsTel}%'
+		</if>
+		ORDER BY
+		bo.insertTime DESC
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchB2bBindOrderCounts" resultType="int">
+		SELECT count(*)
+		FROM b2b_bind_order bo left
+		join b2b_company c on bo.purchaserPk=c.pk
+		where 1=1
+		<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+			and TO_DAYS( bo.insertTime ) >=TO_DAYS(#{insertTimeBegin})
+		</if>
+		<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+			and TO_DAYS( bo.insertTime )
+			&lt;=TO_DAYS(#{insertTimeEnd})
+		</if>
+		<if test="@Ognl@isNotEmpty(orderNumber)">
+			AND bo.orderNumber = #{orderNumber}
+		</if>
+		<if test="@Ognl@isNotEmpty(storePk)">
+			AND bo.storePk = #{storePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(status)">
+			AND bo.status = #{status}
+		</if>
+		<if test="purchaserName != null and purchaserName !=''">
+			AND bo.purchaserInfo like '%purchaserName%${purchaserName}%'
+		</if>
+		<if test="contactsTel != null and contactsTel !=''">
+			AND bo.purchaserInfo like '%contactsTel%${contactsTel}%'
+		</if>
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillCusgoodsApplyDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,customerPk,companyPk,goodsPk,goodsName,goodsShotName,status,account,bankName,bankNo,isVisable
+	    ]]>
+	</sql>
+
+	 
+ 
+
+	<delete id="deleteByCompanyPk"  parameterType="java.lang.String">
+    <![CDATA[
+        DELETE FROM b2b_bill_cusgoods_apply WHERE
+        companyPk = #{companyPk} 
+    ]]>
+	</delete>
+
+	 
+
+	 
+</mapper>
+

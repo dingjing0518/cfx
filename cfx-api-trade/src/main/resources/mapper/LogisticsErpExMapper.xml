@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpDaoEx">
+<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,provinceName,province,cityName,city,areaName,area,town,townName,plantPk,plantName,isDelete,status,storePk,lowPrice,name,lgCompanyPk,lgCompanyName,memo
+	    ]]>
+	</sql>
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+			   <if test="@Ognl@isNotEmpty(name)">
+					AND name like '%${name}%'
+				</if>
+				<if test="@Ognl@isNotEmpty(lgCompanyName)">
+					AND lgCompanyName   like '%${lgCompanyName}%'
+				</if>
+			 
+		</where>
+	</sql>
+	<select id="searchExistenceByName" parameterType="cn.cf.dto.LogisticsErpDto" resultType="int">
+	SELECT count(*) FROM logistics_erp where isDelete =1
+		        <if test="name!=null">
+					AND name = #{name}
+				</if>
+				 <if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+
+				<if test="@Ognl@isNotEmpty(pk)">
+					AND pk != #{pk}
+				</if>
+			 
+	
+	</select>
+		<select id="searchExistence" parameterType="cn.cf.dto.LogisticsErpDto" resultType="int">
+			SELECT count(*) FROM logistics_erp le
+LEFT JOIN logistics_erp_member lem ON le.pk = lem.logisticsPk
+			where   isDelete =1
+		        
+				<if test="province!=null">
+					AND province = #{province}
+				</if>
+				<if test="city!=null">
+					AND city = #{city}
+				</if>
+				<if test="area!=null">
+					AND area = #{area}
+				</if>
+				<if test="town!=null">
+					AND town = #{town}
+				</if>
+				<if test="plantPk!=null">
+					AND plantPk = #{plantPk}
+				</if>
+				<if test="lgCompanyPk!=null">
+					AND lgCompanyPk = #{lgCompanyPk}
+				</if>
+				 <if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+				<if test="@Ognl@isNotEmpty(pk)">
+					AND le.pk != #{pk}
+				</if>
+				<if test="memberType==1">
+				and lem.pk is not NULL
+				</if>
+				<if test="memberType==0">
+				and lem.pk is  NULL
+				</if>
+	</select>
+ <select id="searchLogisticsErpList" resultType="cn.cf.dto.LogisticsErpDto">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp
+		<include refid="searchGridWhere" />
+			ORDER BY name,provinceName ,cityName ,areaName ,townName
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+ </select>
+ <select id="searchLogisticsErpCount" parameterType="java.util.Map"
+		resultType="int">
+ SELECT
+		count(*)
+		FROM logistics_erp
+		<include refid="searchGridWhere" />
+		 
+ </select>
+ <select id="searchLogisticsErpCounts" resultType="map">
+ SELECT
+	count(1) AS allCounts,
+	IFNULL(
+		SUM(
+			CASE STATUS
+			WHEN 1 THEN
+				1
+			ELSE
+				0
+			END
+		),
+		0
+	) AS visableCounts,
+	IFNULL(
+		SUM(
+			CASE STATUS
+			WHEN 2 THEN
+				1
+			ELSE
+				0
+			END
+		),
+		0
+	) AS unVisableCounts
+FROM
+	logistics_erp
+	<include refid="searchGridWhere" />
+ </select>
+ 	<select id="getLogisticsByPk" resultType="cn.cf.dto.LogisticsErpDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM logistics_erp where pk = #{pk}
+	</select>
+</mapper>
+

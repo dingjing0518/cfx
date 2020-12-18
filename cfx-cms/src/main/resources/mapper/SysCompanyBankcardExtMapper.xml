@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysCompanyBankcardExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		  pk,
+		  companyPk,
+		  bankAccount,
+		  bankName,
+		  bankNo,
+		  ecbankPk,
+		  ecbankName,
+		  bankclscode
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(bankNo)">
+				AND bankNo = #{bankNo}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(bankclscode)">
+				AND bankclscode = #{bankclscode}			</if>
+		</where>
+	</sql>
+	
+	<select id="getByCompanyPk" resultType="cn.cf.dto.SysCompanyBankcardDto">
+	 
+	 select * from sys_company_bankcard where companyPk=#{companyPk} limit 0,1
+	
+	</select>
+	
+	
+	<update id="updateSysCompanyBankcard" parameterType="cn.cf.dto.SysCompanyBankcardDto">
+        UPDATE sys_company_bankcard
+		<set>
+			<if test="bankAccount != null and bankAccount !=''">
+			 bankAccount = #{bankAccount}, 
+			</if>
+			<if test="bankName != null and bankName !=''">
+			 bankName = #{bankName},  
+			</if>
+			<if test="bankNo != null and bankNo != ''">
+			 bankNo = #{bankNo}, 
+			</if>
+			<if test="bankNo != null and bankNo != ''">
+				bankclscode = #{bankclscode},
+			</if>
+		
+			 ecbankPk = #{ecbankPk},  
+
+			 ecbankName = #{ecbankName}
+		</set>
+        WHERE 
+        	pk = #{pk}
+	</update>
+	
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridEx" resultType="cn.cf.dto.SysCompanyBankcardDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		s.pk,
+		s.companyPk,
+		s.bankclscode,
+		<choose>
+			<when test="bankAccountCol == 'OPER_CM_SUPPLIER_ACCOUNT_COL_BANKNUM' or bankAccountCol == 'MARKET_CM_SUPPLIER_ACCOUNT_COL_BANKNUM'">
+				'*****' AS bankAccount,
+			</when>
+			<when test="bankAccountCol == 'OPER_CM_SUPPLIER_SUBACCOUNT_COL_BANKNUM' or bankAccountCol == 'MARKET_CM_SUPPLIER_SUBACCOUNT_COL_BANKNUM'">
+				'*****' AS bankAccount,
+			</when>
+			<otherwise>
+				s.bankAccount AS bankAccount,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="ecbankNameCol == 'OPER_CM_SUPPLIER_ACCOUNT_COL_BANKNAME' or ecbankNameCol == 'MARKET_CM_SUPPLIER_ACCOUNT_COL_BANKNAME'">
+				'*****' AS ecbankName,
+			</when>
+			<when test="ecbankNameCol == 'OPER_CM_SUPPLIER_SUBACCOUNT_COL_BANKNAME' or ecbankNameCol == 'MARKET_CM_SUPPLIER_SUBACCOUNT_COL_BANKNAME'">
+				'*****' AS ecbankName,
+			</when>
+			<otherwise>
+				s.ecbankName AS ecbankName,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="bankNoCol =='OPER_CM_SUPPLIER_ACCOUNT_COL_ACCNUM' or bankNoCol =='MARKET_CM_SUPPLIER_ACCOUNT_COL_ACCNUM'">
+				'*****' AS bankNo,
+			</when>
+			<when test="bankNoCol =='OPER_CM_SUPPLIER_SUBACCOUNT_COL_ACCNUM' or bankNoCol =='MARKET_CM_SUPPLIER_SUBACCOUNT_COL_ACCNUM'">
+				'*****' AS bankNo,
+			</when>
+			<otherwise>
+				s.bankNo AS bankNo,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="bankNameCol =='OPER_CM_SUPPLIER_ACCOUNT_COL_ACCNAME' or bankNameCol =='MARKET_CM_SUPPLIER_ACCOUNT_COL_ACCNAME'">
+				'*****' AS bankName,
+			</when>
+			<when test="bankNameCol =='OPER_CM_SUPPLIER_SUBACCOUNT_COL_ACCNAME' or bankNameCol =='MARKET_CM_SUPPLIER_SUBACCOUNT_COL_ACCNAME'">
+				'*****' AS bankName,
+			</when>
+			<otherwise>
+				s.bankName AS bankName,
+			</otherwise>
+		</choose>
+		s.ecbankPk,
+		<choose>
+			<when test="companyNameCol =='OPER_CM_SUPPLIER_ACCOUNT_COL_COMPANYNAME' or companyNameCol =='MARKET_CM_SUPPLIER_ACCOUNT_COL_COMPANYNAME'">
+				INSERT (c.name,3,5,'*****') as companyName
+			</when>
+			<when test="companyNameCol =='OPER_CM_SUPPLIER_SUBACCOUNT_COL_COMPANYNAME' or companyNameCol =='MARKET_CM_SUPPLIER_SUBACCOUNT_COL_COMPANYNAME'">
+				INSERT (c.name,3,5,'*****') as companyName
+			</when>
+			<otherwise>
+				c.name as companyName
+			</otherwise>
+		</choose>
+		FROM sys_company_bankcard  s
+		left join b2b_company c   on  s.companyPk = c.pk
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by c.${orderName} ${orderType}
+		</if>
+		<if test="limit != null and limit != ''">
+			LIMIT #{start}, #{limit}
+		</if>
+	</select>
+	
+	
+	
+	
+	<select id="checkCompanyAndBank" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT
+		count(*)
+		FROM sys_company_bankcard  
+		where 
+		 companyPk = #{companyPk}
+		and  ecbankPk = #{ecbankPk}
+		<if test="pk != null and pk != ''">
+		and	pk != #{pk}
+		</if>
+	</select>
+</mapper>
+

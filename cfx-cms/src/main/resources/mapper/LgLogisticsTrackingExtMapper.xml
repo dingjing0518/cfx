@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgLogisticsTrackingExtDao">
+
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="pk!=null and pk!=''">
+				AND l.pk = #{pk}
+			</if>
+			<if test="updateTime !=null and updateTime !=''">
+				AND str_to_date(l.updateTime, '%Y-%m-%d') >=
+				#{updateTime}
+			</if>
+			<if test="provinceName !=null and provinceName !='' ">
+				AND l.provinceName like '%${provinceName}%'
+			</if>
+			<if test="cityName !=null and cityName !='' ">
+				AND l.cityName like '%${cityName}%'
+			</if>
+			<if test="areaName !=null and areaName !='' ">
+				AND l.areaName like '%${areaName}%'
+			</if>
+			<if test="arrivalTime !=null and arrivalTime !='' ">
+				AND l.arrivalTime = #{arrivalTime}
+			</if>
+			<if test="meno !=null and meno !='' ">
+				AND l.meno like '%${meno}%'
+			</if>
+			<if test="orderPk !=null and orderPk !='' ">
+				AND l.orderPk = #{orderPk}
+			</if>
+		</where>
+	</sql>
+   
+   
+    <!-- 用于select查询公用抽取的列 -->
+    <select id="countLgLogisticsTracking" parameterType="java.util.Map"  resultType="int">
+        SELECT count(l.pk) FROM lg_logistics_tracking l
+        <include refid="searchGridWhere" />
+    </select>
+
+    <select id="getLgLogisticsTracking" parameterType="java.util.Map" resultType="cn.cf.dto.LgLogisticsTrackingDto">
+        SELECT * FROM lg_logistics_tracking l
+        <include refid="searchGridWhere" />
+        <if test="orderName != null">
+            order by l.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+	<insert id="insertExt" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_logistics_tracking (
+         pk, updateTime, provinceName,provincePk ,cityName,cityPk, areaName,areaPk, arrivalTime, meno, orderPk
+        ) VALUES (
+          REPLACE(UUID(),'-',''),now(), #{provinceName}, #{provincePk}, #{cityName},#{cityPk}, #{areaName},#{areaPk}, #{arrivalTime}, #{meno}, #{orderPk}        
+        )
+    ]]>
+	</insert>
+
+	<update id="updateExt" parameterType="cn.cf.model.LgLogisticsTracking">
+	 UPDATE lg_logistics_tracking 
+	 <set>
+	  <if test="provincePk !=null and provincePk!=''">
+	 provincePk = #{provincePk} ,
+	 </if>
+	 <if test="cityPk !=null and cityPk!=''">
+	 cityPk = #{cityPk} , 
+	 </if>
+	 <if test="areaPk !=null and areaPk!=''">
+	 areaPk = #{areaPk} ,
+	 </if>
+	 <if test="provinceName !=null and provinceName!=''">
+	 provinceName = #{provinceName} ,
+	 </if>
+	 <if test="cityName !=null and cityName!=''">
+	 cityName = #{cityName} , 
+	 </if>
+	 <if test="areaName !=null and areaName!=''">
+	 
+	 areaName = #{areaName} ,
+	 </if>
+	 <if test="arrivalTime !=null and arrivalTime!=''">
+	 arrivalTime = #{arrivalTime} ,
+	 </if>
+	  <if test="orderPk !=null and orderPk!=''">
+	 orderPk = #{orderPk} ,
+	 </if>
+	 <if test=" meno!=null and meno!=''">
+	 meno = #{meno} ,
+	 </if>
+	 updateTime =now()
+	 </set>
+      WHERE 
+        	pk = #{pk}  
+	</update>
+    
+</mapper>

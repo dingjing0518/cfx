@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bMemberDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,mobile,password,companyPk,companyName,insertTime,auditStatus,isVisable,rolePk,auditTime,auditPk,updateTime,registerSource,invitationCode,beInvitedCode,loginTime,headPortrait,refuseReason,employeeNumber,employeeName,parentPk
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(password)">
+				AND password = #{password}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPks)">
+				AND companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(rolePk)">
+				AND rolePk = #{rolePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(registerSource)">
+				AND registerSource = #{registerSource}
+			</if>
+			<if test="@Ognl@isNotEmpty(invitationCode)">
+				AND invitationCode = #{invitationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeBegin)">
+				AND loginTime >= #{loginTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeEnd)">
+				AND loginTime &lt;= #{loginTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				AND headPortrait = #{headPortrait}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getAdmin" resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT
+		JOIN b2b_member_role mr on m.pk= mr.memberPk
+		LEFT JOIN b2b_role r ON
+		mr.rolePk=r.pk
+		WHERE
+		r.companyType = 0
+		AND m.auditStatus = 2
+		AND
+		m.isVisable=1
+		AND m.companyPk = #{companyPk}
+		GROUP BY m.pk
+	</select>
+
+
+	<select id="getAdminByParent" parameterType="java.lang.String"
+		resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON
+		m.pk = mr.memberPk
+		LEFT JOIN b2b_role
+		r ON mr.rolePk = r.pk
+		WHERE
+		r.companyType = 0
+		AND m.companyPk = (
+		SELECT
+		parentPk
+		FROM
+		b2b_company
+		WHERE
+		pk = #{companyPk}
+		)
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY
+		m.pk
+	</select>
+
+
+	<select id="searchMemberByCompany" resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.pk,
+		m.mobile,
+		m.employeeName,
+		m.employeeNumber
+		FROM
+		b2b_member m
+		WHERE m.auditStatus = 2 and m.isVisable = 1 and
+		m.parentPk=-1
+		<if test="companyPks != null and companyPks !=''">
+			AND m.companyPk in
+			<foreach item="item" index="index" collection="companyPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		or m.pk in (SELECT
+		m.pk
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr
+		on
+		m.pk=mr.memberPk
+		LEFT JOIN b2b_role r ON mr.rolePk=r.pk
+		WHERE
+		r.companyType = 0
+		<if test="companyPks != null and companyPks !=''">
+			AND m.companyPk in
+			<foreach item="item" index="index" collection="companyPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY m.pk)
+	</select>
+
+
+	<update id="updateParentPk">
+		UPDATE b2b_member set parentPk="" where
+		parentPk=#{parentPk}
+	</update>
+
+
+
+	<update id="upgradeMember">
+		UPDATE b2b_member set level= #{gradeNumber} ,
+		levelName = #{gradeName} where
+		experience between #{numberStart} and
+		#{numberEnd}
+	</update>
+
+
+	<update id="upgradeMember2">
+		UPDATE b2b_member set level= #{gradeNumber} ,
+		levelName = #{gradeName} where experience >= #{numberStart}
+	</update>
+	<update id="updateLoginTime">
+		UPDATE b2b_member set loginTime= now() where pk = #{pk}
+	</update>
+
+	<select id="searchMemberGrid" resultType="cn.cf.dto.B2bMemberDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member
+		<include refid="searchGridWhere" />
+		order by insertTime desc
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+
+	<select id="memberGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_member
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="isRepeat" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where
+		mobile = #{mobile}
+		<if test="pk != null and pk!=''">
+			and pk !=#{pk}
+		</if>
+	</select>
+
+	<select id="searchMemberBySmsRole" resultType="cn.cf.dto.B2bMemberDto">
+
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT
+		JOIN sys_sms_role sr ON mr.rolePk = sr.rolePk
+		LEFT JOIN
+		sys_sms_template st on sr.smsName=st.`name`
+		WHERE
+		st.name=#{name}
+		AND
+		m.companyPk = #{companyPk}
+		GROUP BY
+		m.pk
+	</select>
+
+	<select id="getMemberByPk" resultType="cn.cf.dto.B2bMemberDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_member where pk = #{pk}
+	</select>
+
+
+	<select id="searchAccumulativeMember" parameterType="java.util.Map"
+		resultType="int">
+		select COUNT(*) from b2b_member
+		where insertTime >=
+		DATE_FORMAT(date_add(#{periodTimeStart}, interval 1
+		day),'%Y-%m-%d')
+		and insertTime &lt;= DATE_FORMAT(date_add(#{periodTimeStart}, interval
+		#{periodTime} day),'%Y-%m-%d')
+		AND addPk =#{addPk}
+
+		<!-- SELECT COUNT(*) FROM b2b_member WHERE addPk =#{addPk} AND insertTime 
+			>DATE_SUB(NOW(),INTERVAL #{periodTime} day) -->
+	</select>
+
+	<select id="searchMemberByEmployeeNumber" resultType="cn.cf.dto.B2bMemberDtoEx">
+		select m.*
+		from b2b_member m left join
+		b2b_company c on m.companyPk = c.pk
+		where
+		employeeNumber =#{employeeNumber}
+		and (c.pk = (select companyPk from
+		b2b_store where pk = #{storePk})
+		or c.parentPk = (select companyPk from
+		b2b_store where pk = #{storePk}))
+		ORDER BY if(m.parentPk ='-1',0,1),
+		m.parentPk ASC
+	</select>
+</mapper>
+

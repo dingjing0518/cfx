@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLotteryAwardExDao">
+
+
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bLotteryAwardExDto"
+		parameterType="java.util.Map">
+		SELECT
+			aw.pk AS pk,
+			aw.activityPk AS activityPk,
+			aw.NAME AS name,
+			aw.awardType AS awardType,
+			aw.awardVariety AS awardVariety,
+			aw.awardName AS awardName,
+			aw.relevancyPk AS relevancyPk,
+			aw.amount AS amount,
+			aw.awardPercent AS awardPercent,
+			aw.insertTime AS insertTime,
+			aw.updateTime AS updateTime,
+			aw.isDelete AS isDelete,
+			aw.isVisable AS isVisable,
+			aw.awardRule AS awardRule,
+			aw.STATUS AS status,
+			aw.awardSort AS awardSort,
+			aw.showSort AS showSort,
+		    aw.packageNumber AS packageNumber,
+			concat_ws("--",DATE_FORMAT(startTime,'%Y-%m-%d %H:%i'),DATE_FORMAT(endTime,'%Y-%m-%d %H:%i')) AS rangeTime,
+			ac.name AS activityName,
+			ac.activityType AS activityType
+		FROM
+			b2b_lottery_award aw
+		LEFT JOIN (select `name`,activityType,pk from b2b_lottery_activity) ac ON aw.activityPk = ac.pk
+		where 1=1 AND aw.isDelete = 1
+		<if test="awardType != null">
+				AND aw.awardType = #{awardType}			</if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="searchGridCountEx" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM
+		b2b_lottery_award aw
+		LEFT JOIN b2b_lottery_activity ac ON aw.activityPk = ac.pk
+		where
+		1=1 AND aw.isDelete = 1
+		<if test="awardType != null">
+			AND aw.awardType = #{awardType}
+		</if>
+	</select>
+
+	<!-- 根据pk查询奖项 -->
+	<select id="getLotteryAwardByAwardPk" resultType="cn.cf.dto.B2bLotteryAwardExDto"
+		parameterType="java.lang.String">
+		SELECT
+		aw.pk AS pk,
+		aw.activityPk AS activityPk,
+		aw.NAME AS name,
+		aw.awardType AS awardType,
+		aw.awardVariety AS awardVariety,
+		aw.awardName AS awardName,
+		aw.relevancyPk AS relevancyPk,
+		aw.amount AS amount,
+		aw.awardPercent AS awardPercent,
+		aw.insertTime AS insertTime,
+		aw.updateTime AS updateTime,
+		aw.isDelete AS isDelete,
+		aw.isVisable AS isVisable,
+		aw.awardRule AS awardRule,
+		aw.STATUS AS status,
+		aw.awardSort AS awardSort,
+		aw.showSort AS showSort,
+		aw.startTime AS startTime,
+		aw.endTime AS endTime,
+		aw.packageNumber AS packageNumber,
+		ac.name AS activityName,
+		ac.activityType AS activityType
+		FROM
+		b2b_lottery_award aw
+		LEFT JOIN b2b_lottery_activity ac ON aw.activityPk = ac.pk
+		where
+		aw.pk = #{pk}
+	</select>
+
+    <update id="updateAwardObjEx" parameterType="cn.cf.model.B2bLotteryAward">
+        UPDATE b2b_lottery_award
+        <set>
+            <if test="activityPk != null and activityPk !=''">
+                activityPk = #{activityPk},
+            </if>
+            <if test="name != null and name !=''">
+                name = #{name},
+            </if>
+            <if test="awardType != null and awardType !=''">
+                awardType = #{awardType},
+            </if>
+            <if test="awardVariety != null and awardVariety !=''">
+                awardVariety = #{awardVariety},
+            </if>
+            <if test="awardName != null and awardName !=''">
+                awardName = #{awardName},
+            </if>
+            <if test="relevancyPk != null and relevancyPk !=''">
+                relevancyPk = #{relevancyPk},
+            </if>
+
+                amount = #{amount},
+
+
+             awardPercent = #{awardPercent},
+
+            <if test="insertTime != null">
+                insertTime = #{insertTime},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime},
+            </if>
+            <if test="isDelete != null and isDelete !=''">
+                isDelete = #{isDelete},
+            </if>
+            <if test="isVisable != null and isVisable !=''">
+                isVisable = #{isVisable},
+            </if>
+            <if test="awardRule != null and awardRule !=''">
+                awardRule = #{awardRule},
+            </if>
+            <if test="status != null and status !=''">
+                status = #{status},
+            </if>
+				awardSort = #{awardSort},
+                showSort = #{showSort},
+                startTime = #{startTime},
+                endTime = #{endTime},
+
+            <if test="packageNumber != null and packageNumber !=''">
+                packageNumber = #{packageNumber}
+            </if>
+
+        </set>
+        where pk = #{pk}
+    </update>
+
+<update id="updateAwardStatus" parameterType="cn.cf.dto.B2bLotteryAwardExDto">
+	UPDATE b2b_lottery_award
+	<set>
+		<if test="isDelete != null and isDelete !=''">
+			isDelete = #{isDelete},
+		</if>
+		<if test="isVisable != null and isVisable !=''">
+			isVisable = #{isVisable}
+		</if>
+	</set>
+	where pk = #{pk}
+
+
+</update>
+
+		
+</mapper>
+

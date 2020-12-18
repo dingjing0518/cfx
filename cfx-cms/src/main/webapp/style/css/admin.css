@@ -1,0 +1,60 @@
+#containerscale{
+	width:900px;
+	margin-left:50px;
+	margin:0 auto;
+	margin-top:170px;
+}
+.bgscale{
+	font-family: 'Droid Sans', sans-serif;
+    font-size: 100%;
+    background: url(../images/admin/bg.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+.imgscale{
+	-webkit-transform:scale(0.6);
+	-moz-transform:scale(0.6);
+	-o-transform:scale(0.6);
+	-ms-transform:scale(0.6);
+	float:left;
+	margin-left:-50px;
+	margin-right:-50px;
+	margin-top:-30px;
+	-webkit-transition-duration: 0.5s;
+	-moz-transition-duration: 0.5s;
+	-o-transition-duration: 0.5s;
+	-ms-transition-duration: 0.5s;
+	width:400px;
+	height:225px;
+	display:block;
+	text-align:center;
+	}
+.imgscale img{border:5px solid #fff;border-radius:5px;}
+.imgscale:hover{
+	-webkit-transform:scale(0.8);
+	-webkit-box-shadow:0px 0px 30px #ccc;
+	-moz-transform:scale(0.8);
+	-moz-box-shadow:0px 0px 30px #ccc;	
+	-ms-transform:scale(0.8);
+	-ms-box-shadow:0px 0px 30px #ccc;	
+	-o-transform:scale(0.8);
+	-o-box-shadow:0px 0px 30px #ccc;	
+}	 
+.icons{
+	color:#333;
+	font-size:10em;
+	text-align:center;
+	display:block;
+	margin-top:35px;
+}
+.imgscale span{
+	text-align:center;
+	font-size:3.5em;
+	color:#333;
+	display:block;
+}
+.imgscale a{
+    text-decoration:none;
+}

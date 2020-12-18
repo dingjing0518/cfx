@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysSmsTemplateDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		templateCode,freeSignName,content,isSms,isMail,name,type,flag,isDelete
+	    ]]>
+	</sql>
+
+	<select id="getByName" resultType="cn.cf.dto.SysSmsTemplateDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		templateCode, freeSignName, content, isSms, content as contentStr, isMail,flag,type
+		FROM sys_sms_template where name = #{name}	and isSms=1 and isDelete=1	</select>
+</mapper>
+

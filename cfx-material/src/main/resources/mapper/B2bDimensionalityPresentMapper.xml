@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bDimensionalityPresentDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,rewardPk,companyPk,companyName,contactsTel,dimenCategory,dimenName,dimenType,dimenTypeName,periodType,fibreShellNumber,empiricalValue,isDelete,isVisable,insertTime,updateTime,fibreShellRatio,empiricalRatio,levelRatio
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_dimensionality_present (
+         pk, rewardPk, companyPk, companyName, contactsTel, dimenCategory, 
+         dimenName, dimenType, dimenTypeName, periodType, fibreShellNumber,
+          empiricalValue, isDelete, isVisable, insertTime, updateTime,fibreShellRatio,
+          empiricalRatio,fbGradeRatio,emGradeRatio,memberPk,memberName,type,total,orderNumber,fbShellNumberWeighting,empiricalValueWeighting
+        ) VALUES (
+         #{pk}, #{rewardPk}, #{companyPk}, #{companyName}, #{contactsTel}, #{dimenCategory}, 
+         #{dimenName}, #{dimenType}, #{dimenTypeName}, #{periodType}, #{fibreShellNumber}, 
+         #{empiricalValue}, 1, 1, now(), now(),#{fibreShellRatio},
+         #{empiricalRatio}, #{fbGradeRatio},#{emGradeRatio}, #{memberPk},#{memberName},#{type},#{total},#{orderNumber},#{fbShellNumberWeighting},#{empiricalValueWeighting}
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bDimensionalityPresent">
+    <![CDATA[
+        UPDATE b2b_dimensionality_present SET
+	        rewardPk = #{rewardPk} , companyPk = #{companyPk} , companyName = #{companyName} , contactsTel = #{contactsTel} , dimenCategory = #{dimenCategory} , dimenName = #{dimenName} , dimenType = #{dimenType} , dimenTypeName = #{dimenTypeName} , periodType = #{periodType} , fibreShellNumber = #{fibreShellNumber} , empiricalValue = #{empiricalValue} , isDelete = #{isDelete} , isVisable = #{isVisable} , insertTime = #{insertTime} , updateTime = #{updateTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bDimensionalityPresent">
+    <![CDATA[
+        DELETE FROM b2b_dimensionality_present WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(rewardPk)">
+				AND rewardPk = #{rewardPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND periodType = #{periodType}			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND fibreShellNumber = #{fibreShellNumber}			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND empiricalValue = #{empiricalValue}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateStartTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') >= #{updateStartTime}			</if>
+			<if test="@Ognl@isNotEmpty(updateEndTime)">
+				AND str_to_date(updateTime,'%Y-%m-%d') &lt;= #{updateEndTime}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_dimensionality_present
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where pk = #{pk}	</select>
+	<select id="getByRewardPk" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where rewardPk = #{rewardPk}	</select>
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where companyPk = #{companyPk}	</select>
+	<select id="getByCompanyName" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where companyName = #{companyName}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where contactsTel = #{contactsTel}	</select>
+	<select id="getByDimenName" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where dimenName = #{dimenName}	</select>
+	<select id="getByDimenTypeName" resultType="cn.cf.dto.B2bDimensionalityPresentDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_dimensionality_present where dimenTypeName = #{dimenTypeName}	</select>
+</mapper>
+

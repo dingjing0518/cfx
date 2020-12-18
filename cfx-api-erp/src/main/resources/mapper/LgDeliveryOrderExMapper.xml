@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderDaoEx">
+
+
+	<select id="getByMap" resultType="cn.cf.dto.LgDeliveryOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM lg_delivery_order
+		where orderPk = #{orderPk} and deliveryNumber = #{deliveryNumber}
+	</select>
+
+	<select id="getCarByMap" resultType="cn.cf.dto.LgCarDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM lg_car where plateNumber = #{plateNumber}
+		and companyPk = #{companyPk} and isDeleted = 1
+	</select>
+
+	<select id="getDriverByMap" resultType="cn.cf.dto.LgDriverDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM lg_driver where name = #{name}
+		and companyPk = #{companyPk} and isDelete = 1
+	</select>
+
+
+
+	<insert id="BatchDeliveryGoods" parameterType="java.util.List">
+		insert into lg_delivery_order_goods
+		(pk, deliveryPk, goodsPk, productName, productPk, varietiesName,
+		seedvarietyName,
+		specName, seriesName, gradeName, gradePk, batchNumber, weight, boxes,
+		orderNumber, tareWeight,
+		originalFreight, presentFreight, goodsName, goodsOriginalFreight, goodsPresentFreight,
+		unit
+		)
+		values
+		<foreach collection="list" item="i" index="index" separator=",">
+			( #{i.pk}, #{i.deliveryPk}, #{i.goodsPk}, #{i.productName},
+			#{i.productPk}, #{i.varietiesName}, #{i.seedvarietyName},
+			#{i.specName}, #{i.seriesName}, #{i.gradeName}, #{i.gradePk},
+			#{i.batchNumber}, #{i.weight}, #{i.boxes},
+			#{i.orderNumber}, #{i.tareWeight},
+			#{i.originalFreight}, #{i.presentFreight}, #{i.goodsName}, #{i.goodsOriginalFreight},
+			#{i.goodsPresentFreight}, #{i.unit}
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="insertDeliveryGoods">
+		insert into lg_delivery_order_goods
+		(pk, deliveryPk, goodsPk, productName, productPk, varietiesName,
+		seedvarietyName,
+		specName, seriesName, gradeName, gradePk, batchNumber, weight, boxes,
+		orderNumber, tareWeight,
+		originalFreight, presentFreight, goodsName, goodsOriginalFreight, goodsPresentFreight,
+		unit
+		)
+		values
+			( #{pk}, #{deliveryPk}, #{goodsPk}, #{productName},
+			#{productPk}, #{varietiesName}, #{seedvarietyName},
+			#{specName}, #{seriesName}, #{gradeName}, #{gradePk},
+			#{batchNumber}, #{weight}, #{boxes},
+			#{orderNumber}, #{tareWeight},
+			#{originalFreight}, #{presentFreight}, #{goodsName}, #{goodsOriginalFreight},
+			#{goodsPresentFreight}, #{unit}
+			)
+	</insert>
+	
+	<update id="updateDeliveryGoods">
+		update lg_delivery_order_goods
+		<set>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="boxes != null">
+				boxes = #{boxes},
+			</if>
+			<if test="originalFreight != null">
+				originalFreight = #{originalFreight},
+			</if>
+			<if test="presentFreight != null">
+				presentFreight = #{presentFreight},
+			</if>
+		</set>
+			where pk = #{pk}
+	</update>
+
+
+
+
+	<update id="updatelgDeliveryOrder" parameterType="cn.cf.model.LgDeliveryOrder">
+		update lg_delivery_order
+		<set>
+		<if test="driver!=null and driver!=''">
+			driver = #{driver,jdbcType=VARCHAR},
+		</if>
+		<if test="driverPk!=null and driverPk!=''">
+
+			driverPk = #{driverPk,jdbcType=VARCHAR},
+		</if>
+		<if test="driverContact!=null and driverContact!=''">
+
+			driverContact = #{driverContact,jdbcType=VARCHAR},
+		</if>
+		<if test="carPk!=null and carPk!=''">
+
+			carPk = #{carPk,jdbcType=VARCHAR},
+		</if>
+		<if test="carPlate!=null and carPlate!=''">
+
+			carPlate = #{carPlate,jdbcType=VARCHAR},
+		</if>
+		<if test="orderStatus!=null and orderStatus!=''">
+			orderStatus = #{orderStatus,jdbcType=TINYINT},
+		</if>
+		</set>
+		
+		where pk = #{pk}
+	</update>
+</mapper>
+

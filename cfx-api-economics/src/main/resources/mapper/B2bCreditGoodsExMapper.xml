@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCreditGoodsDaoEx">
+
+<update id="updateByCreditGoods">
+	update b2b_credit_goods
+	<set>
+		<if test="pledgeUsedAmount != null">
+			pledgeUsedAmount = #{pledgeUsedAmount},
+		</if>
+		<if test="bankAccountNumber != null">
+			bankAccountNumber = #{bankAccountNumber},
+		</if>
+	</set>
+	where companyPk = #{companyPk}  and bankPk = #{bankPk}
+	<if test="goodsType != null">
+		and goodsType =#{goodsType}
+	</if>
+</update>
+	
+	<select id="getCreditGoods" resultType="cn.cf.entity.B2bCreditGoodsDtoMa">
+	<![CDATA[
+		SELECT
+			cg.pk,
+			cg.companyPk,
+			eg.goodsType,
+			cg.economicsGoodsPk as economicsGoodsPk,
+			eg.NAME AS economicsGoodsName,
+			cg.creditStartTime as startTime,
+			cg.creditEndTime as endTime,
+			cg.platformAmount,
+			cg.pledgeUsedAmount,
+			cg.pledgeAmount,
+			IF(cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0) <0,0,cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0)) AS avaiableAmount,
+			eg.proportion,
+			cg.totalRate,
+			cg.bankRate,
+			cg.term,
+			cg.sevenRate,
+			cg.bank,
+			cg.bankPk,
+			cg.bankAccountNumber,
+			cg.status,
+			cg.isVisable
+		FROM
+			b2b_credit_goods cg
+		INNER JOIN b2b_economics_goods eg ON cg.economicsGoodsPk = eg.pk
+		where 1 = 1
+	]]>	
+		<if test="pk != null and pk != ''">
+			and cg.pk = #{pk}
+		</if>
+		<if test="companyPk != null and companyPk != ''">
+			and cg.companyPk = #{companyPk}
+		</if>
+		<if test="status != null and status != ''">
+			and cg.status = #{status}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and cg.creditEndTime >= date_format(now(),'%y-%m-%d')
+		</if>
+		<if test="endTime != null and endTime != ''">
+		<![CDATA[	and cg.creditStartTime <= date_format(now(),'%y-%m-%d') ]]>
+		</if>
+		<if test="isVisable != null and isVisable !=''">
+			and eg.status = #{isVisable}
+		</if>
+		<if test="isDelete != null and isDelete !=''">
+			and eg.isDelete = #{isDelete}
+		</if>
+	</select>
+	
+	
+	<select id="getEconomicsGoods" resultType="cn.cf.entity.B2bCreditGoodsDtoMa">
+	<![CDATA[
+		SELECT
+			cg.pk,
+			eg.goodsType,
+			cg.economicsGoodsPk as economicsGoodsPk,
+			eg.NAME AS economicsGoodsName,
+			cg.creditStartTime as startTime,
+			cg.creditEndTime as endTime,
+			cg.platformAmount,
+			cg.pledgeUsedAmount,
+			IF(cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0) <0,0,cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0)) AS avaiableAmount,
+			eg.proportion,
+			cg.totalRate,
+			cg.bankRate,
+			cg.term,
+			cg.sevenRate,
+			cg.bank,
+			cg.bankPk,
+			cg.bankAccountNumber,
+			cg.status,
+			IFNULL(cg.isVisable,2) as isVisable
+		FROM
+			b2b_economics_goods eg
+		LEFT JOIN  b2b_credit_goods cg ON eg.pk =cg.economicsGoodsPk and cg.companyPk = #{companyPk}
+		where 1 = 1
+	]]>		 
+		<if test="isVisable != null and isVisable !=''">
+			and eg.status = #{isVisable}
+		</if>
+		<if test="isDelete != null and isDelete !=''">
+			and eg.isDelete = #{isDelete}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and cg.creditEndTime >= date_format(now(),'%y-%m-%d')
+		</if>
+	 
+	</select>
+	<select id="getCreditGroupBank" resultType="cn.cf.dto.B2bCreditGoodsDto">
+		select * from 	b2b_credit_goods where companyPk = #{companyPk} 
+		group by bankPk
+	</select>
+</mapper>
+

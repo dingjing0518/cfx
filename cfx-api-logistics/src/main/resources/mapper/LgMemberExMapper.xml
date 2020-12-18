@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgMemberDaoEx">
+
+	<select id="getByMobile" resultType="cn.cf.dto.LgMemberDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		`lg_member`.`pk`,
+		`lg_member`.`isDelete`,
+		`lg_member`.`auditStatus`,
+		`lg_member`.`insertTime`,
+		`lg_member`.`updateTime`,
+		`province`,
+		`provinceName`,
+		`city`,
+		`cityName`,
+		`area`,
+		`areaName`,
+		`contacts`,
+		`contactsTel`,
+		`businessLicense`,
+		`blUrl`,
+		lg_member.parantPk,
+		`lg_member`.`isVisable`,
+		`auditTime`,
+		`lg_member`.`headPortrait` ,
+		`lg_member`.`mobile`,
+		`lg_member`.`password`,
+		`lg_company`.pk as
+		`companyPk`,
+		`lg_company`.name as `name`
+		FROM
+		`lg_member` 
+		LEFT JOIN
+		`lg_company` ON `lg_member`.`companyPk`=`lg_company`.`pk`
+		where mobile
+		= #{mobile} and `lg_company`.isDelete=1 and lg_member.isDelete=1
+	</select>
+
+	<update id="update" parameterType="cn.cf.model.LgMember">
+		UPDATE lg_member
+		<trim prefix="set" suffixOverrides=",">
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="companyPk != null ">
+				companyPk = #{companyPk},
+			</if>
+			<if test="isDelete != null and isDelete != ''">
+				isDelete = #{isDelete},
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="updateTime != null ">
+				updateTime = #{updateTime},
+			</if>
+			<if test="headPortrait != null and headPortrait != ''">
+				headPortrait = #{headPortrait},
+			</if>
+			updateTime = now()
+		</trim>
+		WHERE
+		pk = #{pk}
+	</update>
+
+
+	<!-- 根据memberPk查询 -->
+	<select id="getMemberByPk" resultType="cn.cf.dto.LgMemberDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		`lg_member`.`pk`,
+		`lg_member`.`isDelete`,
+		`lg_member`.`auditStatus`,
+		`lg_member`.`insertTime`,
+		`lg_member`.`updateTime`,
+		lg_company.`province`,
+		lg_company.`provinceName`,
+		lg_company.`city`,
+		lg_company.`cityName`,
+		lg_company.`area`,
+		lg_company.`areaName`,
+		lg_company.`contacts`,
+		lg_company.`contactsTel`,
+		lg_company.`businessLicense`,
+		lg_company.`blUrl`,
+		lg_company.`isVisable`,
+		lg_company.`auditTime`,
+		`lg_member`.`headPortrait`,
+		`lg_member`.`mobile`,
+		`lg_member`.`password`,
+		`lg_company`.pk as `companyPk`,
+		`lg_company`.name as `companyName`,
+		lg_member.parantPk
+		FROM
+		`lg_member` LEFT JOIN
+		`lg_company` ON `lg_member`.`companyPk`=`lg_company`.`pk`
+		where
+		lg_member.pk = #{memberPk} and `lg_company`.isDelete=1
+	</select>
+
+	<select id="isReapetMobile" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1) FROM lg_member
+		WHERE
+		mobile = #{mobile}
+		AND isDelete =1
+		<if test="pk !=null and pk!=''">
+			AND pk != #{pk}
+		</if>
+
+	</select>
+
+	<select id="searchRoleMember" resultType="cn.cf.dto.LgMemberDtoEx"
+		parameterType="java.util.Map">
+		SELECT * FROM lg_member  m
+		<if test="@Ognl@isNotEmpty(rolePk)">
+		LEFT JOIN lg_member_role r  ON r.memberPk = m.pk and r.rolePk = #{rolePk}
+		</if>
+		WHERE
+		m.isDelete =1 
+		<if test="@Ognl@isNotEmpty(rolePk)">
+			AND r.rolePk = #{rolePk}
+		</if>
+		<if test="@Ognl@isNotEmpty(parantPk)">
+			AND m.parantPk = #{parantPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(isVisable)">
+			AND m.isVisable = #{isVisable}
+		</if>
+		<if test="@Ognl@isNotEmpty(mobile)">
+			and m.mobile like #{mobile}
+		</if>
+<!-- 		<if test="@Ognl@isNotEmpty(startTime)">
+			AND DATE_FORMAT(m.updateTime,'%Y-%m-%d') = #{startTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(endTime)">
+			AND DATE_FORMAT(m.updateTime,'%Y-%m-%d') = #{endTime}
+		</if> -->
+		<if test="@Ognl@isNotEmpty(startTime)">
+        	and m.updateTime &gt;=CONCAT(#{startTime},' 00:00:00')
+        </if>
+		<if test="@Ognl@isNotEmpty(endTime)">
+        	and updateTime &lt;=CONCAT(#{endTime},' 23:59:59')
+        </if>
+		order by m.updateTime desc
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	
+	</select>
+
+	<select id="countRoleMember" resultType="int" parameterType="java.util.Map">
+		SELECT count(*) FROM lg_member  m
+		<if test="@Ognl@isNotEmpty(rolePk)">
+		LEFT JOIN lg_member_role r  ON r.memberPk = m.pk and r.rolePk = #{rolePk}
+		</if>
+		WHERE  m.isDelete =1 
+		<if test="@Ognl@isNotEmpty(parantPk)">
+			AND m.parantPk = #{parantPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(isVisable)">
+			AND m.isVisable = #{isVisable}
+		</if>
+		<if test="@Ognl@isNotEmpty(mobile)">
+			and m.mobile like #{mobile}
+		</if>
+		<if test="@Ognl@isNotEmpty(startTime)">
+			AND DATE_FORMAT(m.updateTime,'%Y-%m-%d') = #{startTime}
+		</if>
+		<if test="@Ognl@isNotEmpty(endTime)">
+			AND DATE_FORMAT(m.updateTime,'%Y-%m-%d') = #{endTime}
+		</if>
+	</select>
+</mapper>

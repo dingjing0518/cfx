@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bSpecDaoEx">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,sort,isDelete,isVisable,insertTime,parentPk
+	    ]]>
+	</sql>
+
+
+	<select id="searchChList" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_spec
+		where isDelete = #{isDelete} and isVisable = #{isVisable}
+		and parentPk != -1
+		<if test="parentPks != null and parentPks != '-1' and parentPks !=''">
+			and parentPk in
+			<foreach item="item" index="index" collection="parentPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="name != null and name !=''">
+			and name like '%${name}%'
+		</if>
+		<if test="orderName == null">
+			order by sort desc
+		</if>
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="start !=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchChCount" resultType="int"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM b2b_spec
+		where isDelete = #{isDelete} and isVisable = #{isVisable}
+		and parentPk != -1
+		<if test="parentPks != null and parentPks != '-1' and parentPks !=''">
+			and parentPk in
+			<foreach item="item" index="index" collection="parentPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="name != null and name !=''">
+			and name like '%${name}%'
+		</if>
+	</select>
+	<select id="searchSeriesNameBySeriesPks" resultType="cn.cf.dto.B2bSpecDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,name
+		FROM b2b_spec
+		where isDelete = 1 and isVisable =1
+		<if test="seriesPks != null and seriesPks !=''">
+			and pk in
+			<foreach item="item" index="index" collection="seriesPks"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		</select>
+</mapper>

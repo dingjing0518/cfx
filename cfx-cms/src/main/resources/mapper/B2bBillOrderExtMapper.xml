@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillOrderExtDao">
+
+	<!-- 用于select查询公用抽取的列 -->
+<sql id="columns">
+	    <![CDATA[
+		orderNumber,serialNumber,status,amount,insertTime,purchaserPk,purchaserName,supplierPk,supplierName,storePk,storeName,goodsName,goodsShotName,returnUrl
+	    ]]>
+	</sql>
+
+	
+	
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber like '%${orderNumber}%'			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND serialNumber  like '%${serialNumber}%'				</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(amount)">
+				AND amount = #{amount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND str_to_date(insertTime, '%Y-%m-%d') >= #{insertTimeBegin}	</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND str_to_date(insertTime, '%Y-%m-%d') &lt;= #{insertTimeEnd}		</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName like '%${purchaserName}%'					</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName like '%${goodsName}%'		</if>
+			<if test="@Ognl@isNotEmpty(goodsShotName)">
+				AND goodsShotName = #{goodsShotName}			</if>
+			<if test="@Ognl@isNotEmpty(returnUrl)">
+				AND returnUrl = #{returnUrl}			</if>
+			<if test="@Ognl@isNotEmpty(insertTime)">
+				AND str_to_date(insertTime, '%Y-%m-%d %H:%i:%s') &lt;= #{insertTime}		</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCountExt" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_bill_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bBillOrderExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		orderNumber,serialNumber,status,amount,billAmount,insertTime,
+		purchaserPk,supplierPk,storePk,goodsName,goodsShotName,returnUrl,
+		(
+			CASE status
+			WHEN -1 THEN
+				'取消处理中'
+			WHEN 1 THEN
+				'处理中'
+			WHEN 2 THEN
+				'成功'
+			WHEN 3 THEN
+				'失败'
+			WHEN 4 THEN
+				'锁定'
+			WHEN 5 THEN
+				'完成处理中'
+			END
+			) as statusName,
+			
+		<choose>
+			<when test="supplierCol == 'EM_ECONOMICS_BILL_PAYRECORD_COL_SUPPLIER'">
+				INSERT (supplierName, 3, 5, '*****') as supplierName,
+			</when>
+			<otherwise>
+				supplierName as supplierName,
+			</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="purcheserCol == 'EM_ECONOMICS_BILL_PAYRECORD_COL_PURCHESER'">
+				INSERT (purchaserName, 3, 5, '*****') as purchaserName,
+			</when>
+			<otherwise>
+				purchaserName as purchaserName,
+			</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="storeNameCol == 'EM_ECONOMICS_BILL_PAYRECORD_COL_STORENAME'">
+				INSERT (storeName, 3, 5, '*****') as storeName
+			</when>
+			<otherwise>
+				storeName as storeName
+			</otherwise>
+		</choose>
+		
+		FROM b2b_bill_order
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	
+</mapper>

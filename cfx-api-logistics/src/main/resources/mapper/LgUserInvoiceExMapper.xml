@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgUserInvoiceDaoEx">
+
+	<!-- 根据companyPk或者userPk查询发票信息 -->
+    <select id="getByCompanyPkOrUserPk" resultType="cn.cf.model.LgUserInvoice" >
+              SELECT pk,userPk,companyPk,companyName,taxidNumber,regPhone,bankAccount,bankName,regAddress,
+               province,provinceName,city,cityName,`area`,areaName,recipt
+               FROM `lg_user_invoice`
+               WHERE companyPk = #{companyPk} or userPk=#{userPk}
+    </select>
+
+	<!-- 对发票信息做存在性验证 -->
+    <select id="searchEntity" parameterType="cn.cf.dto.LgUserInvoiceDto" resultType="int">
+        select count(1) from lg_user_invoice where 1=1
+        <if test="@Ognl@isNotEmpty(pk)">
+            AND pk != #{pk}
+        </if>
+        <if test="@Ognl@isNotEmpty(userPk)">
+            AND ( userPk = #{userPk} or companyPk = #{companyPk} )
+        </if>
+    </select>
+
+
+    <update id="updatePartField" parameterType="cn.cf.model.LgUserInvoice">
+        UPDATE lg_user_invoice
+         <trim prefix="set" suffixOverrides=",">
+            <if test="companyPk != null and companyPk !=''">
+                companyPk = #{companyPk} ,
+            </if>
+            <if test="companyName != null and companyName !=''">
+                companyName = #{companyName} ,
+            </if>
+            <if test="taxidNumber != null and taxidNumber !=''">
+                taxidNumber = #{taxidNumber} ,
+            </if>
+            <if test="regPhone != null and regPhone !=''">
+                regPhone = #{regPhone} ,
+            </if>
+            <if test="regAddress != null and regAddress !=''">
+                regAddress = #{regAddress} ,
+            </if>
+            <if test="bankAccount != null and bankAccount !=''">
+                bankAccount = #{bankAccount} ,
+            </if>
+            <if test="cityName != null and cityName !=''">
+                cityName = #{cityName} ,
+            </if>
+            <if test="city != null and city !=''">
+                city = #{city} ,
+            </if>
+            <if test="area != null and area !=''">
+                area = #{area} ,
+            </if>
+            <if test="areaName != null and areaName !=''">
+                areaName = #{areaName} ,
+            </if>
+            <if test="bankName != null and bankName !=''">
+                bankName = #{bankName} ,
+            </if>
+            <if test="province != null and province !=''">
+                province = #{province} ,
+            </if>
+            <if test="provinceName != null and provinceName !=''">
+                provinceName = #{provinceName} ,
+            </if>
+            <if test="recipt != null and recipt !=''">
+                recipt = #{recipt} ,
+            </if>
+        </trim>
+        WHERE
+        pk = #{pk}
+    </update>
+    
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgCompanyDaoEx">
+
+	<!-- 根据物流承运商名字查询物流承运商 -->
+	<select id="getLogisticsByName" resultType="cn.cf.dto.LgCompanyDto">
+		SELECT
+		lg_company.`pk`,lg_company.`name`,lg_company.`city`,lg_company.`cityName`,lg_company.`area`,lg_company.`areaName`,
+		lg_company.`insertTime`,lg_company.`auditTime`,lg_company.`updateTime`,lg_company.`isDelete`,lg_company.`auditStatus`,
+		lg_company.`isVisable`,lg_company.`province`,lg_company.`provinceName`,
+		lg_company.`contacts`,lg_company.`contactsTel`,lg_company.`businessLicense`,lg_company.`blUrl`,
+		lg_company.`headPortrait`
+		FROM lg_company
+		WHERE
+		lg_company.`name`=#{logisticsName,jdbcType=VARCHAR}
+		and lg_company.isDelete=1
+		and lg_company.auditStatus=1 limit 1
+	</select>
+	<select id="searchLgCompanyList" resultType="cn.cf.dto.LgCompanyDto">
+		SELECT
+		pk,
+		`name`
+		FROM
+		lg_company
+		WHERE
+		isDelete = 1
+		<if test="@Ognl@isNotEmpty(purchaserName)">
+			and NAME like '%${logisticsName}%'
+		</if>
+		AND auditStatus = 1
+		AND isVisable = 1
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+
+	</select>
+</mapper>
+

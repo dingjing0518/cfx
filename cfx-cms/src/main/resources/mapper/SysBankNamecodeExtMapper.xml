@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysBankNamecodeExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		bnc_id,bankno,bankstatus,banktype,bankclscode,clearbank,legalperson,topbanklist,topbankno,topbankname,rplbankno,peoplebankno,ccpcnodeno,citycode,bankname,bankaliasname,signflag,address,postcode,telephone,email,remark,cnapsgeneration,saccstatus,saccaltdate,saccalttime,remark1,changetype,updatedate,updateno,effectdate,invaliddate,create_time
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(bncId)">
+				AND bnc_id = #{bncId}			</if>
+			<if test="@Ognl@isNotEmpty(bankno)">
+				AND bankno = #{bankno}			</if>
+			<if test="@Ognl@isNotEmpty(bankstatus)">
+				AND bankstatus = #{bankstatus}			</if>
+			<if test="@Ognl@isNotEmpty(banktype)">
+				AND banktype = #{banktype}			</if>
+			<if test="@Ognl@isNotEmpty(bankclscode)">
+				AND bankclscode = #{bankclscode}			</if>
+			<if test="@Ognl@isNotEmpty(clearbank)">
+				AND clearbank = #{clearbank}			</if>
+			<if test="@Ognl@isNotEmpty(legalperson)">
+				AND legalperson = #{legalperson}			</if>
+			<if test="@Ognl@isNotEmpty(topbanklist)">
+				AND topbanklist = #{topbanklist}			</if>
+			<if test="@Ognl@isNotEmpty(topbankno)">
+				AND topbankno = #{topbankno}			</if>
+			<if test="@Ognl@isNotEmpty(topbankname)">
+				AND topbankname = #{topbankname}			</if>
+			<if test="@Ognl@isNotEmpty(rplbankno)">
+				AND rplbankno = #{rplbankno}			</if>
+			<if test="@Ognl@isNotEmpty(peoplebankno)">
+				AND peoplebankno = #{peoplebankno}			</if>
+			<if test="@Ognl@isNotEmpty(ccpcnodeno)">
+				AND ccpcnodeno = #{ccpcnodeno}			</if>
+			<if test="@Ognl@isNotEmpty(citycode)">
+				AND citycode = #{citycode}			</if>
+			<if test="@Ognl@isNotEmpty(bankname)">
+				AND bankname = #{bankname}			</if>
+			<if test="@Ognl@isNotEmpty(bankaliasname)">
+				AND bankaliasname = #{bankaliasname}			</if>
+			<if test="@Ognl@isNotEmpty(signflag)">
+				AND signflag = #{signflag}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(postcode)">
+				AND postcode = #{postcode}			</if>
+			<if test="@Ognl@isNotEmpty(telephone)">
+				AND telephone = #{telephone}			</if>
+			<if test="@Ognl@isNotEmpty(email)">
+				AND email = #{email}			</if>
+			<if test="@Ognl@isNotEmpty(remark)">
+				AND remark = #{remark}			</if>
+			<if test="@Ognl@isNotEmpty(cnapsgeneration)">
+				AND cnapsgeneration = #{cnapsgeneration}			</if>
+			<if test="@Ognl@isNotEmpty(saccstatus)">
+				AND saccstatus = #{saccstatus}			</if>
+			<if test="@Ognl@isNotEmpty(saccaltdate)">
+				AND saccaltdate = #{saccaltdate}			</if>
+			<if test="@Ognl@isNotEmpty(saccalttime)">
+				AND saccalttime = #{saccalttime}			</if>
+			<if test="@Ognl@isNotEmpty(remark1)">
+				AND remark1 = #{remark1}			</if>
+			<if test="@Ognl@isNotEmpty(changetype)">
+				AND changetype = #{changetype}			</if>
+			<if test="@Ognl@isNotEmpty(updatedate)">
+				AND updatedate = #{updatedate}			</if>
+			<if test="@Ognl@isNotEmpty(updateno)">
+				AND updateno = #{updateno}			</if>
+			<if test="@Ognl@isNotEmpty(effectdate)">
+				AND effectdate = #{effectdate}			</if>
+			<if test="@Ognl@isNotEmpty(invaliddate)">
+				AND invaliddate = #{invaliddate}			</if>
+			<if test="@Ognl@isNotEmpty(createTime)">
+				AND create_time = #{createTime}			</if>
+		</where>
+	</sql>
+	<select id="getSysBankNameCodeExt" resultType="cn.cf.dto.SysBankNamecodeExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_bank_namecode where 1=1
+		<if test="bankname != null and bankname != ''">
+			AND bankname like '%${bankname}%'
+		</if>
+		<if test="bankno != null and bankno != ''">
+			AND bankno = #{bankno}
+		</if>
+		limit 0,1000
+	</select>
+</mapper>
+

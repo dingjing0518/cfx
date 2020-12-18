@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLoanNumberDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,loanNumber,contractNumber,bankPk,bankName,loanStatus,loanAmount,loanStartTime,loanEndTime,repaymentTime,principal,interest,penalty,compound,economicsGoodsName,economicsGoodsType,purchaserPk,purchaserName,supplierPk,supplierName,organizationCode,customerNumber,totalRate,bankRate,sevenRate,repaidInterest,repaidSerCharge
+	    ]]>
+	</sql>
+	<select id="searchNewUsersLoanByEconomicsGoodsTypeIsOne" resultType="cn.cf.dto.B2bLoanNumberDtoEx"
+		parameterType="java.util.Map">
+SELECT
+	o1.*,  '100' as cardAmount  
+	
+FROM
+	(
+		SELECT
+			IFNULL(SUM(loanAmount), 0) AS loanAmount,
+			purchaserName,
+			purchaserPk 
+		FROM
+			b2b_loan_number
+			LEFT JOIN b2b_credit c on purchaserPk=c.companyPk
+		WHERE
+			loanStatus in (3,5,6)
+		AND economicsGoodsType = 1
+		<![CDATA[  	AND (
+			TO_DAYS(#{startTime}) <= TO_DAYS(loanStartTime)
+			AND TO_DAYS(loanStartTime) <= TO_DAYS(#{endTime})
+		) 
+			AND (
+			#{startTime} <= c.creditAuditTime
+		and	c.creditAuditTime <= #{endTime}
+		)
+		
+		]]>
+	
+		GROUP BY
+			purchaserPk
+	) o1
+LEFT JOIN (
+	SELECT
+		purchaserName,
+		purchaserPk,
+		loanStartTime
+	FROM
+		b2b_loan_number
+	WHERE
+		loanStatus in (3,5,6)
+	AND economicsGoodsType = 1
+	<![CDATA[  		AND (
+		TO_DAYS(#{startTime}) > TO_DAYS(loanStartTime)
+		OR TO_DAYS(loanStartTime) > TO_DAYS(#{endTime})
+	)]]>
+	GROUP BY
+		purchaserPk
+) o2 ON o1.purchaserPk = o2.purchaserPk
+WHERE
+	o2.purchaserPk IS NULL
+	</select>
+
+<select id="searchOldUsersLoanByEconomicsGoodsTypeIsOne" resultType="cn.cf.dto.B2bLoanNumberDtoEx"
+		parameterType="java.util.Map">
+SELECT
+	IFNULL(SUM(loanAmount), 0) AS loanAmount,
+<![CDATA[	CASE
+WHEN  50000<=SUM(loanAmount) and SUM(loanAmount) <= 1000000 THEN
+	100
+WHEN 1000000 < SUM(loanAmount)
+AND SUM(loanAmount) <= 2000000 THEN
+	200
+WHEN 2000000 < SUM(loanAmount)
+AND SUM(loanAmount) <= 5000000 THEN
+	300
+WHEN 5000000 < SUM(loanAmount) THEN
+	500
+ELSE
+	0
+END cardAmount,]]>
+ purchaserName,
+ purchaserPk
+FROM
+	b2b_loan_number
+WHERE
+	loanStatus in (3,5,6)
+AND economicsGoodsType = 1
+<![CDATA[	
+AND (
+	TO_DAYS(#{startTime}) <= TO_DAYS(loanStartTime)
+	AND TO_DAYS(loanStartTime) <= TO_DAYS(#{endTime})
+)]]>
+GROUP BY
+	purchaserPk
+	</select>
+
+</mapper>
+

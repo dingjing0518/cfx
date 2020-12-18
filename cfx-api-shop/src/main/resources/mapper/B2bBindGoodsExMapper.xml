@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBindGoodsDaoEx">
+	<delete id="delBindGoodsByGoodsPk">
+		DELETE FROM b2b_bind_goods WHERE goodsPk = #{goodsPk}
+	</delete>
+ 
+	<select id="getBindGoodDtoExByGoodsPk" parameterType="java.lang.String"
+		resultType="cn.cf.dto.B2bBindGoodsDtoEx">
+		SELECT b2b_bind_goods.*,
+		b2b_bind.status,
+		b2b_bind.isUpDown
+		as bisUpDown
+		from b2b_bind_goods
+		left join b2b_bind on b2b_bind.pk=b2b_bind_goods.bindPk
+		where
+		b2b_bind_goods.goodsPk=#{goodsPk}
+	</select>
+
+	<select id="searchBindingGoods" resultType="cn.cf.dto.B2bBindGoodsDto">
+		SELECT
+		a.goodsPk
+		FROM
+		b2b_bind_goods a
+		LEFT JOIN b2b_bind b ON a.bindPk = b.pk
+		WHERE
+		b.isUpDown = 1
+		<if test="pks != null">
+			AND a.goodsPk IN
+			<foreach item="item" index="index" collection="pks" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+
+
+</mapper>

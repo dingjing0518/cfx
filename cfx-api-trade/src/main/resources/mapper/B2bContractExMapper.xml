@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bContractDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		contractNo,contractStatus,contractSource,saleDepartment,startTime,endTime,days,covenant,supplementary,priceType,member,employeePk,salesman,salesmanNumber,supplierPk,purchaserPk,storePk,storeName,contractType,purchaserType,contractRate,contractCount,orderAmount,totalAmount,logisticsModel,logisticsModelPk,logisticsModelType,carrier,carrierPk,isDelete,insertTime,updateTime,paymentName,paymentType,paymentTime,economicsGoodsName,economicsGoodsType,source,plantName,plantPk,supplierInfo,purchaserInfo,addressInfo,ownAmount,block,receivablesTime
+	    ]]>
+	</sql>
+
+	<insert id="insertBatch" useGeneratedKeys="true"
+		keyProperty="contractNo" parameterType="java.util.List"> 
+        INSERT INTO b2b_contract (
+         contractNo, contractStatus, contractSource, saleDepartment, startTime, endTime, 
+         days, covenant, supplementary, priceType, member, employeePk,
+          salesman, salesmanNumber, supplierPk, purchaserPk, storePk, storeName,
+          contractType,contractRate, contractCount,orderAmount, totalAmount, logisticsModel, 
+          logisticsModelPk,carrier, carrierPk,   isDelete,  insertTime, updateTime,
+          source,logisticsModelType,purchaserType,plantPk,plantName,supplierInfo,
+          purchaserInfo,addressInfo,block
+        ) VALUES 
+        <foreach collection="list" item="item" index="index"
+			separator=",">
+	        (
+	         #{item.contractNo}, #{item.contractStatus}, #{item.contractSource}, #{item.saleDepartment}, #{item.startTime}, #{item.endTime}, 
+	         #{item.days}, #{item.covenant}, #{item.supplementary},#{item.priceType}, #{item.member},#{item.employeePk},
+	          #{item.salesman}, #{item.salesmanNumber}, #{item.supplierPk},#{item.purchaserPk}, #{item.storePk},#{item.storeName},
+	          #{item.contractType},  #{item.contractRate}, #{item.contractCount},#{item.orderAmount}, #{item.totalAmount}, #{item.logisticsModel},
+	          #{item.logisticsModelPk},  #{item.carrier},#{item.carrierPk}, #{item.isDelete}, #{item.insertTime}, #{item.updateTime}, 
+	          #{item.source},#{item.logisticsModelType},#{item.purchaserType},  #{item.plantPk},#{item.plantName},#{item.supplierInfo},
+	          #{item.purchaserInfo}, #{item.addressInfo}, #{item.block}
+	        )
+			</foreach>
+	</insert>
+	
+	<sql id="searchGridWhere">
+		<if test="storePk != null ">
+			and c.storePk = #{storePk}
+		</if>
+		<if test="supplierPk != null ">
+			and c.supplierPk = #{supplierPk}
+		</if>
+		<if test="contractStatus != null ">
+			and c.contractStatus = #{contractStatus}
+		</if>
+		<if test="purchaserPk != null ">
+			and c.purchaserPk = #{purchaserPk}
+		</if>
+		<if test="contractNo != null">
+			and c.contractNo like '%${contractNo}%'
+		</if>
+		<if test="startTime != null">
+			and TO_DAYS( c.insertTime ) >=TO_DAYS(#{startTime})
+		</if>
+		<if test="endTime != null">
+			and TO_DAYS( c.insertTime ) &lt;=TO_DAYS(#{endTime})
+		</if>
+		<if test="employeePk != null">
+			and c.employeePk = #{employeePk}
+		</if>
+		<if test="paymentType != null ">
+			and c.paymentType = #{paymentType}
+		</if>
+		<if test="salesman != null">
+			and c.salesman like '%${salesman}%'
+		</if>
+		<if test="goodsInfo != null">
+			and (c.contractNo in (select cg.contractNo from b2b_contract_goods cg where goodsInfo like '%${goodsInfo}%')
+			or c.contractNo like '%${goodsInfo}%')
+		</if>
+		<if test="purchaserName != null and purchaserName !=''">
+			and c.purchaserInfo like '%purchaserName%${purchaserName}%'
+		</if>
+		<if test="contactsTel != null and contactsTel !=''">
+			and c.purchaserInfo like '%contactsTel%${contactsTel}%'
+		</if>
+		<if test="supplierName != null and supplierName !=''">
+			and c.supplierInfo like '%supplierName%${supplierName}%'
+		</if>
+		<if test="supplierContactsTel != null and supplierContactsTel !=''">
+			and c.supplierInfo like '%contactsTel%${supplierContactsTel}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaserPks)">
+				AND c.purchaserPk in
+				<foreach item="item" index="index" collection="purchaserPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		<if test="@Ognl@isNotEmpty(employeePks)">
+				AND c.employeePk in
+				<foreach item="item" index="index" collection="employeePks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>			
+		</if>	
+	</sql>
+	
+	<select id="searchContractList" resultType="cn.cf.dto.B2bContractDtoEx">
+		select c.*
+		from b2b_contract c
+		where c.isDelete = 1 
+		<include refid="searchGridWhere" />
+		 ORDER BY c.insertTime DESC
+		 <if test="start != null ">
+		 	limit #{start},#{limit}
+		 </if>
+	</select>
+	
+	<select id="searchContractCount" resultType="int">
+		select count(*) from 
+		b2b_contract c
+		where c.isDelete = 1
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<update id="updateContract">
+		update b2b_contract
+		<set>
+			<if test="contractStatus != null">
+				contractStatus = #{contractStatus},
+			</if>		
+			<if test="contractStatus==3">
+				receivablesTime = now(),
+			</if>	
+			<if test="startTime != null">
+				startTime = #{startTime},
+			</if>
+			<if test="endTime != null">
+				endTime = #{endTime},
+			</if>
+			<if test="days != null">
+				days = #{days},
+			</if>
+			<if test="covenant != null">
+				covenant = #{covenant},
+			</if>
+			<if test="supplementary != null">
+				supplementary = #{supplementary},
+			</if>
+			<if test="priceType != null">
+				priceType = #{priceType},
+			</if>
+			<if test="contractRate != null">
+				contractRate = #{contractRate},
+			</if>
+			<if test="contractCount != null">
+				contractCount = #{contractCount},
+			</if>
+			<if test="totalAmount != null">
+				totalAmount = #{totalAmount},
+			</if>
+			<if test="isDelete != null">
+				isDelete = #{isDelete},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+			<if test="paymentName != null">
+				paymentName = #{paymentName},
+			</if>
+			<if test="paymentType != null">
+				paymentType = #{paymentType},
+			</if>
+			<if test="paymentTime != null">
+				paymentTime = #{paymentTime},
+			</if>
+			
+			<if test="economicsGoodsName != null">
+				economicsGoodsName = #{economicsGoodsName},
+			</if>
+			<if test="economicsGoodsType != null">
+				economicsGoodsType = #{economicsGoodsType},
+			</if>
+			<if test="addressInfo != null">
+				addressInfo = #{addressInfo},
+			</if>
+			<if test="purchaserInfo != null">
+				purchaserInfo = #{purchaserInfo},
+			</if>
+			<if test="supplierInfo != null">
+				supplierInfo = #{supplierInfo},
+			</if>
+			<if test="ownAmount != null">
+				ownAmount = #{ownAmount},
+			</if>
+		</set>
+		where contractNo = #{contractNo}
+	</update>
+	
+	<select id="searchContractStatusCounts" resultType="map">
+		SELECT
+		count(1) AS allCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 1 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS paymentCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 2 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS auditCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 3 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS confirmedCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 4 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS shipmentCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 5 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS shippedCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN 6 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS completedCounts,
+		IFNULL(
+		SUM(
+		CASE c.contractStatus
+		WHEN -1 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS canceledCounts
+		FROM 
+		b2b_contract c
+		where c.isDelete = 1
+		<include refid="searchGridWhere" />
+	</select>
+</mapper>
+

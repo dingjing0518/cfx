@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bInvitationRecordExtDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,member,mname,mphone,mcompanyPk,mcompanyName,beInvitedCode,tname,tphone,tcompanyPk,tcompanyName,insertTime,applyStatus,invitationStatus,awardStatus,address,provinceName,province,cityName,city,areaName,area,town,
+		townName,addressPk,contacts,contactsTel,activityPk,awardName,grantType,note
+	    ]]>
+	</sql>
+	
+	<update id="updateInvitation" parameterType="cn.cf.dto.B2bInvitationRecordExtDto">
+		UPDATE b2b_invitation_record 
+		<set>
+			<if test="member != null and member != ''">
+				member = #{member},			</if>
+			<if test="mname != null and mname != ''">
+				mname = #{mname},			</if>
+			<if test="mphone != null and mphone != ''">
+				mphone = #{mphone},			</if>
+			<if test="mcompanyPk != null and mcompanyPk != ''">
+				mcompanyPk = #{mcompanyPk},			</if>
+			<if test="mcompanyName != null and mcompanyName != ''">
+				mcompanyName = #{mcompanyName},			</if>
+			<if test="beInvitedCode != null and beInvitedCode != ''">
+				beInvitedCode = #{beInvitedCode},			</if>
+			<if test="tname != null and tname != ''">
+				tname = #{tname},			</if>
+			<if test="tphone != null and tphone != ''">
+				tphone = #{tphone},			</if>
+			<if test="tcompanyPk != null and tcompanyPk != ''">
+				tcompanyPk = #{tcompanyPk},			</if>
+			<if test="tcompanyName != null and tcompanyName != ''">
+				tcompanyName = #{tcompanyName},			</if>
+			<if test="insertTime != null ">
+				insertTime = #{insertTime},			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				applyStatus = #{applyStatus},			</if>
+			<if test="invitationStatus != null and invitationStatus != ''">
+				invitationStatus = #{invitationStatus},			</if>
+			<if test="awardStatus != null and awardStatus != ''">
+				awardStatus = #{awardStatus},			</if>
+			<if test="address != null and address != ''">
+				address = #{address},			</if>
+			<if test="provinceName != null">
+				provinceName = #{provinceName},			</if>
+			<if test="province != null ">
+				province = #{province},			</if>
+			<if test="cityName != null ">
+				cityName = #{cityName},			</if>
+			<if test="city != null ">
+				city = #{city},			</if>
+			<if test="areaName != null">
+				areaName = #{areaName},			</if>
+			<if test="area != null">
+				area = #{area},			</if>
+			<if test="town != null">
+				town = #{town},		</if>
+			<if test="townName != null">
+				townName = #{townName},			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts},			</if>
+			<if test="contactsTel != null and contactsTel != ''">
+				contactsTel = #{contactsTel},			</if>
+			<if test="activityPk != null and activityPk != ''">
+				activityPk = #{activityPk},			</if>
+			<if test="awardName != null and awardName != ''">
+				awardName = #{awardName},			</if>
+			<if test="grantType != null and grantType != ''">
+				grantType = #{grantType},			</if>
+			<if test="note != null">
+				note = #{note}			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	
+	<update id="updatePkByCompanyName">
+		update b2b_invitation_record set tcompanyPk = #{companyPk}
+		where tcompanyName = #{companyName}
+	</update>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(member)">
+				AND member = #{member}			</if>
+			<if test="@Ognl@isNotEmpty(mname)">
+				AND mname = #{mname}			</if>
+			<if test="@Ognl@isNotEmpty(mphone)">
+				AND mphone = #{mphone}			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyPk)">
+				AND mcompanyPk = #{mcompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(mcompanyName)">
+				AND mcompanyName = #{mcompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}			</if>
+			<if test="@Ognl@isNotEmpty(tname)">
+				AND tname = #{tname}			</if>
+			<if test="@Ognl@isNotEmpty(tphone)">
+				AND tphone = #{tphone}			</if>
+			<if test="@Ognl@isNotEmpty(tcompanyPk)">
+				AND tcompanyPk = #{tcompanyPk}			</if>
+			<if test="@Ognl@isNotEmpty(tcompanyName)">
+				AND tcompanyName = #{tcompanyName}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(applyStatus)">
+				AND applyStatus = #{applyStatus}			</if>
+			<if test="@Ognl@isNotEmpty(invitationStatus)">
+				AND invitationStatus = #{invitationStatus}			</if>
+			<if test="@Ognl@isNotEmpty(awardStatus)">
+				AND awardStatus = #{awardStatus}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(town)">
+				AND town = #{town}			</if>
+			<if test="@Ognl@isNotEmpty(townName)">
+				AND townName = #{townName}			</if>
+			<if test="@Ognl@isNotEmpty(addressPk)">
+				AND addressPk = #{addressPk}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(activityPk)">
+				AND activityPk = #{activityPk}			</if>
+			<if test="@Ognl@isNotEmpty(awardName)">
+				AND awardName = #{awardName}			</if>
+			<if test="@Ognl@isNotEmpty(grantType)">
+				AND grantType = #{grantType}			</if>
+			<if test="@Ognl@isNotEmpty(note)">
+				AND note = #{note}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridExtCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridExt" resultType="cn.cf.dto.B2bInvitationRecordExtDto"
+		parameterType="java.util.Map">
+		SELECT
+		pk,member,mname,mphone,mcompanyPk,mcompanyName,beInvitedCode,tname,tphone,tcompanyPk,tcompanyName,
+		insertTime,applyStatus,(CASE applyStatus
+					WHEN 1 THEN '是'
+					WHEN 2 THEN '否'
+					ELSE '待确定'
+					END
+				) AS applyStatusName,
+					invitationStatus,
+					(CASE invitationStatus
+						WHEN 1 THEN '待确认'
+						WHEN 2 THEN '邀请成功'
+						WHEN 3 THEN '邀请失败'
+						END
+				) AS invitationStatusName,
+					awardStatus,
+				(CASE awardStatus
+							WHEN 1 THEN '未发放'
+							WHEN 2 THEN '已发放'
+							WHEN 3 THEN '无'
+								END) AS awardStatusName,invitationStatus,awardStatus,address,provinceName,province,cityName,city,
+		areaName,area,town,townName,addressPk,contacts,contactsTel,activityPk,awardName,grantType,note
+		FROM b2b_invitation_record
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="getByPkExt" resultType="cn.cf.dto.B2bInvitationRecordExtDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_invitation_record where pk = #{pk}	</select>
+</mapper>
+

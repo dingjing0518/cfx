@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBindGoodsDaoEx">
+
+	<select id="searchListEx" resultType="cn.cf.dto.B2bBindGoodsDtoEx"
+		parameterType="java.util.Map">
+		SELECT b2b_bind_goods.*,
+		b2b_bind_goods.*, `b2b_goods`.`brandName`,
+		REPLACE (
+		REPLACE (
+		REPLACE (
+		`b2b_goods`.goodsInfo,
+		',',
+		','
+		),
+		CHAR (13),
+		''
+		),
+		CHAR (10),
+		''
+		) AS goodsInfo,
+		b2b_goods.block,
+		`b2b_goods`.`tareWeight` / 1000 AS tareWeight,
+		`b2b_goods`.`brandName`,
+		b2b_bind.isUpDown AS bisUpDown
+		FROM `b2b_bind_goods`
+		LEFT JOIN `b2b_goods` ON
+		`b2b_bind_goods`.`goodsPk`=`b2b_goods`.`pk`
+		LEFT JOIN b2b_bind on
+		b2b_bind.pk=b2b_bind_goods.bindPk
+		WHERE 1=1
+		<if test="@Ognl@isNotEmpty(bindPk)">
+			AND `b2b_bind_goods`.`bindPk`=#{bindPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(batchNumber)">
+			and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+		</if>
+		<if test="@Ognl@isNotEmpty(distinctNumber)">
+			and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+		</if>
+		<if test="@Ognl@isNotEmpty(packNumber)">
+			AND b2b_goods.goodsInfo like '%packNumber%${packNumber}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(keyword)">
+			and b2b_goods.goodsInfo LIKE  '%${keyword}%' 
+		</if>
+		<if test="orderName != null">
+			order by b2b_bind_goods.${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1)
+		FROM `b2b_bind_goods`
+		LEFT JOIN `b2b_goods` ON
+		`b2b_bind_goods`.`goodsPk`=`b2b_goods`.`pk`
+		LEFT JOIN b2b_bind on
+		b2b_bind.pk=b2b_bind_goods.bindPk
+		WHERE 1=1
+		<if test="@Ognl@isNotEmpty(bindPk)">
+			AND `b2b_bind_goods`.`bindPk`=#{bindPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(batchNumber)">
+			and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+		</if>
+		<if test="@Ognl@isNotEmpty(distinctNumber)">
+			and SUBSTRING_INDEX(REPLACE(b2b_goods.goodsInfo,CONCAT(SUBSTRING_INDEX(b2b_goods.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+		</if>
+		<if test="@Ognl@isNotEmpty(packNumber)">
+			AND b2b_goods.goodsInfo like '%packNumber%${packNumber}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(keyword)">
+			and b2b_goods.goodsInfo LIKE  '%${keyword}%' 
+		</if>
+	</select>
+
+
+
+
+
+	<delete id="delBindGoodsByBindPk">
+	    <![CDATA[
+	        DELETE FROM b2b_bind_goods WHERE bindPk = #{bindPk} 
+	    ]]>
+	</delete>
+	<select id="searchFirmOrder" parameterType="java.util.Map"
+		resultType="cn.cf.entity.FirmOrder">
+		SELECT
+		REPLACE (REPLACE (REPLACE (g.goodsInfo, ',',
+		','),CHAR (13),''),CHAR (10),'') as goodsInfo,
+		g.storePk,
+		g.block,
+		g.storeName, g.pk as
+		goodsPk,
+		g.totalBoxes as boxes,g.tareWeight,b.bindProductPrice as price,#{price}as
+		increasePrice, g.brandName,bg.bindPk,g.companyPk
+		as
+		supplierPk,g.companyName supplierName
+		FROM b2b_bind_goods bg
+		LEFT
+		JOIN
+		b2b_goods g ON g.PK = bg.goodsPk
+		LEFT JOIN b2b_bind b ON b.PK =
+		bg.bindPk
+		WHERE
+		b.pk=#{bindPk}
+	</select>
+	<select id="getByGoodPkAndBindPk" resultType="cn.cf.dto.B2bBindGoodsDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		*,b.bindProductPrice as bindProductPrice,b.isUpDown as bisUpDown
+		FROM
+		b2b_bind_goods bg LEFT JOIN b2b_bind b on bg.bindPk=b.pk
+		WHERE
+		bg.bindPk = #{bindPk}
+		AND bg.goodsPk = #{goodsPk}
+
+
+
+	</select>
+
+	<update id="updateBatch" parameterType="java.util.List">
+
+		update b2b_bind_goods
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="weight =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when pk=#{i.pk}
+					and weight-#{i.weight}>=0 then weight-#{i.weight}
+					when pk=#{i.pk}
+					and weight-#{i.weight} &lt; 0 then 0
+				</foreach>
+			</trim>
+			<trim prefix=" boxes =case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					when pk=#{i.pk}
+					and boxes-#{i.boxes}>=0 then boxes-#{i.boxes}
+					when pk=#{i.pk} and
+					boxes-#{i.boxes} &lt; 0 then 0
+				</foreach>
+			</trim>
+
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			pk=#{i.pk}
+		</foreach>
+	</update>
+
+	<select id="checkBind" parameterType="java.lang.String"
+		resultType="int">
+		SELECT SUM(boxes) from b2b_bind_goods where
+		bindPk=#{bindPk}
+	</select>
+
+	<delete id="delBindGoodsByGoodsPk">
+		DELETE FROM b2b_bind_goods WHERE goodsPk = #{goodsPk}
+	</delete>
+
+
+
+	<!-- 拼团中商品 -->
+	<select id="searchGoodsListOnBind" resultType="cn.cf.dto.B2bBindGoodsDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		REPLACE (
+		REPLACE (
+		REPLACE (g.goodsInfo, ',', ','),
+		CHAR (13),
+		''
+		),
+		CHAR (10),
+		''
+		) AS goodsInfo,
+		g.pk AS goodsPk,
+		g.price,
+		g.salePrice,
+		g.tonPrice,
+		g.totalBoxes,
+		g.totalWeight,
+		g.storeName,
+		g.isUpdown AS gisUpdown,
+		CASE g.isUpdown
+		WHEN 1 THEN
+		'待上架'
+		WHEN 2 THEN
+		'上架'
+		WHEN 3 THEN
+		'下架'
+		ELSE
+		''
+		END AS gisUpdownName,
+		bind.bindName,
+		CASE
+		WHEN bind.isUpDown IS NULL THEN
+		- 1
+		ELSE
+		bind.isUpDown
+		END AS bisUpDown,
+		CASE bind.isUpDown
+		WHEN 1 THEN
+		'上架'
+		WHEN 2 THEN
+		'下架'
+		ELSE
+		''
+		END AS bisUpDownName,
+		bindGoods.bindPk
+		FROM b2b_goods g
+		left join b2b_bind_goods bindGoods on
+		bindGoods.goodsPk=g.pk
+		left join b2b_bind bind on
+		bind.pk=bindGoods.bindPk
+		left join b2b_store s on g.storePk = s.pk
+		left
+		join b2b_company c on g.companyPk = c.pk
+		left join b2b_goods_brand b on
+		g.brandPk = b.pk
+		<include refid="searchGoodsGridWhereForOnBind" />
+		<if test="orderName != null and orderName !=''">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="orderName == null or orderName ==''">
+			order by g.updateTime desc
+		</if>
+		<if test="start!= null ">
+			limit ${start},${limit}
+		</if>
+	</select>
+
+	<!-- 拼团商品数量 -->
+	<select id="searchGoodsListOnBindCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*)
+		FROM b2b_goods g
+		left join b2b_bind_goods bindGoods on
+		bindGoods.goodsPk=g.pk
+		left join b2b_bind bind on
+		bind.pk=bindGoods.bindPk
+		left join b2b_store s on g.storePk = s.pk
+		left
+		join b2b_company c on g.companyPk = c.pk
+		left join b2b_goods_brand b on
+		g.brandPk = b.pk
+		<include refid="searchGoodsGridWhereForOnBind" />
+	</select>
+
+
+	<sql id="searchGoodsGridWhereForOnBind">
+		<where>
+			1=1
+			and g.type ='binding'
+			<if test="pk != null and pk !=''">
+				and g.pk = #{pk}
+			</if>
+			<if test="storeName != null and storeName !=''">
+				and g.storeName = #{storeName}
+			</if>
+			<if test="storePk != null">
+				and g.storePk = #{storePk}
+			</if>
+			<if test="companyPk != null and companyPk !=''">
+				and g.companyPk = #{companyPk}
+			</if>
+			<if test="companyPks != null and companyPks !=''">
+				and g.companyPk in
+				<foreach item="item" index="index" collection="companyPks"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="pks != null and pks !=''">
+				and g.pk in
+				<foreach item="item" index="index" collection="pks" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="brandPk != null and brandPk !=''">
+				and b.brandPk IN
+				<foreach item="item" index="index" collection="brandPk"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productPk != null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="specifications != null and specifications !=''">
+				and SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(g.goodsInfo,'"specifications":',1),'"specifications":"'),''),'"',1) like '%${specifications}%' 
+			</if>
+			<if test="specPk != null and specPk !=''">
+				<foreach collection="specPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"specPk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="gradePk != null and gradePk !=''">
+				<foreach collection="gradePk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"gradePk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="varietiesPk != null and varietiesPk !=''">
+				<foreach collection="varietiesPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="seedvarietyPk != null and seedvarietyPk !=''">
+				<foreach collection="seedvarietyPk" item="item" open=" AND(" close=" )" separator=" or ">
+					FIND_IN_SET('"seedvarietyPk":"${item}"',g.goodsInfo)
+				</foreach>
+			</if>
+			<if test="isUpdown != null and isUpdown !=''">
+				and g.isUpdown = #{isUpdown}
+			</if>
+			<if test="packNumber != null and packNumber !=''">
+				and FIND_IN_SET('"packNumber":"${packNumber}"',g.goodsInfo)
+			</if>
+			<if test="batchNumber != null and batchNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(g.goodsInfo,'"batchNumber":',1),'"batchNumber":"'),''),'"',1) like '%${batchNumber}%' 
+			</if>
+			<if test="plantPk != null and plantPk !=''">
+				and FIND_IN_SET('"plantPk":"${plantPk}"',g.goodsInfo)
+			</if>
+			<if test="warePk != null and warePk !=''">
+				and FIND_IN_SET('"warePk":"${warePk}"',g.goodsInfo)
+			</if>
+			<if test="type != null and type != ''">
+				and g.type = #{type}
+			</if>
+			<if test="updateTimeBegin !=null and updateTimeBegin !=''">
+				and g.updateTime &gt;=CONCAT(#{updateTimeBegin},'00:00:00')
+			</if>
+			<if test="updateTimeEnd !=null and updateTimeEnd !=''">
+				and g.updateTime &lt;=CONCAT(#{updateTimeEnd},'23:59:59')
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				and g.goodsInfo LIKE  '%${searchKey}%' 
+			</if>
+			<if test="isNewProduct != null">
+				and isNewProduct = #{isNewProduct}
+			</if>
+			<if test="isDelete>0">
+				and g.isDelete =#{isDelete}
+			</if>
+			<if test="companyStatus != null and companyStatus != '' ">
+				and c.auditStatus = 2 and c.auditSpStatus = 2 and
+				c.isVisable = 1 and c.isDelete = 1
+			</if>
+			<if test="isHome != null and isHome !=''">
+				and g.isHome =#{isHome}
+			</if>
+			<if test="productName != null and productName !=''">
+				and FIND_IN_SET('"productName":"${productName}"',goodsInfo)
+			</if>
+			<if test="distinctNumber != null and distinctNumber !=''">
+				and SUBSTRING_INDEX(REPLACE(g.goodsInfo,CONCAT(SUBSTRING_INDEX(g.goodsInfo,'"distinctNumber":',1),'"distinctNumber":"'),''),'"',1) like '%${distinctNumber}%' 
+			</if>
+		</where>
+	</sql>
+
+
+
+	<select id="checkGoodsOnUpBinding" parameterType="java.lang.String"
+		resultType="int">
+		SELECT count(1)
+		from b2b_bind_goods
+		left join b2b_bind on b2b_bind.pk=b2b_bind_goods.bindPk
+		where
+		b2b_bind_goods.goodsPk=#{goodsPk}
+		and b2b_bind.isUpDown=1
+	</select>
+
+
+	<select id="searchBindingGoods" resultType="cn.cf.dto.B2bBindGoodsDto">
+		SELECT
+		a.goodsPk
+		FROM
+		b2b_bind_goods a
+		LEFT JOIN b2b_bind b ON a.bindPk = b.pk
+		WHERE
+		b.isUpDown = 1
+		<if test="pks != null">
+			AND a.goodsPk IN
+			<foreach item="item" index="index" collection="pks" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<!-- 部分字段更新 -->
+	<update id="updateEx" parameterType="cn.cf.model.B2bBindGoods">
+		UPDATE b2b_bind_goods
+		<set>
+			<if test="bindPk != null and bindPk !=''">
+				bindPk = #{bindPk} ,
+			</if>
+			<if test="goodsPk != null and goodsPk !=''">
+				goodsPk = #{goodsPk} ,
+			</if>
+			<if test="updateTime != null  ">
+				updateTime = #{updateTime} ,
+			</if>
+			<if test="insertTime != null  ">
+				insertTime = #{insertTime} ,
+			</if>
+			<if test="weight != null and weight !=''">
+				weight = #{weight} ,
+			</if>
+			<if test="boxes != null and boxes !=''">
+				boxes = #{boxes} ,
+			</if>
+			<if test="totalBoxes != null and totalBoxes !=''">
+				totalBoxes = #{totalBoxes} ,
+			</if>
+		</set>
+		WHERE pk = #{pk}
+	</update>
+	<update id="cleanBindGoods" parameterType="java.lang.String">
+		UPDATE b2b_bind_goods
+		set weight = 0,boxes = 0
+		WHERE bindPk = #{bindPk}
+	</update>
+
+</mapper>

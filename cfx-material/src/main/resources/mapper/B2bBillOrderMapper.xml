@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bBillOrderDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,serialNumber,status,amount,billAmount,insertTime,purchaserPk,purchaserName,supplierPk,supplierName,storePk,storeName,goodsPk,goodsName,goodsShotName,payerAccount,payerBankNo,payerOrzaCode,payeeAccount,payeeBankNo,payeeOrzaCode,returnUrl,type
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="orderNumber">
+    <![CDATA[
+        INSERT INTO b2b_bill_order (
+         orderNumber, serialNumber, status, amount, billAmount, insertTime, purchaserPk, purchaserName, supplierPk, supplierName, storePk, storeName, goodsPk, goodsName, goodsShotName, payerAccount, payerBankNo, payerOrzaCode, payeeAccount, payeeBankNo, payeeOrzaCode, returnUrl, type
+        ) VALUES (
+         #{orderNumber}, #{serialNumber}, #{status}, #{amount}, #{billAmount}, #{insertTime}, #{purchaserPk}, #{purchaserName}, #{supplierPk}, #{supplierName}, #{storePk}, #{storeName}, #{goodsPk}, #{goodsName}, #{goodsShotName}, #{payerAccount}, #{payerBankNo}, #{payerOrzaCode}, #{payeeAccount}, #{payeeBankNo}, #{payeeOrzaCode}, #{returnUrl}, #{type}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.B2bBillOrder">
+    <![CDATA[
+        UPDATE b2b_bill_order SET
+	        serialNumber = #{serialNumber} , status = #{status} , amount = #{amount} , billAmount = #{billAmount} , insertTime = #{insertTime} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , storePk = #{storePk} , storeName = #{storeName} , goodsPk = #{goodsPk} , goodsName = #{goodsName} , goodsShotName = #{goodsShotName} , payerAccount = #{payerAccount} , payerBankNo = #{payerBankNo} , payerOrzaCode = #{payerOrzaCode} , payeeAccount = #{payeeAccount} , payeeBankNo = #{payeeBankNo} , payeeOrzaCode = #{payeeOrzaCode} , returnUrl = #{returnUrl} , type = #{type}  
+        WHERE 
+        	orderNumber = #{orderNumber}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.B2bBillOrder">
+    <![CDATA[
+        DELETE FROM b2b_bill_order WHERE
+        orderNumber = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}			</if>
+			<if test="@Ognl@isNotEmpty(serialNumber)">
+				AND serialNumber = #{serialNumber}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(amount)">
+				AND amount = #{amount}			</if>
+			<if test="@Ognl@isNotEmpty(billAmount)">
+				AND billAmount = #{billAmount}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}			</if>
+			<if test="@Ognl@isNotEmpty(storeName)">
+				AND storeName = #{storeName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}			</if>
+			<if test="@Ognl@isNotEmpty(goodsShotName)">
+				AND goodsShotName = #{goodsShotName}			</if>
+			<if test="@Ognl@isNotEmpty(payerAccount)">
+				AND payerAccount = #{payerAccount}			</if>
+			<if test="@Ognl@isNotEmpty(payerBankNo)">
+				AND payerBankNo = #{payerBankNo}			</if>
+			<if test="@Ognl@isNotEmpty(payerOrzaCode)">
+				AND payerOrzaCode = #{payerOrzaCode}			</if>
+			<if test="@Ognl@isNotEmpty(payeeAccount)">
+				AND payeeAccount = #{payeeAccount}			</if>
+			<if test="@Ognl@isNotEmpty(payeeBankNo)">
+				AND payeeBankNo = #{payeeBankNo}			</if>
+			<if test="@Ognl@isNotEmpty(payeeOrzaCode)">
+				AND payeeOrzaCode = #{payeeOrzaCode}			</if>
+			<if test="@Ognl@isNotEmpty(returnUrl)">
+				AND returnUrl = #{returnUrl}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_bill_order
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByOrderNumber" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where orderNumber = #{orderNumber}	</select>
+	<select id="getBySerialNumber" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where serialNumber = #{serialNumber}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where purchaserName = #{purchaserName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where supplierName = #{supplierName}	</select>
+	<select id="getByStorePk" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where storePk = #{storePk}	</select>
+	<select id="getByStoreName" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where storeName = #{storeName}	</select>
+	<select id="getByGoodsPk" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where goodsPk = #{goodsPk}	</select>
+	<select id="getByGoodsName" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where goodsName = #{goodsName}	</select>
+	<select id="getByGoodsShotName" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where goodsShotName = #{goodsShotName}	</select>
+	<select id="getByPayerAccount" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payerAccount = #{payerAccount}	</select>
+	<select id="getByPayerBankNo" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payerBankNo = #{payerBankNo}	</select>
+	<select id="getByPayerOrzaCode" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payerOrzaCode = #{payerOrzaCode}	</select>
+	<select id="getByPayeeAccount" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payeeAccount = #{payeeAccount}	</select>
+	<select id="getByPayeeBankNo" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payeeBankNo = #{payeeBankNo}	</select>
+	<select id="getByPayeeOrzaCode" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where payeeOrzaCode = #{payeeOrzaCode}	</select>
+	<select id="getByReturnUrl" resultType="cn.cf.dto.B2bBillOrderDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_bill_order where returnUrl = #{returnUrl}	</select>
+</mapper>
+

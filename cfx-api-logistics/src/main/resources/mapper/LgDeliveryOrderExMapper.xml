@@ -1,0 +1,1553 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgDeliveryOrderDaoEx">
+    
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        <![CDATA[
+		      pk, orderPk, parentPk, orderStatus,isMatched,originalTotalFreight, presentTotalFreight, insertTime, 
+    updateTime, orderTime, logisticsCompanyPk, logisticsCompanyName, arrivedTimeStart, 
+    arrivedTimeEnd, fromCompanyName, fromAddress, fromAddressPk,fromContacts, fromContactsTel, 
+    fromProvincePk, fromProvinceName, fromCityPk, fromCityName, fromAreaPk, fromAreaName, 
+    toCompanyPk, toCompanyName, toAddress, toAddressPk,toContacts, toContactsTel, toProvincePk, toProvinceName, 
+    toCityPk, toCityName, toAreaPk, toAreaName,supplierInvoicePk, supplierInvoiceStatus, memberInvoiceStatus, 
+    driver, driverPk, driverContact, carPk, carPlate, source, member, memberPk, abnormalRemark, 
+    remark, deliveryNumber, deliveryTime, signTime, isAbnormal, fromTownPk, fromTownName, 
+    toTownPk, toTownName, isConfirmed, paymentPk, paymentName, paymentTime, 
+    finishedTime, financialTime, purchaserName, purchaserPk, supplierName, 
+    supplierPk,
+    invoicePk, invoiceName, invoiceTaxidNumber, invoiceRegPhone, invoiceBankAccount, 
+    invoiceBankName,invoiceProvinceName,invoiceCityName,invoiceAreaName,invoiceRegAddress,linePricePk,
+    basisLinePrice,settleWeight,isSettleFreight,mandatePk,mandateUrl,orderNumber2
+        ]]>
+    </sql>
+
+
+    <select id="getByPk" resultType="cn.cf.dto.LgDeliveryOrderDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns"/>
+        FROM lg_delivery_order where pk = #{pk}
+    </select>
+
+
+    <select id="getByOrderNumber" resultType="cn.cf.dto.LgDeliveryOrderDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns"/>
+        FROM lg_delivery_order where orderPk = #{orderPk}
+    </select>
+    
+    
+    <!-- 根据pk检查订单的状态  -->
+	<select id="checkOrderStatusByPk" resultType="Integer">
+      SELECT lg_delivery_order.`orderStatus` 
+      FROM lg_delivery_order 
+      WHERE lg_delivery_order.`pk`=#{deliveryPk} limit 1
+    </select>
+
+	<select id="selectByStatus" parameterType="java.util.Map"
+		resultType="cn.cf.entity.SearchLgLine">
+		SELECT
+		de.pk,
+		de.fromProvincePk,
+		de.fromCityPk,
+		de.fromAreaPk,
+		de.fromTownPk,
+		de.toProvincePk,
+		de.toCityPk,
+		de.toAreaPk,
+		de.toTownPk,
+		og.productPk,
+		og.gradePk,
+		og.weight
+		FROM
+		lg_delivery_order de
+		inner JOIN
+		lg_delivery_order_goods og ON og.deliveryPk = de.pk
+		WHERE 1= 1
+		<if test="isAbnormal !=null ">
+			and de.isAbnormal = #{isAbnormal}
+		</if>
+		<if test="isMatched !=null">
+			and de.isMatched = #{isMatched}
+		</if>
+		order by de.insertTime DESC
+	</select>
+
+
+    <sql id="searchGridWhere">
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and ( de.orderPk like '%${orderPk}%' or de.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="fromCompanyName !=null and fromCompanyName !=''">
+                <![CDATA[ and IF(de.supplierName IS NOT NULL && de.supplierName !='', 
+				de.supplierName  like '%${fromCompanyName}%', 
+				de.fromCompanyName  like '%${fromCompanyName}%')]]>
+            </if>
+            <if test="toCompanyName !=null and toCompanyName !=''">
+                and de.toCompanyName like '%${toCompanyName}%'
+            </if>
+            <if test="productInfo !=null and productInfo !=''">
+                and ( go.productName like "%${productInfo}%" or
+                go.varietiesName like "%${productInfo}%" or
+                go.seedvarietyName like "%${productInfo}%" or
+                go.specName like "%${productInfo}%" or
+                go.seriesName like "%${productInfo}%" or
+                go.gradeName like "%${productInfo}%" or
+                go.batchNumber like "%${productInfo}%"
+                )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="arrivedTimeStart !=null and arrivedTimeStart !=''">
+                and de.arrivedTimeStart &gt;=CONCAT(#{arrivedTimeStart},' 00:00:00')
+            </if>
+            <if test="arrivedTimeEnd !=null and arrivedTimeEnd !=''">
+                and de.arrivedTimeEnd &lt;=CONCAT(#{arrivedTimeEnd},' 23:59:59')
+            </if>
+            <if test="orderStatus!=null">
+                and de.orderStatus=#{orderStatus}
+            </if>
+            <if test="memberInvoiceStatus!=null">
+                and de.memberInvoiceStatus=#{memberInvoiceStatus}
+            </if>
+            <if test="supplierInvoiceStatus!=null">
+                and de.supplierInvoiceStatus=#{supplierInvoiceStatus}
+            </if>
+            <if test="isAbnormal !=null">
+                and de.isAbnormal = #{isAbnormal}
+            </if>
+            <if test="isConfirmed !=null and isConfirmed != 0">
+                and de.isConfirmed = #{isConfirmed}
+            </if>
+            <if test="companyPk !=null">
+                and de.logisticsCompanyPk =#{companyPk}
+            </if>
+            <if test="purAndSup!=null ">
+           		and (
+                de.purchaserPk = #{purAndSup}
+                or 
+                de.memberPk=#{memberPk}
+                )
+            </if>
+            <if test="orderStatuses!=null">
+                and de.orderStatus in (${orderStatuses})
+            </if>
+        </where>
+    </sql>
+    <select id="selectDeliveryList" resultType="cn.cf.dto.OrderDeliveryDto" parameterType="Map">
+        select de.pk,
+        de.deliveryNumber as orderPk,
+        de.deliveryNumber,
+        de.parentPk,
+        ROUND(de.originalTotalFreight,2) as presentTotalFreight,
+        ROUND(de.presentTotalFreight,2) as originalTotalFreight,
+        de.orderTime,
+        de.logisticsCompanyName,
+        IF(de.supplierName IS NOT NULL AND de.supplierName !='',de.supplierName,de.fromCompanyName ) AS fromCompanyName,
+        de.supplierName,
+        de.fromProvinceName,
+        de.fromCityName,
+        de.fromAreaName,
+        de.fromTownName,
+        de.fromAddress,
+        de.fromContacts,
+        de.fromContactsTel,
+        de.orderStatus,
+        de.isMatched,
+        de.arrivedTimeStart,
+        de.arrivedTimeEnd,
+        de.toCompanyName,
+        de.toProvinceName,
+        de.toCityName,
+        de.toAreaName,
+        de.toTownName,
+        de.toAddress,
+        de.toContacts,
+        de.toContactsTel,
+        case de.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        else "" end as orderStatusName,
+        case de.isConfirmed
+        when 1 then "已确认"
+        when 2 then "未确认"
+        else "" end as isConfirmedName,
+        de.isConfirmed,
+        de.driver,
+        de.driverContact,
+        de.carPlate,
+        de.remark,
+        go.goodsPk,
+        go.deliveryPk,
+        go.productName,
+        go.varietiesName,
+        go.seedvarietyName,
+        go.specName,
+        go.seriesName,
+        go.gradeName,
+        go.batchNumber,
+        go.boxes,
+        go.weight,
+        ROUND(go.tareWeight,2) as tareWeight,
+        go.originalFreight as presentFreight,
+        go.presentFreight as originalFreight,
+        go.goodsName,
+        go.unit,
+        case go.unit
+        when 1 then "箱"
+        when 2 then "锭"
+        when 3 then "件"
+        when 4 then "粒"
+        else "箱" end as unitName
+        from lg_delivery_order de inner join lg_delivery_order_goods go on de.Pk = go.deliveryPk
+        <include refid="searchGridWhere"/>
+        <if test="orderName != null">
+            order by de.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+    
+    <select id="selectDeliveryCount" resultType="Integer" parameterType="Map">
+        select count(*)
+        from lg_delivery_order de inner join lg_delivery_order_goods go on
+        de.Pk = go.deliveryPk
+        <include refid="searchGridWhere"/>
+    </select>
+    
+    <!-- 承运商某个业务员的订单 -->
+    <select id="selectDeliveryListForMember" resultType="cn.cf.dto.OrderDeliveryDto" parameterType="Map">
+        select de.pk,
+        de.deliveryNumber as orderPk,
+        de.deliveryNumber,
+        de.parentPk,
+        ROUND(de.originalTotalFreight,2) as presentTotalFreight,
+        ROUND(de.presentTotalFreight,2) as originalTotalFreight,
+        de.orderTime,
+        de.logisticsCompanyName,
+        IF(de.supplierName IS NOT NULL AND de.supplierName !='',de.supplierName,de.fromCompanyName ) AS fromCompanyName,
+        de.supplierName,
+        de.fromProvinceName,
+        de.fromCityName,
+        de.fromAreaName,
+        de.fromTownName,
+        de.fromAddress,
+        de.fromContacts,
+        de.fromContactsTel,
+        de.orderStatus,
+        de.isMatched,
+        de.arrivedTimeStart,
+        de.arrivedTimeEnd,
+        de.toCompanyName,
+        de.toProvinceName,
+        de.toCityName,
+        de.toAreaName,
+        de.toTownName,
+        de.toAddress,
+        de.toContacts,
+        de.toContactsTel,
+        case de.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        else "" end as orderStatusName,
+        case de.isConfirmed
+        when 1 then "已确认"
+        when 2 then "未确认"
+        else "" end as isConfirmedName,
+        de.isConfirmed,
+        de.driver,
+        de.driverContact,
+        de.carPlate,
+        de.remark,
+        go.goodsPk,
+        go.deliveryPk,
+        go.productName,
+        go.varietiesName,
+        go.seedvarietyName,
+        go.specName,
+        go.seriesName,
+        go.gradeName,
+        go.batchNumber,
+        go.boxes,
+        go.weight,
+        ROUND(go.tareWeight,2) as tareWeight,
+        go.originalFreight as presentFreight,
+        go.presentFreight as originalFreight,
+        go.goodsName,
+        go.unit,
+        case go.unit
+        when 1 then "箱"
+        when 2 then "锭"
+        when 3 then "件"
+        when 4 then "粒"
+        else "箱" end as unitName
+        from lg_delivery_order de 
+        inner join lg_delivery_order_goods go on  de.Pk = go.deliveryPk
+        inner join lg_member_deliveryorder md on  de.Pk =  md.deliveryOrderPk and md.isDelete=1 and md.memberPk='${memberPk}'
+        <include refid="searchGridWhere"/>
+        <if test="orderName != null">
+            order by de.${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+    
+    <!-- 承运商某个业务员的订单数量 -->
+    <select id="selectDeliveryCountForMember" resultType="Integer" parameterType="Map">
+        select count(*)
+        from lg_delivery_order de 
+        inner join lg_delivery_order_goods go on de.Pk = go.deliveryPk
+        inner join lg_member_deliveryorder md on  de.Pk =  md.deliveryOrderPk and md.isDelete=1 and md.memberPk='${memberPk}'
+        <include refid="searchGridWhere"/>
+    </select>
+    
+    
+    <!-- 查询订单详情 -->
+    <select id="selectDetailByPk" parameterType="Map" resultType="cn.cf.dto.OrderDeliveryDto">
+    select de.pk,
+     de.deliveryNumber as orderPK,
+     de.deliveryNumber,
+     ROUND(de.originalTotalFreight,2) as presentTotalFreight,
+     ROUND(de.presentTotalFreight,2) as originalTotalFreight,
+     de.orderStatus,
+     case de.orderStatus
+     when 10 then "已关闭"
+     when 9 then "待付款"
+     when 8 then "待财务确认"
+     when 7 then "未匹配"
+     when 6 then "待派车"
+     when 5 then "提货中"
+     when 4 then "配送中"
+     when 3 then "已签收"
+     when 2 then "已取消"
+     else "" end as orderStatusName,
+     de.orderTime,
+     de.arrivedTimeStart,
+     de.arrivedTimeEnd,
+     de.paymentTime,
+     de.deliveryTime,
+     de.signTime,
+     de.finishedTime,
+     IF(de.supplierName IS NOT NULL AND de.supplierName !='',de.supplierName,de.fromCompanyName ) AS fromCompanyName,
+     de.supplierName,
+     de.fromProvinceName,
+     de.fromCityName,
+     de.fromAreaName,
+     de.fromTownName,
+     de.fromAddress,
+     de.fromContacts,
+     de.fromContactsTel,
+     de.toCompanyName,
+     de.toProvinceName,
+     de.toCityName,
+     de.toAreaName,
+     de.toTownName,
+     de.toAddress,
+     de.toContacts,
+     de.toContactsTel,
+     de.abnormalRemark,
+     de.remark,
+     de.invoicePk,
+     de.invoiceName,
+     de.invoiceTaxidNumber,
+     de.invoiceRegPhone,
+     de.invoiceBankAccount,
+     de.invoiceBankName,
+     de.invoiceProvinceName,
+     de.invoiceCityName,
+     de.invoiceAreaName,
+     de.invoiceRegAddress,
+     de.paymentName,
+     de.mandatePk,
+     de.mandateUrl,
+     go.productName,
+     go.varietiesName,
+     go.seedvarietyName,
+     go.specName,
+     go.seriesName,
+     go.gradeName,
+     go.batchNumber,
+     go.boxes,
+     go.weight,
+     ROUND(go.originalFreight,2) as presentFreight,
+     ROUND(go.presentFreight,2) as originalFreight,
+     go.unit,
+     case go.unit
+     when 1 then "箱"
+     when 2 then "锭"
+     when 3 then "件"
+     when 4 then "粒"
+     else "箱" end as unitName
+     from lg_delivery_order de 
+     inner join lg_delivery_order_goods go on de.pk = go.deliveryPk
+     where de.pk = #{deliveryPk}
+    </select>
+    
+    <update id="updateByPkSelective" parameterType="cn.cf.dto.LgDeliveryOrderDto">
+        update lg_delivery_order
+        <trim prefix="set" suffixOverrides=",">
+            <if test="orderPk != null">
+                orderPk = #{orderPk},
+            </if>
+            <if test="parentPk != null">
+                parentPk = #{parentPk},
+            </if>
+            <if test="orderStatus != null">
+                orderStatus = #{orderStatus},
+            </if>
+            <if test="isMatched != null">
+                isMatched = #{isMatched},
+            </if>
+            <if test="originalTotalFreight != null">
+                originalTotalFreight = #{originalTotalFreight},
+            </if>
+            <if test="presentTotalFreight != null">
+                presentTotalFreight = #{presentTotalFreight},
+            </if>
+            <if test="insertTime != null">
+                insertTime = #{insertTime},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime},
+            </if>
+            <if test="orderTime != null">
+                orderTime = #{orderTime},
+            </if>
+            <if test="logisticsCompanyPk != null">
+                logisticsCompanyPk = #{logisticsCompanyPk},
+            </if>
+            <if test="logisticsCompanyName != null">
+                logisticsCompanyName = #{logisticsCompanyName},
+            </if>
+            <if test="arrivedTimeStart != null">
+                arrivedTimeStart = #{arrivedTimeStart},
+            </if>
+            <if test="arrivedTimeEnd != null">
+                arrivedTimeEnd = #{arrivedTimeEnd},
+            </if>
+            <if test="fromCompanyName != null">
+                fromCompanyName = #{fromCompanyName},
+            </if>
+            <if test="fromAddress != null">
+                fromAddress = #{fromAddress},
+            </if>
+            <if test="fromContacts != null">
+                fromContacts = #{fromContacts},
+            </if>
+            <if test="fromContactsTel != null">
+                fromContactsTel = #{fromContactsTel},
+            </if>
+            <if test="fromProvincePk != null">
+                fromProvincePk = #{fromProvincePk},
+            </if>
+            <if test="fromProvinceName != null">
+                fromProvinceName = #{fromProvinceName},
+            </if>
+            <if test="fromCityPk != null">
+                fromCityPk = #{fromCityPk},
+            </if>
+            <if test="fromCityName != null">
+                fromCityName = #{fromCityName},
+            </if>
+            <if test="fromAreaPk != null">
+                fromAreaPk = #{fromAreaPk},
+            </if>
+            <if test="fromAreaName != null">
+                fromAreaName = #{fromAreaName},
+            </if>
+            <if test="toCompanyPk != null">
+                toCompanyPk = #{toCompanyPk},
+            </if>
+            <if test="toCompanyName != null">
+                toCompanyName = #{toCompanyName},
+            </if>
+            <if test="toAddress != null">
+                toAddress = #{toAddress},
+            </if>
+            <if test="toContacts != null">
+                toContacts = #{toContacts},
+            </if>
+            <if test="toContactsTel != null">
+                toContactsTel = #{toContactsTel},
+            </if>
+            <if test="toProvincePk != null">
+                toProvincePk = #{toProvincePk},
+            </if>
+            <if test="toProvinceName != null">
+                toProvinceName = #{toProvinceName},
+            </if>
+            <if test="toCityPk != null">
+                toCityPk = #{toCityPk},
+            </if>
+            <if test="toCityName != null">
+                toCityName = #{toCityName},
+            </if>
+            <if test="toAreaPk != null">
+                toAreaPk = #{toAreaPk},
+            </if>
+            <if test="toAreaName != null">
+                toAreaName = #{toAreaName},
+            </if>
+            <if test="memberInvoicePk != null">
+                memberInvoicePk = #{memberInvoicePk},
+            </if>
+            <if test="supplierInvoicePk != null">
+                supplierInvoicePk = #{supplierInvoicePk},
+            </if>
+            <if test="supplierInvoiceStatus != null">
+                supplierInvoiceStatus = #{supplierInvoiceStatus},
+            </if>
+            <if test="memberInvoiceStatus != null">
+                memberInvoiceStatus = #{memberInvoiceStatus},
+            </if>
+            <if test="driver != null">
+                driver = #{driver},
+            </if>
+            <if test="driverPk != null">
+                driverPk = #{driverPk},
+            </if>
+            <if test="driverContact != null">
+                driverContact = #{driverContact},
+            </if>
+            <if test="carPk != null">
+                carPk = #{carPk},
+            </if>
+            <if test="carPlate != null">
+                carPlate = #{carPlate},
+            </if>
+            <if test="source != null">
+                source = #{source},
+            </if>
+            <if test="member != null">
+                member = #{member},
+            </if>
+            <if test="memberPk != null">
+                memberPk = #{memberPk},
+            </if>
+            <if test="abnormalRemark != null">
+                abnormalRemark = #{abnormalRemark},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="deliveryNumber != null">
+                deliveryNumber = #{deliveryNumber},
+            </if>
+            <if test="deliveryTime != null">
+                deliveryTime = #{deliveryTime},
+            </if>
+            <if test="signTime != null">
+                signTime = #{signTime},
+            </if>
+            <if test="isAbnormal != null">
+                isAbnormal = #{isAbnormal},
+            </if>
+            <if test="fromTownPk != null">
+                fromTownPk = #{fromTownPk},
+            </if>
+            <if test="fromTownName != null">
+                fromTownName = #{fromTownName},
+            </if>
+            <if test="toTownPk != null">
+                toTownPk = #{toTownPk},
+            </if>
+            <if test="toTownName != null">
+                toTownName = #{toTownName},
+            </if>
+            <if test="isConfirmed != null">
+                isConfirmed = #{isConfirmed},
+            </if>
+            <if test="paymentPk != null">
+                paymentPk = #{paymentPk},
+            </if>
+            <if test="paymentName != null">
+                paymentName = #{paymentName},
+            </if>
+            <if test="paymentTime != null">
+                paymentTime = #{paymentTime},
+            </if>
+            <if test="finishedTime != null">
+                finishedTime = #{finishedTime},
+            </if>
+            <if test="financialTime != null">
+                financialTime = #{financialTime},
+            </if>
+            <if test="purchaserName != null">
+                purchaserName = #{purchaserName},
+            </if>
+            <if test="purchaserPk != null">
+                purchaserPk = #{purchaserPk},
+            </if>
+            <if test="supplierName != null">
+                supplierName = #{supplierName},
+            </if>
+            <if test="supplierPk != null">
+                supplierPk = #{supplierPk},
+            </if>
+            <if test="invoicePk != null">
+                invoicePk = #{invoicePk},
+            </if>
+            <if test="invoiceName != null">
+                invoiceName = #{invoiceName},
+            </if>
+            <if test="invoiceTaxidNumber != null">
+                invoiceTaxidNumber = #{invoiceTaxidNumber},
+            </if>
+            <if test="invoiceRegPhone != null">
+                invoiceRegPhone = #{invoiceRegPhone},
+            </if>
+            <if test="invoiceBankAccount != null">
+                invoiceBankAccount = #{invoiceBankAccount},
+            </if>
+            <if test="invoiceBankName != null">
+                invoiceBankName = #{invoiceBankName},
+            </if>
+            <if test="invoiceProvinceName != null">
+                invoiceProvinceName = #{invoiceProvinceName},
+            </if>
+            <if test="invoiceCityName != null">
+                invoiceCityName = #{invoiceCityName},
+            </if>
+            <if test="invoiceAreaName != null">
+                invoiceAreaName = #{invoiceAreaName},
+            </if>
+            <if test="invoiceRegAddress != null">
+                invoiceRegAddress = #{invoiceRegAddress},
+            </if>
+            <if test="settleWeight != null">
+                settleWeight = #{settleWeight},
+            </if>
+        </trim>
+        where pk = #{pk}
+    </update>
+    
+    
+    <update id="updateByPk" parameterType="cn.cf.dto.LgDeliveryOrderDto">
+      update lg_delivery_order
+      set orderPk = #{orderPk,jdbcType=VARCHAR},
+      parentPk = #{parentPk,jdbcType=VARCHAR},
+      orderStatus = #{orderStatus,jdbcType=TINYINT},
+      originalTotalFreight = #{originalTotalFreight,jdbcType=DECIMAL},
+      presentTotalFreight = #{presentTotalFreight,jdbcType=DECIMAL},
+      insertTime = #{insertTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      orderTime = #{orderTime,jdbcType=TIMESTAMP},
+      logisticsCompanyPk = #{logisticsCompanyPk,jdbcType=VARCHAR},
+      logisticsCompanyName = #{logisticsCompanyName,jdbcType=VARCHAR},
+      arrivedTimeStart = #{arrivedTimeStart,jdbcType=TIMESTAMP},
+      arrivedTimeEnd = #{arrivedTimeEnd,jdbcType=TIMESTAMP},
+      fromCompanyName = #{fromCompanyName,jdbcType=VARCHAR},
+      fromAddress = #{fromAddress,jdbcType=VARCHAR},
+      fromContacts = #{fromContacts,jdbcType=VARCHAR},
+      fromContactsTel = #{fromContactsTel,jdbcType=VARCHAR},
+      fromProvincePk = #{fromProvincePk,jdbcType=VARCHAR},
+      fromProvinceName = #{fromProvinceName,jdbcType=VARCHAR},
+      fromCityPk = #{fromCityPk,jdbcType=VARCHAR},
+      fromCityName = #{fromCityName,jdbcType=VARCHAR},
+      fromAreaPk = #{fromAreaPk,jdbcType=VARCHAR},
+      fromAreaName = #{fromAreaName,jdbcType=VARCHAR},
+      toCompanyPk = #{toCompanyPk,jdbcType=VARCHAR},
+      toCompanyName = #{toCompanyName,jdbcType=VARCHAR},
+      toAddress = #{toAddress,jdbcType=VARCHAR},
+      toContacts = #{toContacts,jdbcType=VARCHAR},
+      toContactsTel = #{toContactsTel,jdbcType=VARCHAR},
+      toProvincePk = #{toProvincePk,jdbcType=VARCHAR},
+      toProvinceName = #{toProvinceName,jdbcType=VARCHAR},
+      toCityPk = #{toCityPk,jdbcType=VARCHAR},
+      toCityName = #{toCityName,jdbcType=VARCHAR},
+      toAreaPk = #{toAreaPk,jdbcType=VARCHAR},
+      toAreaName = #{toAreaName,jdbcType=VARCHAR},
+      supplierInvoiceStatus = #{supplierInvoiceStatus,jdbcType=TINYINT},
+      memberInvoiceStatus = #{memberInvoiceStatus,jdbcType=TINYINT},
+      driver = #{driver,jdbcType=VARCHAR},
+      driverPk = #{driverPk,jdbcType=VARCHAR},
+      driverContact = #{driverContact,jdbcType=VARCHAR},
+      carPk = #{carPk,jdbcType=VARCHAR},
+      carPlate = #{carPlate,jdbcType=VARCHAR},
+      source = #{source,jdbcType=TINYINT},
+      member = #{member,jdbcType=VARCHAR},
+      memberPk = #{memberPk,jdbcType=VARCHAR},
+      abnormalRemark = #{abnormalRemark,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      deliveryNumber = #{deliveryNumber,jdbcType=VARCHAR},
+      deliveryTime = #{deliveryTime,jdbcType=TIMESTAMP},
+      signTime = #{signTime,jdbcType=TIMESTAMP},
+      isAbnormal = #{isAbnormal,jdbcType=TINYINT},
+      fromTownPk = #{fromTownPk,jdbcType=VARCHAR},
+      fromTownName = #{fromTownName,jdbcType=VARCHAR},
+      toTownPk = #{toTownPk,jdbcType=VARCHAR},
+      toTownName = #{toTownName,jdbcType=VARCHAR},
+      isConfirmed = #{isConfirmed,jdbcType=TINYINT},
+      paymentPk = #{paymentPk,jdbcType=VARCHAR},
+      paymentName = #{paymentName,jdbcType=VARCHAR},
+      paymentTime = #{paymentTime,jdbcType=TIMESTAMP},
+      finishedTime = #{finishedTime,jdbcType=TIMESTAMP},
+      financialTime = #{financialTime,jdbcType=TIMESTAMP},
+      purchaserName = #{purchaserName,jdbcType=VARCHAR},
+      purchaserPk = #{purchaserPk,jdbcType=VARCHAR},
+      supplierName = #{supplierName,jdbcType=VARCHAR},
+      supplierPk = #{supplierPk,jdbcType=VARCHAR},
+      invoicePk = #{invoicePk,jdbcType=VARCHAR},
+      invoiceName = #{invoiceName,jdbcType=VARCHAR},
+      invoiceTaxidNumber = #{invoiceTaxidNumber,jdbcType=VARCHAR},
+      invoiceRegPhone = #{invoiceRegPhone,jdbcType=VARCHAR},
+      invoiceBankAccount = #{invoiceBankAccount,jdbcType=VARCHAR},
+      invoiceBankName = #{invoiceBankName,jdbcType=VARCHAR},
+      invoiceRegAddress = #{invoiceRegAddress,jdbcType=VARCHAR}
+      where pk = #{pk,jdbcType=VARCHAR}
+  </update>
+  
+   <select id="selectUniquefromDeliveryAndGoods" parameterType="Map" resultType="Integer">
+      select count(*) from lg_delivery_order de inner join lg_delivery_order_goods go on de.pk = go.deliveryPk where de.orderPk=#{orderPk}
+      <if test="goodsPk !=null and goodsPk !=''">
+       and go.goodsPk =#{goodsPk}
+      </if>
+      
+    </select>
+
+	<!-- 平台用户开票订单管理 -->
+    <select id="selectInvoiceList4member" parameterType="Map" resultType="cn.cf.dto.OrderDeliveryDto">
+        SELECT  de.pk, 
+        de.deliveryNumber as orderPk,
+        de.deliveryNumber,
+        de.orderTime,
+        de.originalTotalFreight as presentTotalFreight,
+        de.presentTotalFreight as originalTotalFreight,
+        de.orderStatus,
+        de.memberInvoiceStatus,
+        case de.orderStatus
+	        when 10 then "已关闭"
+	        when 9 then "待付款"
+	        when 8 then "待财务确认"
+	        when 7 then "未匹配"
+	        when 6 then "待派车"
+	        when 5 then "提货中"
+	        when 4 then "配送中"
+	        when 3 then "已签收"
+	        when 2 then "已取消"
+	        when 1 then "已完成"
+	        else "" end as orderStatusName,
+        case de.memberInvoiceStatus
+	        when 3 then "已寄送"
+	        when 2 then "已开发票"
+	        when 1 then "未开发票"
+	        else "" end as memberInvoiceStatusName,
+        de.isAbnormal,
+        de.isConfirmed,
+        go.presentFreight as originalFreight,
+        go.originalFreight as presentFreight
+        FROM `lg_delivery_order` de INNER JOIN `lg_delivery_order_goods`  go ON de.pk=go.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                (de.orderPk like '%${orderPk}%'  or de.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="memberInvoiceStatus != null and memberInvoiceStatus ==0">
+				
+            </if>
+            <if test="memberInvoiceStatus != null and memberInvoiceStatus !=0">
+                and  de.memberInvoiceStatus = #{memberInvoiceStatus}
+            </if>
+            <if test="purAndSup!=null">
+                and (
+                de.purchaserPk = #{purAndSup}
+                or
+                de.memberPk = #{memberPk}
+                )
+            </if>
+	            and ((de.orderStatus=3 or de.orderStatus=1) or (de.isAbnormal=2 and de.isConfirmed=1) )
+        </where>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+
+	<!-- 平台用户开票订单数量查询 -->
+    <select id="selectInvoiceCount4member" resultType="Integer" parameterType="Map">
+        SELECT count(*)
+        FROM `lg_delivery_order` de INNER JOIN `lg_delivery_order_goods`  go  ON de.pk=go.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                 (de.orderPk like '%${orderPk}%'  or de.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="memberInvoiceStatus != null and memberInvoiceStatus ==0">
+				
+            </if>
+            <if test="memberInvoiceStatus != null and memberInvoiceStatus !=0">
+                and de.memberInvoiceStatus = #{memberInvoiceStatus}
+            </if>
+            <if test="purAndSup!=null">
+                and (
+                de.purchaserPk = #{purAndSup} or
+                de.memberPk = #{memberPk}
+                )
+            </if>
+            and ((de.orderStatus=3 or de.orderStatus=1) or (de.isAbnormal=2 and de.isConfirmed=1) )
+        </where>
+    </select>
+
+	<!-- 物流承运商开票订单列表 -->
+	<select id="selectInvoiceList4supplier" parameterType="Map" resultType="cn.cf.dto.OrderDeliveryDto">
+       SELECT de.pk,
+       de.deliveryNumber as orderPk,
+       de.deliveryNumber,
+       de.orderTime, 
+       de.orderStatus,
+        case de.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        when 1 then "已完成"
+        else "" end as orderStatusName,
+       de.supplierInvoiceStatus,
+	        case de.supplierInvoiceStatus
+	        when 3 then "已开票已确认"
+	        when 2 then "已开票待确认"
+	        when 1 then "未开票"
+	        when 0 then "订单进行中"
+	        else "(开票状态异常)" end as supplierInvoiceStatusName,
+ 		de.originalTotalFreight as presentTotalFreight,
+ 		de.presentTotalFreight as originalTotalFreight,
+ 		de.isAbnormal,
+ 		de.isConfirmed,
+ 		go.weight,
+ 		go.originalFreight as presentFreight,
+ 		go.presentFreight as originalFreight
+        FROM `lg_delivery_order` de INNER JOIN `lg_delivery_order_goods` go ON de.pk=go.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and  (de.orderPk like '%${orderPk}%'  or de.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+                and  (de.orderStatus=1 or de.orderStatus=3 or  
+                      de.orderStatus=4 or de.orderStatus=5 or 
+                      de.orderStatus=6)
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (de.orderStatus=4 or de.orderStatus=5 or 
+                      de.orderStatus=6)
+            </if>
+            <if test=" orderStatus!=null and orderStatus==0 ">
+                and  (de.orderStatus=1 or de.orderStatus=3)
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==0">
+                and de.supplierInvoiceStatus=0 
+            </if> 
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==1">
+                and de.supplierInvoiceStatus=1
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==2">
+                and (de.supplierInvoiceStatus=2 or de.supplierInvoiceStatus=3)
+            </if> 
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==3">
+                and (de.supplierInvoiceStatus=0 or de.supplierInvoiceStatus=1 or 
+                	 de.supplierInvoiceStatus=2 or de.supplierInvoiceStatus=3)
+            </if> 
+            <if test="purAndSup!=null">
+                and ( de.logisticsCompanyPk = #{purAndSup} )
+            </if>
+        </where>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+    
+    <!-- 承运商开票订单数量-->
+    <select id="selectInvoiceCount4supplier" resultType="Integer" parameterType="Map">
+        SELECT count(*)
+        FROM `lg_delivery_order` INNER JOIN `lg_delivery_order_goods` ON `lg_delivery_order`.pk=`lg_delivery_order_goods`.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and  (lg_delivery_order.orderPk like '%${orderPk}%' or lg_delivery_order.deliveryNumber like '%${orderPk}%')
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and lg_delivery_order.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and lg_delivery_order.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+                and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3 or  
+                      lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+                      lg_delivery_order.orderStatus=6)
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+                      lg_delivery_order.orderStatus=6)
+            </if>
+             <if test=" orderStatus!=null and orderStatus==0 ">
+                and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3)
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==0">
+                and supplierInvoiceStatus=0 
+            </if> 
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==1">
+                and lg_delivery_order.supplierInvoiceStatus=1
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==2">
+                and (supplierInvoiceStatus=2 or supplierInvoiceStatus=3)
+            </if> 
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==3">
+                and (supplierInvoiceStatus=0 or supplierInvoiceStatus=1 or 
+                     supplierInvoiceStatus=2 or supplierInvoiceStatus=3)
+            </if> 
+            <if test="purAndSup!=null">
+                and (
+                logisticsCompanyPk = #{purAndSup}
+                )
+            </if>
+        </where>
+    </select>
+
+	<!-- 承运商开票 -->
+	<insert id="insertLgLogisticsInvoices" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_logistics_invoices 
+        (
+         pk, insertTime, updateTime, month, billAccount, orderCount,applyTime
+        ) 
+        VALUES 
+        (
+         #{pk}, #{insertTime}, #{updateTime}, #{month}, #{billAccount}, #{orderCount},#{applyTime}
+        )
+    ]]>
+	</insert>
+	
+	<!-- 承运商开票管理导出订单 -->
+ 	<select id="exportInvoiceDeliveryOrder" resultType="cn.cf.dto.OrderDeliveryDto" parameterType="Map">
+        select de.pk,
+        de.deliveryNumber as orderPk,
+        de.deliveryNumber,
+        de.parentPk,
+        de.originalTotalFreight as presentTotalFreight,
+        de.presentTotalFreight as originalTotalFreight,
+        de.orderTime,
+        de.logisticsCompanyName,
+        IF(de.supplierName IS NOT NULL AND de.supplierName !='', 
+			de.supplierName , 
+			de.fromCompanyName ) AS fromCompanyName,
+		de.fromProvinceName,
+		de.fromCityName,
+		de.fromAreaName,
+		de.fromTownName,
+        de.fromAddress,
+        de.fromContacts,
+        de.fromContactsTel,
+        de.orderStatus,
+        de.arrivedTimeStart,
+        de.arrivedTimeEnd,
+        de.toCompanyName,
+        de.toProvinceName,
+        de.toCityName,
+        de.toAreaName,
+        de.toTownName,
+        de.toAddress,
+        de.toContacts,
+        de.toContactsTel,
+        case de.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        else "" end as orderStatusName,
+        case de.isConfirmed
+        when 1 then "已确认"
+        when 2 then "未确认"
+        else "" end as isConfirmedName,
+        de.isConfirmed,
+        de.presentTotalFreight,
+        de.driver,
+        de.driverContact,
+        de.carPlate,
+        go.tareWeight,
+        go.presentFreight,
+        go.goodsPk,
+        go.deliveryPk,
+        go.productName,
+        go.varietiesName,
+        go.seedvarietyName,
+        go.specName,
+        go.seriesName,
+        go.gradeName,
+        go.batchNumber,
+        go.boxes,
+        go.weight,
+        go.originalFreight as presentFreight,
+        go.presentFreight as originalFreight,
+        go.goodsName,
+        case go.unit
+         when 1 then "箱"
+         when 2 then "锭"
+         when 3 then "件"
+         when 4 then "粒"
+         else "箱" end as unitName
+        from lg_delivery_order de inner join lg_delivery_order_goods go on de.Pk = go.deliveryPk
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and ( de.orderPk like '%${orderPk}%' or de.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+                and  (de.orderStatus=1 or de.orderStatus=3 or  de.orderStatus=4 or de.orderStatus=5 or de.orderStatus=6)
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (de.orderStatus=4 or de.orderStatus=5 or de.orderStatus=6)
+            </if>
+             <if test=" orderStatus!=null and orderStatus==0 ">
+                and  (de.orderStatus=1 or de.orderStatus=3)
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==1">
+                and de.supplierInvoiceStatus=1
+            </if>
+            <if test="supplierInvoiceStatus!=null and supplierInvoiceStatus==2">
+                and (de.supplierInvoiceStatus=2 or de.supplierInvoiceStatus=3)
+            </if> 
+            <if test="companyPk !=null">
+                and de.logisticsCompanyPk =#{companyPk}
+            </if>
+        </where>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+    </select>
+    
+    
+   <!-- 承运商收入明细订单列表  -->
+   <select id="supplierIncomeDetailList" parameterType="Map" resultType="cn.cf.dto.OrderDeliveryDto">
+        SELECT de.pk,
+        de.deliveryNumber as orderPk,
+        de.deliveryNumber,
+        de.orderTime, 
+        de.updateTime,
+       	de.originalTotalFreight as presentTotalFreight,
+       	de.presentTotalFreight as originalTotalFreight,
+        case de.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        when 1 then "已完成"
+        else "" end as orderStatusName,
+        de.isAbnormal,
+        de.isConfirmed,
+        go.weight,
+        go.originalFreight as presentFreight,
+        go.presentFreight as originalFreight
+        FROM `lg_delivery_order` de  INNER JOIN `lg_delivery_order_goods` go ON de.pk=go.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and (de.orderPk like '%${orderPk}%' or de.deliveryNumber like '%${orderPk}%'  )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and de.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and de.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="updateTimeStart !=null and updateTimeStart !=''">
+                and de.updateTime &gt;=CONCAT(#{updateTimeStart},' 00:00:00')
+            </if>
+            <if test="updateTimeEnd !=null and updateTimeEnd !=''">
+                and de.updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+				and  (de.orderStatus=1 or de.orderStatus=3 or  
+					  de.orderStatus=4 or de.orderStatus=5 or 
+					  de.orderStatus=6 )
+            	and (de.isAbnormal=1 or (de.isAbnormal=2 and de.isConfirmed=1))
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (de.orderStatus=4 or de.orderStatus=5 or de.orderStatus=6)
+           		and de.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==0 ">
+                and  (de.orderStatus=1 or de.orderStatus=3)
+                and de.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==2 ">
+               and  (de.orderStatus=1 or de.orderStatus=3 or  de.orderStatus=4 or de.orderStatus=5 or de.orderStatus=6)
+               and  (de.isAbnormal=2 )
+               and  (de.isConfirmed=1)
+            </if>
+            <if test="purAndSup!=null">
+                and (
+                de.logisticsCompanyPk = #{purAndSup}
+                )
+            </if>
+        </where>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+        <if test="limit != null">
+            limit ${start}, ${limit}
+        </if>
+    </select>
+    
+    <!-- 承运商收入明细订单 数量 -->
+   <select id="supplierIncomeDetailCount" parameterType="Map" resultType="Integer">
+       SELECT count(*)
+        FROM `lg_delivery_order` INNER JOIN `lg_delivery_order_goods` ON `lg_delivery_order`.pk=`lg_delivery_order_goods`.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and (lg_delivery_order.orderPk like '%${orderPk}%'  or lg_delivery_order.deliveryNumber like '%${orderPk}%' )
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and lg_delivery_order.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and lg_delivery_order.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="updateTimeStart !=null and updateTimeStart !=''">
+                and lg_delivery_order.updateTime &gt;=CONCAT(#{updateTimeStart},' 00:00:00')
+            </if>
+            <if test="updateTimeEnd !=null and updateTimeEnd !=''">
+                and lg_delivery_order.updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+				and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3 or  
+				      lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+				      lg_delivery_order.orderStatus=6 )
+				and (lg_delivery_order.isAbnormal=1 or (lg_delivery_order.isAbnormal=2 and lg_delivery_order.isConfirmed=1))
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+                      lg_delivery_order.orderStatus=6)
+           		and lg_delivery_order.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==0 ">
+                and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3)
+                and lg_delivery_order.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==2 ">
+               and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3 or  
+               	     lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+               	     lg_delivery_order.orderStatus=6)
+               and  (lg_delivery_order.isAbnormal=2 )
+               and  (lg_delivery_order.isConfirmed=1)
+            </if>
+            <if test="purAndSup!=null">
+                and (
+                logisticsCompanyPk = #{purAndSup}
+                )
+            </if>
+        </where>
+    </select>
+    
+
+	<!-- 承运商收入明细导出 -->
+ 	<select id="supplierIncomeDetailExport" resultType="cn.cf.dto.OrderDeliveryDto" parameterType="Map">
+        SELECT lg_delivery_order.pk,
+        lg_delivery_order.deliveryNumber as orderPk,
+        lg_delivery_order.deliveryNumber,
+        lg_delivery_order.orderTime,
+        lg_delivery_order.updateTime,
+       	lg_delivery_order_goods.weight,
+       	lg_delivery_order.presentTotalFreight,
+        case lg_delivery_order.orderStatus
+        when 10 then "已关闭"
+        when 9 then "待付款"
+        when 8 then "待财务确认"
+        when 7 then "未匹配"
+        when 6 then "待派车"
+        when 5 then "提货中"
+        when 4 then "配送中"
+        when 3 then "已签收"
+        when 2 then "已取消"
+        when 1 then "已完成"
+        else "" end as orderStatusName,
+        lg_delivery_order.isAbnormal,
+        lg_delivery_order.isConfirmed
+        FROM `lg_delivery_order` INNER JOIN `lg_delivery_order_goods` ON `lg_delivery_order`.pk=`lg_delivery_order_goods`.`deliveryPk`
+        <where>
+            <if test="orderPk !=null and orderPk !=''">
+                and (lg_delivery_order.orderPk like '%${orderPk}%'  or  lg_delivery_order.deliveryNumber  like '%${orderPk}%')
+            </if>
+            <if test="orderTimeStart !=null and orderTimeStart !=''">
+                and lg_delivery_order.orderTime &gt;=CONCAT(#{orderTimeStart},' 00:00:00')
+            </if>
+            <if test="orderTimeEnd !=null and orderTimeEnd !=''">
+                and lg_delivery_order.orderTime &lt;=CONCAT(#{orderTimeEnd},' 23:59:59')
+            </if>
+            <if test="updateTimeStart !=null and updateTimeStart !=''">
+                and lg_delivery_order.updateTime &gt;=CONCAT(#{updateTimeStart},' 00:00:00')
+            </if>
+            <if test="updateTimeEnd !=null and updateTimeEnd !=''">
+                and lg_delivery_order.updateTime &lt;=CONCAT(#{updateTimeEnd},' 23:59:59')
+            </if>
+            <if test=" orderStatus!=null and orderStatus==9 ">
+				and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3 or  
+					  lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or 
+					  lg_delivery_order.orderStatus=6 )
+            	and (lg_delivery_order.isAbnormal=1 or (lg_delivery_order.isAbnormal=2 and lg_delivery_order.isConfirmed=1))
+            </if>
+            <if test=" orderStatus!=null and orderStatus==1 ">
+                and  (lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or lg_delivery_order.orderStatus=6)
+           		and lg_delivery_order.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==0 ">
+                and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3)
+                and lg_delivery_order.isAbnormal=1
+            </if>
+            <if test="orderStatus!=null and orderStatus==2 ">
+               and  (lg_delivery_order.orderStatus=1 or lg_delivery_order.orderStatus=3 or  lg_delivery_order.orderStatus=4 or lg_delivery_order.orderStatus=5 or lg_delivery_order.orderStatus=6)
+               and  (lg_delivery_order.isAbnormal=2 )
+               and  (lg_delivery_order.isConfirmed=1)
+            </if>
+            <if test="purAndSup!=null">
+                and (
+                logisticsCompanyPk = #{purAndSup}
+                )
+            </if>
+        </where>
+        <if test="orderName != null">
+            order by ${orderName} ${orderType}
+        </if>
+    </select>
+    
+    <!-- 根据PK删除订单 -->
+     <select id="deleteByPK" parameterType="java.lang.String">
+        DELETE FROM lg_delivery_order WHERE lg_delivery_order.`pk`=#{deliveryPk}
+    </select>
+
+	 <!-- 更新订单 -->
+	 <update id="update" parameterType="cn.cf.model.LgDeliveryOrder">
+      update lg_delivery_order
+      set orderPk = #{orderPk,jdbcType=VARCHAR},
+      parentPk = #{parentPk,jdbcType=VARCHAR},
+      orderStatus = #{orderStatus,jdbcType=TINYINT},
+      isMatched = #{isMatched,jdbcType=TINYINT},
+      originalTotalFreight = #{originalTotalFreight,jdbcType=DECIMAL},
+      presentTotalFreight = #{presentTotalFreight,jdbcType=DECIMAL},
+      insertTime = #{insertTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      orderTime = #{orderTime,jdbcType=TIMESTAMP},
+      logisticsCompanyPk = #{logisticsCompanyPk,jdbcType=VARCHAR},
+      logisticsCompanyName = #{logisticsCompanyName,jdbcType=VARCHAR},
+      arrivedTimeStart = #{arrivedTimeStart,jdbcType=TIMESTAMP},
+      arrivedTimeEnd = #{arrivedTimeEnd,jdbcType=TIMESTAMP},
+      fromCompanyName = #{fromCompanyName,jdbcType=VARCHAR},
+      fromAddress = #{fromAddress,jdbcType=VARCHAR},
+      fromContacts = #{fromContacts,jdbcType=VARCHAR},
+      fromContactsTel = #{fromContactsTel,jdbcType=VARCHAR},
+      fromProvincePk = #{fromProvincePk,jdbcType=VARCHAR},
+      fromProvinceName = #{fromProvinceName,jdbcType=VARCHAR},
+      fromCityPk = #{fromCityPk,jdbcType=VARCHAR},
+      fromCityName = #{fromCityName,jdbcType=VARCHAR},
+      fromAreaPk = #{fromAreaPk,jdbcType=VARCHAR},
+      fromAreaName = #{fromAreaName,jdbcType=VARCHAR},
+      toCompanyPk = #{toCompanyPk,jdbcType=VARCHAR},
+      toCompanyName = #{toCompanyName,jdbcType=VARCHAR},
+      toAddress = #{toAddress,jdbcType=VARCHAR},
+      toContacts = #{toContacts,jdbcType=VARCHAR},
+      toContactsTel = #{toContactsTel,jdbcType=VARCHAR},
+      toProvincePk = #{toProvincePk,jdbcType=VARCHAR},
+      toProvinceName = #{toProvinceName,jdbcType=VARCHAR},
+      toCityPk = #{toCityPk,jdbcType=VARCHAR},
+      toCityName = #{toCityName,jdbcType=VARCHAR},
+      toAreaPk = #{toAreaPk,jdbcType=VARCHAR},
+      toAreaName = #{toAreaName,jdbcType=VARCHAR},
+      supplierInvoicePk = #{supplierInvoicePk,jdbcType=VARCHAR},
+      supplierInvoiceStatus = #{supplierInvoiceStatus,jdbcType=TINYINT},
+      memberInvoicePk = #{memberInvoicePk,jdbcType=VARCHAR},
+      memberInvoiceStatus = #{memberInvoiceStatus,jdbcType=TINYINT},
+      driver = #{driver,jdbcType=VARCHAR},
+      driverPk = #{driverPk,jdbcType=VARCHAR},
+      driverContact = #{driverContact,jdbcType=VARCHAR},
+      carPk = #{carPk,jdbcType=VARCHAR},
+      carPlate = #{carPlate,jdbcType=VARCHAR},
+      source = #{source,jdbcType=TINYINT},
+      member = #{member,jdbcType=VARCHAR},
+      memberPk = #{memberPk,jdbcType=VARCHAR},
+      abnormalRemark = #{abnormalRemark,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      deliveryNumber = #{deliveryNumber,jdbcType=VARCHAR},
+      deliveryTime = #{deliveryTime,jdbcType=TIMESTAMP},
+      signTime = #{signTime,jdbcType=TIMESTAMP},
+      isAbnormal = #{isAbnormal,jdbcType=TINYINT},
+      fromTownPk = #{fromTownPk,jdbcType=VARCHAR},
+      fromTownName = #{fromTownName,jdbcType=VARCHAR},
+      toTownPk = #{toTownPk,jdbcType=VARCHAR},
+      toTownName = #{toTownName,jdbcType=VARCHAR},
+      isConfirmed = #{isConfirmed,jdbcType=TINYINT},
+      paymentPk = #{paymentPk,jdbcType=VARCHAR},
+      paymentName = #{paymentName,jdbcType=VARCHAR},
+      paymentTime = #{paymentTime,jdbcType=TIMESTAMP},
+      finishedTime = #{finishedTime,jdbcType=TIMESTAMP},
+      financialTime = #{financialTime,jdbcType=TIMESTAMP},
+      purchaserName = #{purchaserName,jdbcType=VARCHAR},
+      purchaserPk = #{purchaserPk,jdbcType=VARCHAR},
+      supplierName = #{supplierName,jdbcType=VARCHAR},
+      supplierPk = #{supplierPk,jdbcType=VARCHAR},
+      invoicePk = #{invoicePk,jdbcType=VARCHAR},
+      invoiceName = #{invoiceName,jdbcType=VARCHAR},
+      invoiceTaxidNumber = #{invoiceTaxidNumber,jdbcType=VARCHAR},
+      invoiceRegPhone = #{invoiceRegPhone,jdbcType=VARCHAR},
+      invoiceBankAccount = #{invoiceBankAccount,jdbcType=VARCHAR},
+      invoiceBankName = #{invoiceBankName,jdbcType=VARCHAR},
+      invoiceRegAddress = #{invoiceRegAddress,jdbcType=VARCHAR},
+      linePricePk = #{linePricePk,jdbcType=VARCHAR},
+      basisLinePrice = #{basisLinePrice,jdbcType=DECIMAL},
+      settleWeight = #{settleWeight,jdbcType=DECIMAL},
+      isSettleFreight = #{isSettleFreight,jdbcType=TINYINT}
+      where pk = #{pk,jdbcType=VARCHAR}
+  </update>
+
+	<!-- 根据deliveryPK查询付款信息 -->
+	<select id="getInfoBeforePay" resultType="cn.cf.dto.LgDeliveryOrderDto" parameterType="java.lang.String">
+        SELECT lg_delivery_order.pk,
+        lg_delivery_order.orderStatus,
+        lg_delivery_order.deliveryNumber as orderPk,
+        lg_delivery_order.deliveryNumber,
+        lg_delivery_order.presentTotalFreight as originalTotalFreight, 
+        lg_delivery_order.originalTotalFreight as presentTotalFreight, 
+        lg_delivery_order.fromProvinceName,
+        lg_delivery_order.fromCityName,
+        lg_delivery_order.fromAreaName,
+        lg_delivery_order.fromTownName,
+       	lg_delivery_order.fromAddress,
+       	lg_delivery_order.fromContacts,
+       	lg_delivery_order.fromContactsTel,
+       	lg_delivery_order.toProvinceName,
+       	lg_delivery_order.toCityName,
+       	lg_delivery_order.toAreaName,
+       	lg_delivery_order.toTownName,
+       	lg_delivery_order.toAddress,
+       	lg_delivery_order.toContacts,
+       	lg_delivery_order.toContactsTel
+        FROM `lg_delivery_order` 
+        INNER JOIN `lg_delivery_order_goods` ON `lg_delivery_order`.pk=`lg_delivery_order_goods`.`deliveryPk`
+        where lg_delivery_order.pk=#{deliveryPk,jdbcType=VARCHAR} and lg_delivery_order.orderStatus=9
+        and lg_delivery_order.isMatched=1
+    </select>
+    
+    <!--平台用户付款（orderStatus:9->8）    -->
+    <update id="payForLogistics" >
+      update lg_delivery_order set lg_delivery_order.orderStatus=8,
+      lg_delivery_order.paymentPk=#{paymentPk},lg_delivery_order.paymentName=#{paymentName},
+      lg_delivery_order.paymentTime=#{tempDate} 
+      where lg_delivery_order.pk=#{deliveryPk} and lg_delivery_order.orderStatus=9
+  	</update>
+
+	<!--订单详情（再来一单）  -->
+	<select id="getInfo4MoreOrder" parameterType="Map" resultType="cn.cf.dto.OrderDeliveryDto">
+	     select de.pk,
+	     DATE_FORMAT(de.arrivedTimeStart,'%Y-%m-%d') as arrivedTimeStart,
+	     DATE_FORMAT(de.arrivedTimeEnd,'%Y-%m-%d') as arrivedTimeEnd,
+	     DATE_FORMAT(de.arrivedTimeStart,'%H:%i')  as arrivedHourStart,
+	     DATE_FORMAT(de.arrivedTimeEnd,'%H:%i')  as arrivedHourEnd,
+	     de.fromCompanyName,
+	     de.fromAddressPk,
+	     de.fromAddress,
+	     de.fromContacts,
+	     de.fromContactsTel,
+	     de.fromProvincePk,
+	     de.fromProvinceName,
+	     de.fromCityPk,
+	     de.fromCityName,
+	     de.fromAreaPk,
+	     de.fromAreaName,
+	     de.toCompanyName,
+	     de.toAddressPk,
+	     de.toAddress,
+	     de.toContacts,
+	     de.toContactsTel,
+	     de.toProvincePk,
+	     de.toProvinceName,
+	     de.toCityPk,
+	     de.toCityName,
+	     de.toAreaPk,
+	     de.toAreaName,
+	     de.remark,
+	     de.fromTownPk,
+	     de.fromTownName,
+	     de.toTownPk,
+	     de.toTownName,
+	     de.invoicePk,
+	     de.invoiceName,
+	     de.invoiceTaxidNumber,
+	     de.invoiceRegPhone,
+	     de.invoiceBankAccount,
+	     de.invoiceBankName,
+	     de.invoiceRegAddress,
+	     de.mandatePk,
+	     de.mandateUrl,
+	     go.productName,
+	     go.productPk,
+	     go.gradeName,
+	     go.gradePk,
+	     go.batchNumber,
+	     go.boxes,
+	     go.weight,
+	     go.unit,
+	     case go.unit
+         when 1 then "箱"
+         when 2 then "锭"
+         when 3 then "件"
+         when 4 then "粒"
+         else "箱" end as unitName
+	     from lg_delivery_order de inner join lg_delivery_order_goods go on de.pk = go.deliveryPk
+	     where de.pk = #{deliveryPk}
+    </select>
+
+	<update id="savePushLgCompanyName" parameterType="java.util.Map">
+		UPDATE lg_delivery_order
+		<set>
+			logisticsCompanyPk = #{logisticsCompanyPk},
+			logisticsCompanyName =#{logisticsCompanyName},
+			basisLinePrice = #{basisLinePrice},
+			linePricePk = #{linePricePk},
+			settleWeight = #{settleWeight},
+			presentTotalFreight = #{presentTotalFreight},
+			originalTotalFreight = #{originalTotalFreight},
+			isMatched = #{isMatched},
+			updateTime = SYSDATE()
+		</set>
+		WHERE pk = #{pk}
+	</update>
+		
+	
+	<!-- 查询  超过24小时未支付的订单 -->
+	<select id="searchAutoClosePayOrders" resultType="String">
+        SELECT lg_delivery_order.pk FROM `lg_delivery_order` 
+      	WHERE lg_delivery_order.`orderStatus`=9
+		AND lg_delivery_order.`isMatched`=1
+    </select>
+	
+	
+	<!-- 查询  待财务确认的订单48小时后关闭 -->
+	<select id="searchCloseConfirmOrder" resultType="String">
+        SELECT lg_delivery_order.pk FROM `lg_delivery_order` 
+      	WHERE lg_delivery_order.`orderStatus`=8 
+		AND DATE_SUB(NOW(), INTERVAL 48 HOUR)>lg_delivery_order.`orderTime`
+    </select>
+	
+	
+	<!-- 关闭订单 -->
+	<update id="closeOrder" >
+		UPDATE  lg_delivery_order 
+		SET lg_delivery_order.`orderStatus`=10 ,lg_delivery_order.updateTime=now()
+		WHERE lg_delivery_order.pk=#{pk}
+	</update>
+	
+
+	
+	
+	
+	<!-- 根据订单编号查询订单数量 -->
+	<select id="getDeliveryCountByOrderPk" resultType="Integer">
+      SELECT COUNT(*) FROM lg_delivery_order WHERE lg_delivery_order.`orderPk` =#{orderPk}
+    </select>
+	
+	<!-- 根据deliveryNumber字段检查订单状态 -->
+	<select id="checkOrderStatusByDeliveryNumber" resultType="Integer">
+      SELECT lg_delivery_order.`orderStatus` 
+      FROM lg_delivery_order 
+      WHERE lg_delivery_order.`deliveryNumber`=#{deliveryNumber} limit 1
+    </select>
+    
+    <!-- 根据deliveryNumber查询订单 -->
+	<select id="getByDeliveryNumber" resultType="cn.cf.dto.LgDeliveryOrderDto"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="columns"/>
+        FROM lg_delivery_order where deliveryNumber = #{deliveryNumber} limit 1
+    </select>
+	
+	<!-- 根据orderPk查询所有订单（包括子订单）的状态 -->
+	<select id="getAllStatusByOrderPk" resultType="Integer" parameterType="java.lang.String">
+        SELECT lg_delivery_order.orderStatus
+        FROM lg_delivery_order where lg_delivery_order.orderPk = #{orderPk}
+    </select>
+    
+    <!-- 根据deliveryNumber字段查询订单主键 -->
+	<select id="getPkByDeliveryNumber" resultType="String">
+      SELECT lg_delivery_order.`pk` 
+      FROM lg_delivery_order 
+      WHERE lg_delivery_order.`deliveryNumber`=#{deliveryNumber} limit 1
+    </select>
+    
+    
+     <!-- 根据deliveryNumber字段查询订单是否存在 -->
+	<select id="checkOrderExistByDeliveryNumber" resultType="int">
+      SELECT count(*) 
+      FROM lg_delivery_order 
+      WHERE lg_delivery_order.`deliveryNumber`=#{deliveryNumber}
+    </select>
+    
+    <!-- 根据pk修改deliveryNumber -->
+    <update id="updateDeliveryNumberByPk" >
+      update lg_delivery_order set lg_delivery_order.deliveryNumber=#{deliveryNumber}
+      where lg_delivery_order.pk=#{pk}
+  	</update>
+	
+</mapper>

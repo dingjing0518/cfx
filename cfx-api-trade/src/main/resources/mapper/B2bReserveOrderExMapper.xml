@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bReserveOrderDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,purchaserName,purchaserPk,orderStatus,orderAmount,actualAmount,insertTime,meno,deliverDetails,addressJson,memberPk,memberName,storeName,storePk,source,logisticsModelPk,logisticsModelName,invoiceJson,purchaseType,completeTime,purchaserMobile,goodsJson,isBatches
+	    ]]>
+	</sql>
+	<insert id="insertBatch" useGeneratedKeys="true" keyProperty="orderNumber"
+		parameterType="java.util.List">
+		INSERT INTO b2b_reserve_order (
+		orderNumber,
+		purchaserName,
+		purchaserPk,
+		orderStatus,
+		orderAmount,
+		actualAmount,
+		insertTime,
+		meno,
+		memberPk,
+		memberName,
+		storeName,
+		storePk,
+		source,
+		logisticsModelPk,
+		logisticsModelName,
+		purchaseType,
+		purchaserMobile,
+		deliverDetails,
+		invoiceJson,
+		addressJson,
+		goodsJson,
+		isBatches,
+		appointmentTime
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.orderNumber}, #{item.purchaserName},
+			#{item.purchaserPk},
+			1,
+			#{item.orderAmount},
+			#{item.actualAmount},
+			NOW(),
+			#{item.meno},
+			#{item.memberPk},
+			#{item.memberName},
+			#{item.storeName}, #{item.storePk},
+			#{item.source},
+			#{item.logisticsModelPk},
+			#{item.logisticsModelName},
+	        #{item.purchaseType },
+			#{item.purchaserMobile},
+			#{item.deliverDetails},
+			#{item.invoiceJson},
+			#{item.addressJson},
+			#{item.goodsJson},
+			#{item.isBatches},
+			#{item.appointmentTime}
+			)
+		</foreach>
+	</insert>
+
+	<select id="searchReserveOrderCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_reserve_order
+		<include refid="searchGridWhere" />
+	</select>
+
+
+	<select id="searchReserveOrderList" resultType="cn.cf.dto.B2bReserveOrderDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_reserve_order
+		<include refid="searchGridWhere" />
+		<if test="orderName != null">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName like '%${purchaserName}%'
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				and TO_DAYS( insertTime ) >=TO_DAYS(#{insertTimeBegin})
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				and TO_DAYS(  insertTime ) &lt;=TO_DAYS(#{insertTimeEnd})
+			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(storePk)">
+				AND storePk = #{storePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaseType)">
+				AND purchaseType = #{purchaseType}
+			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeBegin)">
+				AND completeTime >= #{completeTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(completeTimeEnd)">
+				AND completeTime &lt;= #{completeTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(purchaserMobile)">
+				AND purchaserMobile = #{purchaserMobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsJson)">
+				AND goodsJson like '%"${goodsJson}"%'
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND goodsJson like '%"${employeeName}"%'
+			</if>
+		</where>
+	</sql>
+
+	<select id="searchReserveStatusCounts" resultType="map">
+		SELECT
+		count(1) AS allCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 1 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS uncommittedCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 2 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS successCounts,
+		IFNULL(
+		SUM(
+		CASE orderStatus
+		WHEN 3 THEN
+		1
+		ELSE
+		0
+		END
+		),
+		0
+		) AS closeCounts
+		FROM
+		b2b_reserve_order
+		<include refid="searchGridWhere" />
+	</select>
+	
+	
+	<update id="updateReserve">
+		UPDATE b2b_reserve_order
+		<set>
+			completeTime=now(),
+			<if test="orderStatus!=null and orderStatus!=''">
+				orderStatus = #{orderStatus}
+			</if>
+		</set>
+		where orderNumber= #{orderNumber}
+	</update>
+	<select id="searchReserveOrderListForToday" resultType="cn.cf.dto.B2bReserveOrderDto">
+	SELECT
+	*
+FROM
+	b2b_reserve_order
+WHERE
+	orderStatus = 1
+AND to_days(appointmentTime) = to_days(now())
+	
+	</select>
+</mapper>
+

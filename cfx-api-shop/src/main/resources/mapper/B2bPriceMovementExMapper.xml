@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bPriceMovementDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,goodsPk,yesterdayPrice,price,date,sort,updateTime,isHome,isDelete
+	    ]]>
+	</sql>
+
+	
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}			</if>
+			<if test="@Ognl@isNotEmpty(price)">
+				AND price = #{price}			</if>
+			<if test="@Ognl@isNotEmpty(dateBegin)">
+				AND date >= #{dateBegin}			</if>
+			<if test="@Ognl@isNotEmpty(dateEnd)">
+				AND date &lt;= #{dateEnd}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isHome)">
+				AND isHome = #{isHome}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+		</where>
+	</sql>
+
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchB2bPriceMovementList" resultType="cn.cf.dto.B2bPriceMovementDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+			p.pk,
+			g.goodsInfo,
+			p.price,
+			p.yesterdayPrice,
+			p.updateTime AS goodsUpdateTime,
+			p.goodsPk AS goodsPk,
+			str_to_date(p.date,'%Y-%m-%d') AS date,
+			g.updateTime AS platformUpdateTime
+		FROM
+			b2b_price_movement p
+		LEFT JOIN b2b_goods g ON p.goodsPk = g.pk
+		where p.isDelete = 1 and p.price is not null and p.price >0
+		<if test="pk != null">
+			and p.pk = #{pk}
+		</if>
+		<if test="isHome != null">
+			and p.isHome = #{isHome}
+		</if>
+		 <if test="productPk != null and productPk !=''">
+				<foreach collection="productPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"productPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+		<if test="varietiesPk != null and varietiesPk !=''">
+				<foreach collection="varietiesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"varietiesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="seriesPk != null and seriesPk !=''">
+				<foreach collection="seriesPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"seriesPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="technologyPk != null and technologyPk !=''">
+				<foreach collection="technologyPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"technologyPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialPk != null and rawMaterialPk !=''">
+				<foreach collection="rawMaterialPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			<if test="rawMaterialParentPk != null and rawMaterialParentPk !=''">
+				<foreach collection="rawMaterialParentPk" item="item" open=" AND("
+					close=" )" separator=" or ">
+					FIND_IN_SET('"rawMaterialParentPk":"${item}"',goodsInfo)
+				</foreach>
+			</if>
+			
+		<if test="specifications != null">
+			AND goodsInfo like '%specifications%${specifications}%'
+		</if>
+		<if test="block != null">
+			and p.block = #{block}
+		</if>
+			order by p.sort desc,p.updateTime desc  
+		<if test="start != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="searchB2bPriceMovementCount" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			b2b_price_movement p
+		LEFT JOIN b2b_goods g ON p.goodsPk = g.pk
+		where p.isDelete = 1 and p.price is not null and p.price >0
+		<if test="pk != null">
+			and p.pk = #{pk}
+		</if>
+		<if test="isHome != null">
+			and p.isHome = #{isHome}
+		</if>
+		<if test="productPk != null">
+			and FIND_IN_SET('"productPk":"${productPk}"',goodsInfo)
+		</if>
+		<if test="varietiesPk != null">
+			and FIND_IN_SET('"varietiesPk":"${varietiesPk}"',goodsInfo)
+		</if> 
+		<if test="seriesPk != null">
+			and FIND_IN_SET('"seriesPk":"${seriesPk}"',goodsInfo)
+		</if> 
+		<if test="specifications != null">
+				AND goodsInfo like '%specifications%${specifications}%'
+		</if>
+		<if test="block != null">
+			and p.block = #{block}
+		</if>
+	</select>
+	
+	<update id="updateYesterdayPrice">
+		update b2b_price_movement set yesterdayPrice = price
+	</update>
+</mapper>
+

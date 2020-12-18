@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysLivebroadCategoryExDao">
+
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,insertTime,isDelete,isVisable,sort,updateTime
+	    ]]>
+	</sql>
+
+	
+
+<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(sort)">
+				AND sort = #{sort}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+		</where>
+	</sql>
+
+<select id="getAllBroadCastCategory"   parameterType="java.lang.String" resultType="cn.cf.dto.B2bLiveBroadCastCategoryExDto">  
+SELECT * from sys_livebroad_category where isDelete=1 and isVisable=1
+
+
+</select>
+
+	<select id="searchGridExCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM sys_livebroad_category
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGridEx" resultType="cn.cf.dto.B2bLiveBroadCastCategoryExDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM sys_livebroad_category
+		<include refid="searchGridWhere" />
+			<if test="orderName != null ">
+			order by ${orderName} ${orderType}
+		</if>
+		<if test="limit != null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	
+		<select id="valiDateCounts" resultType="int">
+		select count(1) from sys_livebroad_category
+		where isDelete = 1
+		<if test="name != null and name !=''">
+			and name = #{name}
+		</if>
+		<if test="pk != null and pk !=''">
+			and pk !=#{pk}
+		</if>
+	</select>
+
+
+	<update id="updateEx" parameterType="cn.cf.model.SysLivebroadCategory">
+    <![CDATA[
+        UPDATE sys_livebroad_category SET
+	        name = #{name} , insertTime = #{insertTime} , isDelete = #{isDelete} , isVisable = #{isVisable} , sort = #{sort} , updateTime = #{updateTime}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+</mapper>
+

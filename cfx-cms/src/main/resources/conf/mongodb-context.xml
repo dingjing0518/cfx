@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:mongo="http://www.springframework.org/schema/data/mongo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans   
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+           http://www.springframework.org/schema/data/mongo  
+               http://www.springframework.org/schema/data/mongo/spring-mongo.xsd">
+          <context:annotation-config/>
+        <context:component-scan base-package="cn.cf" >
+        <context:exclude-filter type="annotation" expression="org.springframework.scheduling.annotation.EnableScheduling"/>
+        </context:component-scan>
+      <!-- 加载mongodb的属性配置文件 -->
+    <!-- <context:property-placeholder location="classpath:/conf/mongodb.properties" /> -->
+    <context:property-placeholder location="classpath:/application.properties" />
+    <mongo:mongo-client id="mongoClient" host="${spring.data.mongodb.host}" port="${spring.data.mongodb.port}" credentials="${spring.data.mongodb.username}:${spring.data.mongodb.password}@${spring.data.mongodb.database}">
+    
+        <!-- 一些连接属性的设置 -->    
+        <mongo:client-options
+             connections-per-host="${spring.data.mongodb.connectionsPerHost}"
+             threads-allowed-to-block-for-connection-multiplier="${spring.data.mongodb.threadsAllowedToBlockForConnectionMultiplier}"
+             connect-timeout="${spring.data.mongodb.connectTimeout}"
+             max-wait-time="${spring.data.mongodb.maxWaitTime}"
+             socket-keep-alive="${spring.data.mongodb.socketKeepAlive}"
+             socket-timeout="${spring.data.mongodb.socketTimeout}"
+             description="${spring.data.mongodb.description}"/>          
+    </mongo:mongo-client>  
+    
+    <mongo:db-factory id="mongoDbFactory" dbname="${spring.data.mongodb.database}" mongo-ref="mongoClient" />
+
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+        <!-- <constructor-arg name="mongoConverter" ref="mongoConverter" /> -->
+    </bean>
+	 <!--激活注解-->
+    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+    
+</beans>

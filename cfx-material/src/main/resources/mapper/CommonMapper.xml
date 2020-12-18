@@ -1,0 +1,1382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.CommonDao">
+
+	<select id="getMemberByPk" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_member where pk = #{pk}
+	</select>
+
+	<select id="getGroupMan" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM
+		b2b_member,
+		(
+		SELECT
+		parentPk
+		FROM
+		b2b_member_group
+		WHERE
+		memberPk = #{pk}
+		ORDER BY
+		RAND()
+		LIMIT 1
+		) AS groupMan
+		WHERE
+		pk = groupMan.parentPk
+	</select>
+
+	<select id="searchMemberBySmsRoleM" resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON m.pk = mr.memberPk
+		LEFT
+		JOIN sys_sms_role sr ON mr.rolePk = sr.rolePk
+		LEFT JOIN
+		sys_sms_template st on sr.smsName=st.`name`
+		WHERE
+		st.name=#{name}
+		AND
+		m.companyPk = #{companyPk}
+		GROUP BY
+		m.pk
+	</select>
+
+	<select id="getAdminM" resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT
+		JOIN b2b_member_role mr on m.pk= mr.memberPk
+		LEFT JOIN b2b_role r ON
+		mr.rolePk=r.pk
+		WHERE
+		r.companyType = 0
+		AND m.auditStatus = 2
+		AND
+		m.isVisable=1
+		AND m.companyPk = #{companyPk}
+		GROUP BY m.pk
+	</select>
+
+	<select id="getMemberByMobile" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_member where mobile = #{mobile}
+	</select>
+
+	 
+
+	<select id="getTemplateByName" resultType="cn.cf.dto.SysSmsTemplateDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM sys_sms_template where name = #{name} and
+		 isDelete=1
+	</select>
+
+	<select id="searchDimensionalityRewardList" resultType="cn.cf.dto.B2bDimensionalityRewardDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_dimensionality_reward
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(dimenCategory)">
+				AND dimenCategory = #{dimenCategory}
+			</if>
+			<if test="@Ognl@isNotEmpty(dimenName)">
+				AND dimenName = #{dimenName}
+			</if>
+			<if test="@Ognl@isNotEmpty(dimenType)">
+				AND dimenType = #{dimenType}
+			</if>
+			<if test="@Ognl@isNotEmpty(dimenTypeName)">
+				AND dimenTypeName = #{dimenTypeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(periodType)">
+				AND periodType = #{periodType}
+			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellNumber)">
+				AND fibreShellNumber = #{fibreShellNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(empiricalValue)">
+				AND empiricalValue = #{empiricalValue}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(fibreShellRatio)">
+				AND fibreShellRatio = #{fibreShellRatio}
+			</if>
+			<if test="@Ognl@isNotEmpty(empiricalRatio)">
+				AND empiricalRatio = #{empiricalRatio}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+		</where>
+	</select>
+
+	<select id="getCompanyByPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_company where pk = #{pk}
+	</select>
+
+	<select id="getDtoByGradeNumber" resultType="cn.cf.dto.B2bMemberGradeDto"
+		parameterType="int">
+		SELECT
+		*
+		FROM b2b_member_grade where gradeNumber =
+		#{gradeNumber} and isDelete
+		= 1 and isVisable = 1
+	</select>
+
+	<update id="updateMember" parameterType="cn.cf.model.B2bMember">
+		UPDATE b2b_member
+		<set>
+			<if test="employeeNumber != null">
+				employeeNumber = #{employeeNumber},
+			</if>
+			<if test="employeeName!=null">
+				employeeName=#{employeeName},
+			</if>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="companyPk != null ">
+				companyPk = #{companyPk},
+			</if>
+			<if test="companyName != null ">
+				companyName = #{companyName},
+			</if>
+			<if test="insertTime != null">
+				insertTime = #{insertTime},
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				auditStatus = #{auditStatus},
+				auditPk = #{auditPk},
+				auditTime =now(),
+			</if>
+			<if test="isVisable != null and isVisable != ''">
+				isVisable = #{isVisable},
+			</if>
+			<if test="registerSource != null and registerSource != ''">
+				registerSource = #{registerSource},
+			</if>
+			<if test="invitationCode != null and invitationCode != ''">
+				invitationCode = #{invitationCode},
+			</if>
+			<if test="beInvitedCode != null and beInvitedCode != ''">
+				beInvitedCode = #{beInvitedCode},
+			</if>
+			<if test="headPortrait != null and headPortrait != ''">
+				headPortrait = #{headPortrait},
+			</if>
+			<if test="refuseReason!=null and refuseReason!=''">
+				refuseReason=#{refuseReason},
+			</if>
+			<if test="experience!=null and experience!=''">
+				experience=#{experience},
+			</if>
+			<if test="shell!=null and shell!=''">
+				shell=#{shell},
+				feedTime= now(),
+			</if>
+			<if test="level!=null and level!=''">
+				level=#{level},
+			</if>
+			<if test="parentPk!=null ">
+				parentPk=#{parentPk},
+			</if>
+			<if test="levelName!= null and levelName !='' ">
+				levelName=#{levelName},
+			</if>
+			<if test="addMembers!= null and addMembers !='' ">
+				addMembers=#{addMembers},
+			</if>
+			<if test="addPk!= null and addPk !='' ">
+				addPk=#{addPk},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+
+	<insert id="insertDimensionalityPresent" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_dimensionality_present (
+         pk, rewardPk, companyPk, companyName, contactsTel, dimenCategory, 
+         dimenName, dimenType, dimenTypeName, periodType, fibreShellNumber,
+          empiricalValue, isDelete, isVisable, insertTime, updateTime,fibreShellRatio,
+          empiricalRatio,fbGradeRatio,emGradeRatio,memberPk,memberName,type,total,orderNumber,fbShellNumberWeighting,empiricalValueWeighting
+        ) VALUES (
+         #{pk}, #{rewardPk}, #{companyPk}, #{companyName}, #{contactsTel}, #{dimenCategory}, 
+         #{dimenName}, #{dimenType}, #{dimenTypeName}, #{periodType}, #{fibreShellNumber}, 
+         #{empiricalValue}, 1, 1, now(), now(),#{fibreShellRatio},
+         #{empiricalRatio}, #{fbGradeRatio},#{emGradeRatio}, #{memberPk},#{memberName},#{type},#{total},#{orderNumber},#{fbShellNumberWeighting},#{empiricalValueWeighting}
+        )
+    ]]>
+	</insert>
+
+	<select id="searchGoodsBySaleMan" resultType="cn.cf.dto.B2bCustomerSalesmanDto">
+		SELECT
+		*
+		FROM
+		b2b_customer_salesman
+		WHERE
+		memberPk=#{memberPk}
+		<if test="purchaserPk and purchaserPk!=''">
+			and purchaserPk = #{purchaserPk}
+		</if>
+		and storePk = #{storePk}
+	</select>
+
+	<select id="searchMemberList" resultType="cn.cf.dto.B2bMemberDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_member
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(mobile)">
+				AND mobile = #{mobile}
+			</if>
+			<if test="@Ognl@isNotEmpty(password)">
+				AND password = #{password}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(rolePk)">
+				AND rolePk = #{rolePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(registerSource)">
+				AND registerSource = #{registerSource}
+			</if>
+			<if test="@Ognl@isNotEmpty(invitationCode)">
+				AND invitationCode = #{invitationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(beInvitedCode)">
+				AND beInvitedCode = #{beInvitedCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeBegin)">
+				AND loginTime >= #{loginTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(loginTimeEnd)">
+				AND loginTime &lt;= #{loginTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				AND headPortrait = #{headPortrait}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeNumber)">
+				AND employeeNumber = #{employeeNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(employeeName)">
+				AND employeeName = #{employeeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+		</where>
+	</select>
+
+	<select id="getLgCompanyByPk" resultType="cn.cf.dto.LgCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM lg_company where pk = #{pk}
+	</select>
+
+	<select id="getRegionsByNameExM" resultType="cn.cf.dto.SysRegionsDto"
+		parameterType="Map">
+		SELECT
+		*
+		FROM sys_regions
+		where name = #{name}
+		<if test="parentPk != null and parentPk!='' ">
+			and sys_regions.parentPk = #{parentPk}
+		</if>
+		<if test="isDelete != null ">
+			and sys_regions.isDelete = #{isDelete}
+		</if>
+		<if test="isVisable != null ">
+			and sys_regions.isVisable = #{isVisable}
+		</if>
+	</select>
+
+	<!-- 根据订单编号查询订单数量 -->
+	<select id="getDeliveryCountByOrderPkM" resultType="Integer">
+		SELECT
+		COUNT(*) FROM lg_delivery_order WHERE lg_delivery_order.`orderPk`
+		=#{orderPk}
+	</select>
+
+	<!-- 根据deliveryNumber字段查询订单主键 -->
+	<select id="getPkByDeliveryNumberM" resultType="String">
+		SELECT
+		lg_delivery_order.`pk`
+		FROM lg_delivery_order
+		WHERE
+		lg_delivery_order.`deliveryNumber`=#{deliveryNumber} limit 1
+	</select>
+
+	<!-- 根据pk修改deliveryNumber -->
+	<update id="updateDeliveryNumberByPkM">
+		update lg_delivery_order set
+		lg_delivery_order.deliveryNumber=#{deliveryNumber}
+		where
+		lg_delivery_order.pk=#{pk}
+	</update>
+
+	<insert id="insertLgDeliveryOrder" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_delivery_order (
+         pk, orderPk, parentPk, orderStatus, isMatched, originalTotalFreight, presentTotalFreight, insertTime, updateTime, orderTime, logisticsCompanyPk, logisticsCompanyName, arrivedTimeStart, arrivedTimeEnd, fromAddressPk, fromCompanyName, fromAddress, fromContacts, fromContactsTel, fromProvincePk, fromProvinceName, fromCityPk, fromCityName, fromAreaPk, fromAreaName, fromTownPk, fromTownName, toAddressPk, toCompanyPk, toCompanyName, toAddress, toContacts, toContactsTel, toProvincePk, toProvinceName, toCityPk, toCityName, toAreaPk, toAreaName, toTownPk, toTownName, supplierInvoicePk, supplierInvoiceStatus, memberInvoicePk, memberInvoiceStatus, driver, driverPk, driverContact, carPk, carPlate, source, member, memberPk, abnormalRemark, remark, deliveryNumber, deliveryTime, signTime, isAbnormal, isConfirmed, paymentPk, paymentName, paymentTime, finishedTime, financialTime, purchaserName, purchaserPk, supplierName, supplierPk,invoicePk, invoiceName, invoiceTaxidNumber, invoiceRegPhone, invoiceBankAccount, invoiceBankName, invoiceProvinceName, invoiceCityName, invoiceAreaName, invoiceRegAddress, linePricePk, basisLinePrice, settleWeight, isSettleFreight, mandatePk, mandateUrl, orderNumber2
+        ) VALUES (
+         #{pk}, #{orderPk}, #{parentPk}, #{orderStatus}, #{isMatched}, #{originalTotalFreight}, #{presentTotalFreight}, #{insertTime}, #{updateTime}, #{orderTime}, #{logisticsCompanyPk}, #{logisticsCompanyName}, #{arrivedTimeStart}, #{arrivedTimeEnd}, #{fromAddressPk}, #{fromCompanyName}, #{fromAddress}, #{fromContacts}, #{fromContactsTel}, #{fromProvincePk}, #{fromProvinceName}, #{fromCityPk}, #{fromCityName}, #{fromAreaPk}, #{fromAreaName}, #{fromTownPk}, #{fromTownName}, #{toAddressPk}, #{toCompanyPk}, #{toCompanyName}, #{toAddress}, #{toContacts}, #{toContactsTel}, #{toProvincePk}, #{toProvinceName}, #{toCityPk}, #{toCityName}, #{toAreaPk}, #{toAreaName}, #{toTownPk}, #{toTownName}, #{supplierInvoicePk}, #{supplierInvoiceStatus}, #{memberInvoicePk}, #{memberInvoiceStatus}, #{driver}, #{driverPk}, #{driverContact}, #{carPk}, #{carPlate}, #{source}, #{member}, #{memberPk}, #{abnormalRemark}, #{remark}, #{deliveryNumber}, #{deliveryTime}, #{signTime}, #{isAbnormal}, #{isConfirmed}, #{paymentPk}, #{paymentName}, #{paymentTime}, #{finishedTime}, #{financialTime}, #{purchaserName}, #{purchaserPk}, #{supplierName}, #{supplierPk}, #{invoicePk}, #{invoiceName}, #{invoiceTaxidNumber}, #{invoiceRegPhone}, #{invoiceBankAccount}, #{invoiceBankName}, #{invoiceProvinceName}, #{invoiceCityName}, #{invoiceAreaName}, #{invoiceRegAddress}, #{linePricePk}, #{basisLinePrice}, #{settleWeight}, #{isSettleFreight}, #{mandatePk}, #{mandateUrl}, #{orderNumber2}        
+        )
+    ]]>
+	</insert>
+
+	<insert id="insertLgDeliveryOrderGoods" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_delivery_order_goods (
+         pk, deliveryPk, goodsPk, productName, productPk, varietiesName, seedvarietyName, specName, seriesName, gradeName, gradePk, batchNumber, weight, boxes, orderNumber, tareWeight, originalFreight, presentFreight, goodsName, goodsOriginalFreight, goodsPresentFreight, unit
+        ) VALUES (
+         #{pk}, #{deliveryPk}, #{goodsPk}, #{productName}, #{productPk}, #{varietiesName}, #{seedvarietyName}, #{specName}, #{seriesName}, #{gradeName}, #{gradePk}, #{batchNumber}, #{weight}, #{boxes}, #{orderNumber}, #{tareWeight}, #{originalFreight}, #{presentFreight}, #{goodsName}, #{goodsOriginalFreight}, #{goodsPresentFreight}, #{unit}        
+        )
+    ]]>
+	</insert>
+
+	<insert id="insertLgTrackDetail" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_track_detail (
+         pk, deliveryPk, orderStatus, stepDetail, finishedTime, insertTime, updateTime
+        ) VALUES (
+         #{pk}, #{deliveryPk}, #{orderStatus}, #{stepDetail}, #{finishedTime}, #{insertTime}, #{updateTime}        
+        )
+    ]]>
+	</insert>
+
+	<select id="lgRolematchMembersM" resultType="java.lang.String"
+		parameterType="java.util.Map">
+		SELECT lg_member.`pk`
+		FROM lg_role
+		LEFT JOIN lg_member_role ON
+		lg_member_role.`rolePk`=lg_role.`pk`
+		LEFT JOIN lg_member ON
+		lg_member.`pk`=lg_member_role.`memberPk`
+		WHERE
+		lg_role.`companyPk`=#{companyPk}
+		AND
+		(
+		<if test="@Ognl@isNotEmpty(province)">
+			lg_role.`province`=#{province}
+		</if>
+		<if test="@Ognl@isNotEmpty(city)">
+			and lg_role.`city`=#{city}
+		</if>
+		<if test="@Ognl@isNotEmpty(area)">
+			and lg_role.`area`=#{area}
+		</if>
+		<if test="@Ognl@isNotEmpty(town)">
+			and lg_role.`town`=#{town}
+		</if>
+		)
+		AND lg_role.`isDelete`=1 AND lg_role.`isVisable`=1
+		and
+		lg_member.isVisable=1 and lg_member.parantPk!=-1
+	</select>
+
+	<select id="getLgLineByPk" resultType="cn.cf.dto.LgLineDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM lg_line where pk = #{pk}
+	</select>
+
+	<select id="getByPk" resultType="cn.cf.dto.LgLinePriceDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM lg_line_price where pk = #{pk}
+	</select>
+
+	<select id="searchCompanyBankcardList" resultType="cn.cf.dto.SysCompanyBankcardDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM sys_company_bankcard
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankNo)">
+				AND bankNo = #{bankNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCreditGoods" resultType="cn.cf.entity.B2bCreditGoodsDtoMa">
+	<![CDATA[
+		SELECT
+			cg.pk,
+			cg.companyPk,
+			eg.goodsType,
+			cg.economicsGoodsPk as economicsGoodsPk,
+			eg.NAME AS economicsGoodsName,
+			cg.creditStartTime as startTime,
+			cg.creditEndTime as endTime,
+			cg.platformAmount,
+			cg.pledgeUsedAmount,
+			IF(cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0) <0,0,cg.platformAmount - IFNULL(cg.pledgeUsedAmount,0)) AS avaiableAmount,
+			eg.proportion,
+			cg.totalRate,
+			cg.bankRate,
+			cg.term,
+			cg.sevenRate,
+			cg.bank,
+			cg.bankPk,
+			cg.bankAccountNumber,
+			cg.status,
+			eg.storeInfo
+		FROM
+			b2b_credit_goods cg
+		INNER JOIN b2b_economics_goods eg ON cg.economicsGoodsPk = eg.pk
+		where 1 = 1 
+		and eg.isDelete = 1
+		and eg.status = 1
+		and cg.isVisable = 1
+	]]>
+		<if test="pk != null and pk != ''">
+			and cg.pk = #{pk}
+		</if>
+		<if test="companyPk != null and companyPk != ''">
+			and cg.companyPk = #{companyPk}
+		</if>
+		<if test="status != null and status != ''">
+			and cg.status = #{status}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and cg.creditEndTime >= date_format(now(),'%y-%m-%d')
+		</if>
+		<if test="startTime != null and startTime != ''">
+		<![CDATA[	and cg.creditStartTime <= date_format(now(),'%y-%m-%d') ]]>
+		</if>
+	</select>
+
+	<select id="getLoanNumberByOrderNumber" resultType="cn.cf.dto.B2bLoanNumberDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_loan_number where orderNumber =
+		#{orderNumber}
+	</select>
+
+	<select id="searchEconomicsGoodsList" resultType="cn.cf.dto.B2bEconomicsGoodsDto"
+		parameterType="java.util.Map">
+		SELECT * FROM b2b_economics_goods
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(url)">
+				AND url = #{url}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsType)">
+				AND goodsType = #{goodsType}
+			</if>
+			<if test="@Ognl@isNotEmpty(proportion)">
+				AND proportion = #{proportion}
+			</if>
+			<if test="@Ognl@isNotEmpty(qualityValue)">
+				AND qualityValue = #{qualityValue}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertLgMemberDeliveryOrder" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO lg_member_deliveryorder (
+         pk, memberPk, deliveryOrderPk, insertTime, isDelete
+        ) VALUES (
+         #{pk}, #{memberPk}, #{deliveryOrderPk}, now(), #{isDelete}
+        )
+    ]]>
+	</insert>
+
+	<delete id="deleteLgDeliveryOrder" parameterType="cn.cf.model.LgDeliveryOrder">
+    <![CDATA[
+        DELETE FROM lg_delivery_order WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<select id="searchMemberBySaleMan" resultType="cn.cf.dto.B2bCustomerSalesmanDto"
+		parameterType="java.util.Map">
+		SELECT *
+		FROM b2b_customer_salesman
+		where 1=1
+		<if test="productPk != null">
+			AND (productPk = #{productPk} or productPk is null)
+		</if>
+		<if test="filiale != null">
+			AND (filiale = #{filiale} or filiale is null)
+		</if>
+		<if test="@Ognl@isNotEmpty(purchaserPk)">
+			AND purchaserPk = #{purchaserPk}
+		</if>
+		<if test="@Ognl@isNotEmpty(storePk)">
+			AND storePk = #{storePk}
+		</if>
+	</select>
+
+	<select id="getAdminByParent" parameterType="java.lang.String"
+		resultType="cn.cf.dto.B2bMemberDto">
+		SELECT
+		m.*
+		FROM
+		b2b_member m
+		LEFT JOIN b2b_member_role mr ON
+		m.pk = mr.memberPk
+		LEFT JOIN b2b_role
+		r ON mr.rolePk = r.pk
+		WHERE
+		r.companyType = 0
+		AND m.companyPk = (
+		SELECT
+		parentPk
+		FROM
+		b2b_company
+		WHERE
+		pk = #{companyPk}
+		)
+		and m.auditStatus=2
+		and m.isVisable=1
+		GROUP BY
+		m.pk
+	</select>
+
+	<select id="isCustomerReaped" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM b2b_customer_management
+		where
+		storePk = #{storePk}
+		AND purchaserPk = #{purchaserPk}
+		<if test="@Ognl@isNotEmpty(pk)">
+			AND pk != #{pk}
+		</if>
+	</select>
+
+	<update id="updateB2bCustomerManagement" parameterType="cn.cf.model.B2bCustomerManagement">
+		UPDATE b2b_customer_management
+		<set>
+			<if test="storePk !=null and storePk!=''">
+				storePk = #{storePk} ,
+			</if>
+			<if test="purchaserPk !=null and  purchaserPk!=''">
+				purchaserPk = #{purchaserPk}
+			</if>
+		</set>
+		WHERE
+		pk = #{pk}
+	</update>
+
+	<insert id="insertB2bCustomerManagement" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_customer_management (
+         pk, storePk, purchaserPk
+        ) VALUES (
+        #{pk}, #{storePk}, #{purchaserPk}        
+        )
+    ]]>
+	</insert>
+
+	<select id="getByOrderNumber" resultType="cn.cf.entity.B2bOrderDtoMa"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_order where orderNumber = #{orderNumber}
+	</select>
+
+	<select id="searchOrderGoodsList" resultType="cn.cf.entity.B2bOrderGoodsDtoMa"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_order_goods
+		<where>
+			<if test="@Ognl@isNotEmpty(originalTotalFreight)">
+				AND originalTotalFreight = #{originalTotalFreight}
+			</if>
+			<if test="@Ognl@isNotEmpty(presentTotalFreight)">
+				AND presentTotalFreight = #{presentTotalFreight}
+			</if>
+			<if test="@Ognl@isNotEmpty(orderNumber)">
+				AND orderNumber = #{orderNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsName)">
+				AND goodsName = #{goodsName}
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsPk)">
+				AND goodsPk = #{goodsPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}
+			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND varietiesName = #{varietiesName}
+			</if>
+			<if test="@Ognl@isNotEmpty(varietiesPk)">
+				AND varietiesPk = #{varietiesPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				AND seedvarietyName = #{seedvarietyName}
+			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyPk)">
+				AND seedvarietyPk = #{seedvarietyPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND specName = #{specName}
+			</if>
+			<if test="@Ognl@isNotEmpty(specPk)">
+				AND specPk = #{specPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				AND seriesName = #{seriesName}
+			</if>
+			<if test="@Ognl@isNotEmpty(seriesPk)">
+				AND seriesPk = #{seriesPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(gradeChineseName)">
+				AND gradeChineseName = #{gradeChineseName}
+			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName = #{gradeName}
+			</if>
+			<if test="@Ognl@isNotEmpty(gradePk)">
+				AND gradePk = #{gradePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(batchNumber)">
+				AND batchNumber = #{batchNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(weight)">
+				AND weight = #{weight}
+			</if>
+			<if test="@Ognl@isNotEmpty(afterWeight)">
+				AND afterWeight = #{afterWeight}
+			</if>
+			<if test="@Ognl@isNotEmpty(boxes)">
+				AND boxes = #{boxes}
+			</if>
+			<if test="@Ognl@isNotEmpty(afterBoxes)">
+				AND afterBoxes = #{afterBoxes}
+			</if>
+			<if test="@Ognl@isNotEmpty(originalPrice)">
+				AND originalPrice = #{originalPrice}
+			</if>
+			<if test="@Ognl@isNotEmpty(presentPrice)">
+				AND presentPrice = #{presentPrice}
+			</if>
+			<if test="@Ognl@isNotEmpty(originalFreight)">
+				AND originalFreight = #{originalFreight}
+			</if>
+			<if test="@Ognl@isNotEmpty(presentFreight)">
+				AND presentFreight = #{presentFreight}
+			</if>
+			<if test="@Ognl@isNotEmpty(weightShipped)">
+				AND weightShipped = #{weightShipped}
+			</if>
+			<if test="@Ognl@isNotEmpty(boxesShipped)">
+				AND boxesShipped = #{boxesShipped}
+			</if>
+			<if test="@Ognl@isNotEmpty(orderStatus)">
+				AND orderStatus = #{orderStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(childOrderNumber)">
+				AND childOrderNumber = #{childOrderNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(packNumber)">
+				AND packNumber = #{packNumber}
+			</if>
+			<if test="@Ognl@isNotEmpty(warePk)">
+				AND warePk = #{warePk}
+			</if>
+			<if test="@Ognl@isNotEmpty(wareCode)">
+				AND wareCode = #{wareCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(wareName)">
+				AND wareName = #{wareName}
+			</if>
+			<if test="@Ognl@isNotEmpty(logisticsPk)">
+				AND logisticsPk = #{logisticsPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(logisticsStepInfoPk)">
+				AND logisticsStepInfoPk = #{logisticsStepInfoPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(specifications)">
+				AND specifications = #{specifications}
+			</if>
+			<if test="@Ognl@isNotEmpty(unit)">
+				AND unit = #{unit}
+			</if>
+			<if test="@Ognl@isNotEmpty(logisticsCarrierPk)">
+				AND logisticsCarrierPk = #{logisticsCarrierPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(logisticsCarrierName)">
+				AND logisticsCarrierName = #{logisticsCarrierName}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertB2bDimensionalityPresentList" parameterType="java.util.List">
+		INSERT INTO b2b_dimensionality_present (
+		pk, rewardPk, companyPk,
+		companyName, contactsTel, dimenCategory,
+		dimenName, dimenType,
+		dimenTypeName, periodType, fibreShellNumber,
+		empiricalValue, isDelete,
+		isVisable, insertTime,
+		updateTime,fibreShellRatio,
+		empiricalRatio,fbGradeRatio,emGradeRatio,memberPk,memberName,type,total,orderNumber,
+		fbShellNumberWeighting,empiricalValueWeighting
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.pk}, #{item.rewardPk}, #{item.companyPk},
+			#{item.companyName}, #{item.contactsTel},
+			#{item.dimenCategory},
+			#{item.dimenName}, #{item.dimenType}, #{item.dimenTypeName},
+			#{item.periodType}, #{item.fibreShellNumber},
+			#{item.empiricalValue},
+			1, 1, now(), now(),#{item.fibreShellRatio},
+			#{item.empiricalRatio},
+			#{item.fbGradeRatio},#{item.emGradeRatio},
+			#{item.memberPk},#{item.memberName},#{item.type},#{item.total},#{item.orderNumber},
+			#{item.fbShellNumberWeighting},#{item.empiricalValueWeighting}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 根据维度类别查询所有额外奖励维度 -->
+	<select id="getExtrewardByDimenCategory" resultType="cn.cf.dto.B2bDimensionalityExtrewardDto"
+		parameterType="java.lang.String">
+		SELECT
+		*
+		FROM b2b_dimensionality_extreward
+		where
+		b2b_dimensionality_extreward.dimenCategory=#{dimenCategory}
+		and
+		b2b_dimensionality_extreward.isDelete=1
+		and b2b_dimensionality_extreward.isVisable=1
+	</select>
+
+	<!-- 查询再一定时间范围内累计成交供应商家数 -->
+	<select id="selectTotalSupCountInPeriodTime" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` >=
+		DATE_FORMAT(date_add(#{periodTimeStart}, interval 1 day),'%Y-%m-%d')
+		AND b2b_order.`completeTime` &lt;=
+		DATE_FORMAT(date_add(#{periodTimeStart}, interval #{periodTime}
+		day),'%Y-%m-%d')
+		GROUP BY b2b_order.`supplierPk`
+		) temp
+	</select>
+
+	<!-- 查询再一定时间范围内累计成交供应商家数（排除本次订单） -->
+	<select id="checkLastTotalSupCountInPeriodTime" resultType="Integer">
+		SELECT COUNT(*) FROM
+		(
+		SELECT COUNT(1) FROM b2b_order
+		WHERE
+		b2b_order.`memberPk`=#{memberPk}
+		AND b2b_order.`completeTime` >=
+		DATE_FORMAT(date_add(#{periodTimeStart}, interval 1 day),'%Y-%m-%d')
+		AND b2b_order.`completeTime` &lt;=
+		DATE_FORMAT(date_add(#{periodTimeStart}, interval #{periodTime}
+		day),'%Y-%m-%d')
+		and b2b_order.orderNumber !=#{orderNumber}
+		GROUP BY
+		b2b_order.`supplierPk`
+		) temp
+	</select>
+
+	<select id="searchCompanyList" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM b2b_company
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}
+			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}
+			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditSpStatus)">
+				AND auditSpStatus = #{auditSpStatus}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}
+			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}
+			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}
+			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}
+			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}
+			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}
+			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				AND regAddress = #{regAddress}
+			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}
+			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}
+			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}
+			</if>
+			<if test="@Ognl@isNotEmpty(businessLicense)">
+				AND businessLicense = #{businessLicense}
+			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				AND blUrl = #{blUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ocUrl)">
+				AND ocUrl = #{ocUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}
+			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}
+			</if>
+			<if test="@Ognl@isNotEmpty(trUrl)">
+				AND trUrl = #{trUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(taxRegistration)">
+				AND taxRegistration = #{taxRegistration}
+			</if>
+			<if test="@Ognl@isNotEmpty(opUrl)">
+				AND opUrl = #{opUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(ecUrl)">
+				AND ecUrl = #{ecUrl}
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}
+			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}
+			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}
+			</if>
+			<if test="@Ognl@isNotEmpty(isPerfect)">
+				AND isPerfect = #{isPerfect}
+			</if>
+			<if test="@Ognl@isNotEmpty(parentChildPk)">
+				AND (pk = #{parentChildPk} or parentPk =
+				#{parentChildPk})
+			</if>
+			<if test="@Ognl@isNotEmpty(uname)">
+				AND pk not in
+				<foreach item="item" index="index" collection="uname" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		order by insertTime desc
+		<if test="start!= null and start != ''  ">
+			limit ${start},${limit}
+		</if>
+	</select>
+
+	<select id="isDeletePlantByB" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from b2b_goods where  goodsInfo  LIKE '%plantPk%${plantPk}%' and isDelete=1
+	</select>
+
+
+	<select id="isDeleteWareByB" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) from b2b_goods where  goodsInfo  LIKE '%warePk%${warePk}%' and isDelete=1
+	</select>
+
+	<select id="getLgLinePriceByPk" resultType="cn.cf.dto.LgLinePriceDto"
+		parameterType="java.lang.String">
+		SELECT *
+		FROM lg_line_price where pk = #{pk}	
+	</select>
+	<select id="getB2bGoodsDtoMa" resultType="cn.cf.entity.B2bGoodsDtoMa">
+		SELECT *
+		FROM b2b_goods where pk = #{pk}	
+	</select>
+	<select id="getMemberGroupList" resultType="cn.cf.dto.B2bMemberGroupDto">
+		select parentPk from b2b_member_group where memberPk = #{memberPk}
+	</select>
+	<select id="getB2bOnlinepayRecordDto" resultType="cn.cf.dto.B2bOnlinepayRecordDto">
+		select * from b2b_onlinepay_record where orderNumber = #{orderNumber}
+	</select>
+	<select id="getBillCusgoods" resultType="cn.cf.entity.B2bBillCusgoodsDtoMa">
+		select pk,customerPk,companyPk,goodsPk,goodsName,goodsShotName,bindStatus,account,bankName,bankNo,isVisable,ifnull(platformAmount,0) as platformAmount,ifnull(useAmount,0) as useAmount from b2b_bill_cusgoods where 
+		isVisable = 1
+		and companyPk = #{companyPk}
+	</select>
+	<select id="getBillGoods" resultType="cn.cf.dto.B2bBillGoodsDto">
+		select * from b2b_bill_goods where pk = #{pk}
+	</select>
+		<select id="getBillOrder" resultType="cn.cf.dto.B2bBillOrderDto">
+		select * from b2b_bill_order where orderNumber = #{orderNumber}
+	</select>
+	<select id="searchBillSigncardList" resultType="cn.cf.dto.B2bBillSigncardDto">
+		select * from b2b_bill_signcard where companyPk = #{companyPk} and status = #{status}
+	</select>
+	<select id="searchBillInventoryList" resultType="cn.cf.dto.B2bBillInventoryDto">
+		select * from b2b_bill_inventory where orderNumber = #{orderNumber}
+	</select>
+		<insert id="insertB2bGood" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_goods (
+         pk, price, tonPrice, salePrice, storePk, storeName, companyPk, companyName, brandPk, brandName, insertTime, isUpdown, updateTime, upTime, tareWeight, totalBoxes, totalWeight, type, isDelete, isNewProduct, block, goodsInfo, pk1, pk2, pk3, pk4 
+        ) VALUES (
+         #{pk}, #{price}, #{tonPrice}, #{salePrice}, #{storePk}, #{storeName}, #{companyPk}, #{companyName}, #{brandPk}, #{brandName}, #{insertTime}, #{isUpdown}, #{updateTime}, #{upTime}, #{tareWeight}, #{totalBoxes}, #{totalWeight}, #{type}, #{isDelete}, #{isNewProduct}, #{block}, #{goodsInfo}, #{pk1}, #{pk2}, #{pk3}, #{pk4}   
+        )
+    ]]>
+	</insert>
+	<select id="getStoreByPk" resultType="cn.cf.dto.B2bStoreDto"
+		parameterType="java.lang.String">
+		SELECT *	FROM b2b_store where pk = #{pk}	</select>
+		<select id="getGoodsBrandByPk" resultType="cn.cf.dto.B2bGoodsBrandDto"
+		parameterType="java.lang.String">
+		SELECT * FROM b2b_goods_brand where pk = #{pk}
+	</select>
+		<select id="searchGoodsBrandList" resultType="cn.cf.dto.B2bGoodsBrandDto"
+		parameterType="java.util.Map">
+		SELECT * FROM b2b_goods_brand 
+		<where>
+						<if test="@Ognl@isNotEmpty(brandName)">
+							AND brandName = #{brandName}
+						</if>
+						<if test="@Ognl@isNotEmpty(storePk)">
+							AND storePk = #{storePk}
+						</if>
+						<if test="@Ognl@isNotEmpty(isDelete)">
+							AND isDelete = #{isDelete}
+						</if>
+		</where>
+		</select>
+		 
+	 
+	<insert id="insertB2bGoodsBrand" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_goods_brand (
+         pk,brandName,brandPk,storePk,storeName,insertTime,isDelete,auditStatus, addMemberPk,shortName
+        ) VALUES (
+         #{pk},#{brandName},#{brandPk},#{storePk},#{storeName},now(),1,#{auditStatus}, #{addMemberPk},#{shortName}
+
+        )
+    ]]>
+	</insert>
+	
+	<select id="getPlantByPk" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.lang.String">
+		SELECT *  FROM b2b_plant where pk = #{pk}	</select>
+		
+		<select id="searchPlantList" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.util.Map">
+		SELECT * FROM b2b_plant 
+		<where>
+		 				<if test="@Ognl@isNotEmpty(name)">
+							AND name = #{name}
+						</if>
+						<if test="@Ognl@isNotEmpty(storePk)">
+							AND storePk = #{storePk}
+						</if>
+						<if test="@Ognl@isNotEmpty(isDelete)">
+							AND isDelete = #{isDelete}
+						</if>
+		
+		</where>
+	 
+	</select>
+	
+	<insert id="insertPlant" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_plant (
+         pk, name, storePk, insertTime, isDelete,province,provinceName,city,
+         cityName,area,areaName,town,townName,address, plantCode, storeName,
+         contactsTel,contacts,landline
+        ) VALUES (
+         #{pk}, #{name}, #{storePk}, now(),1,#{province},#{provinceName},
+         #{city},#{cityName},#{area},#{areaName},#{town},#{townName},
+         #{address}, #{plantCode}, #{storeName},#{contactsTel},#{contacts},#{landline}
+        )
+    ]]>
+	</insert>
+	
+	<select id="getWareByPk" resultType="cn.cf.dto.B2bWareDto"
+		parameterType="java.lang.String">
+		SELECT  * FROM b2b_ware where pk = #{pk}
+	</select>
+	<select id="searchWareList" resultType="cn.cf.dto.B2bWareDto"
+		parameterType="java.util.Map">
+		SELECT * FROM b2b_ware 
+		<where>
+			            <if test="@Ognl@isNotEmpty(name)">
+							AND name = #{name}
+						</if>
+						<if test="@Ognl@isNotEmpty(storePk)">
+							AND storePk = #{storePk}
+						</if>
+						<if test="@Ognl@isNotEmpty(isDelete)">
+							AND isDelete = #{isDelete}
+						</if>
+			
+			</where>
+		
+	 
+	</select>
+	
+	<insert id="insertB2bWare" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_ware (
+         pk, name, insertTime, storePk, address, isDelete, wareCode,
+         contactsTel,contacts,landline
+        ) VALUES (
+         #{pk}, #{name}, now(), #{storePk}, #{address}, 1, #{wareCode},
+         #{contactsTel},#{contacts},#{landline}
+        )
+    ]]>
+	</insert>
+	<select id="searchB2bWarehouseNumberList" resultType="cn.cf.dto.B2bWarehouseNumberDto"
+		parameterType="java.util.Map">
+		SELECT
+		 *
+		FROM b2b_warehouse_number
+		<where>
+		   <if test="@Ognl@isNotEmpty(number)">
+							AND number = #{number}
+						</if>
+						<if test="@Ognl@isNotEmpty(storePk)">
+							AND storePk = #{storePk}
+						</if>
+						<if test="@Ognl@isNotEmpty(isDelete)">
+							AND isDelete = #{isDelete}
+						</if>
+						<if test="@Ognl@isNotEmpty(type)">
+							AND type = #{type}
+						</if>
+		
+		
+		</where>
+		
+	</select>
+			<insert id="insertB2bWarehouseNumber" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO b2b_warehouse_number (
+         pk, type, number, isDelete, storePk,remark,updateTime
+        ) VALUES (
+         #{pk}, #{type}, #{number}, 1, #{storePk}   ,#{remark}   ,now()
+        )
+    ]]>
+	</insert>
+	<select id="isGoodsRepeated" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1)
+		FROM b2b_goods
+		WHERE
+		isDelete = 1
+		and block=#{block}
+		and storePk =#{storePk}
+		and brandName =#{brandName}
+		<!--cf: 区分号，等级，包装批号，品牌,批号， -->
+		<if test="block=='cf'">
+			and FIND_IN_SET('"batchNumber":"${batchNumber}"',goodsInfo)
+			<choose>
+				<when test="distinctNumber ==null || distinctNumber == ''">
+					and locate('"distinctNumber"',goodsInfo)=0
+				</when>
+				<otherwise>
+					and FIND_IN_SET('"distinctNumber":"${distinctNumber}"',goodsInfo)
+				</otherwise>
+			</choose>
+			and FIND_IN_SET('"gradePk":"${gradePk}"',goodsInfo)
+			<choose>
+				<when test="packNumber ==null || packNumber == ''">
+					and locate('"packNumber"',goodsInfo)=0
+				</when>
+				<otherwise>
+					and FIND_IN_SET('"packNumber":"${packNumber}"',goodsInfo)
+				</otherwise>
+			</choose>
+		</if>
+
+		<!--sx: 物料名称、品牌、所属公司、 -->
+		<if test="block=='sx'">
+			and FIND_IN_SET('"materialName":"${materialName}"',goodsInfo)
+			and companyPk =#{companyPk}
+		</if>
+		<if test="pk!=null and pk !=''">
+			and pk!=#{pk}
+		</if>
+
+	</select>
+	
+		<select id="getStoreByCompanyPk" resultType="cn.cf.dto.B2bStoreDto"
+		parameterType="java.lang.String">
+SELECT
+ 	s.pk,s.`name`
+FROM
+	b2b_company com LEFT JOIN b2b_store s on com.pk=s.companyPk
+WHERE
+	com.pk = (
+SELECT
+	CASE c.parentPk
+		WHEN "-1" THEN
+			c.pk
+		ELSE
+			c.parentPk
+		END
+		FROM
+			b2b_company c
+		WHERE
+			c.pk =#{pk}
+	)		
+	</select>
+		
+	
+	<select id="searchCreditGoods" resultType="cn.cf.dto.B2bCreditGoodsDto" parameterType="java.util.Map">
+		SELECT * FROM b2b_credit_goods
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditPk)">
+				AND creditPk = #{creditPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(companyPk)">
+				AND companyPk = #{companyPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(companyName)">
+				AND companyName = #{companyName}			
+			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsPk)">
+				AND economicsGoodsPk = #{economicsGoodsPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(economicsGoodsName)">
+				AND economicsGoodsName = #{economicsGoodsName}			
+			</if>
+			<if test="@Ognl@isNotEmpty(goodsType)">
+				AND goodsType = #{goodsType}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeBegin)">
+				AND creditStartTime >= #{creditStartTimeBegin}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditStartTimeEnd)">
+				AND creditStartTime &lt;= #{creditStartTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeBegin)">
+				AND creditEndTime >= #{creditEndTimeBegin}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditEndTimeEnd)">
+				AND creditEndTime &lt;= #{creditEndTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditInsertTimeBegin)">
+				AND creditInsertTime >= #{creditInsertTimeBegin}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditInsertTimeEnd)">
+				AND creditInsertTime &lt;= #{creditInsertTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditAuditTimeBegin)">
+				AND creditAuditTime >= #{creditAuditTimeBegin}			
+			</if>
+			<if test="@Ognl@isNotEmpty(creditAuditTimeEnd)">
+				AND creditAuditTime &lt;= #{creditAuditTimeEnd}			
+			</if>
+			<if test="@Ognl@isNotEmpty(platformAmount)">
+				AND platformAmount = #{platformAmount}			
+			</if>
+			<if test="@Ognl@isNotEmpty(suggestAmount)">
+				AND suggestAmount = #{suggestAmount}			
+			</if>
+			<if test="@Ognl@isNotEmpty(pledgeAmount)">
+				AND pledgeAmount = #{pledgeAmount}			
+			</if>
+			<if test="@Ognl@isNotEmpty(pledgeUsedAmount)">
+				AND pledgeUsedAmount = #{pledgeUsedAmount}			
+			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			
+			</if>
+			<if test="@Ognl@isNotEmpty(totalRate)">
+				AND totalRate = #{totalRate}			
+			</if>
+			<if test="@Ognl@isNotEmpty(bankRate)">
+				AND bankRate = #{bankRate}		
+			</if>
+			<if test="@Ognl@isNotEmpty(term)">
+				AND term = #{term}			
+			</if>
+			<if test="@Ognl@isNotEmpty(sevenRate)">
+				AND sevenRate = #{sevenRate}			
+			</if>
+			<if test="@Ognl@isNotEmpty(bankPk)">
+				AND bankPk = #{bankPk}			
+			</if>
+			<if test="@Ognl@isNotEmpty(bank)">
+				AND bank = #{bank}			
+			</if>
+			<if test="@Ognl@isNotEmpty(bankAccountNumber)">
+				AND bankAccountNumber = #{bankAccountNumber}			
+			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			
+			</if>
+		</where>
+	</select>
+	<select id="getLogisticsModel" resultType="cn.cf.dto.LogisticsModelDto">
+		select * from logistics_model where pk = #{pk}
+	</select>
+</mapper>

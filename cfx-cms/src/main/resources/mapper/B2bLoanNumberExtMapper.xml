@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bLoanNumberExtDao">
+
+
+	<sql id="columns">
+	    <![CDATA[
+		orderNumber,loanNumber,contractNumber,bankPk,bankName,loanStatus,loanAmount,loanStartTime,loanEndTime,repaymentTime,principal,interest,penalty,compound,economicsGoodsName,economicsGoodsType,purchaserPk,purchaserName,supplierPk,supplierName,organizationCode,customerNumber,loanAccount,insertTime,totalRate,bankRate,sevenRate,repaidInterest,repaidSerCharge
+	    ]]>
+	</sql>
+	
+	
+	<!--<select id = "getCreditOrderRepayDetail">-->
+		<!--SELECT  <include refid="columns" />-->
+		  <!--FROM b2b_loan_number   WHERE  orderNumber = #{orderNumber} -->
+	<!--</select>-->
+	
+
+	<select id = "searchBankAmount"   parameterType="java.util.Map"  resultType="String">
+	SELECT  ROUND(IFNULL((SUM(loanAmount) - SUM(principal)),0),2 )AS amount 
+		FROM b2b_loan_number  WHERE
+		 economicsGoodsType = #{economicsGoodsType}  
+		 and bankPk = #{bankPk}
+		 and loanStatus in (3,6) 
+	</select>
+	
+	
+	
+	<select id = "searchLoanDetail"   parameterType="java.util.Map"  resultType="cn.cf.entity.LoanDetail">
+	SELECT  ROUND(IFNULL((loanAmount - principal),0),2 )AS balance ,  orderNumber,loanNumber,purchaserName
+		FROM b2b_loan_number  WHERE
+		 economicsGoodsType = #{economicsGoodsType} 
+		 and bankPk = #{bankPk}
+		 and loanStatus in (3,6) 
+	</select>
+
+
+	<update id="updateExt" parameterType="cn.cf.model.B2bLoanNumber">
+		UPDATE b2b_loan_number SET
+		   isOverdue = #{isOverdue}
+		WHERE
+			orderNumber = #{orderNumber}
+	</update>
+</mapper>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bPlantDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,storePk,insertTime,isDelete,province,provinceName,city,cityName,area,areaName,town,townName,address,plantCode,storeName,contactsTel,contacts,landline
+	    ]]>
+	</sql>
+	
+	<select id="getByName" resultType="cn.cf.dto.B2bPlantDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_plant where name = #{name} and storePk= #{storePk} AND isDelete=1 
+		<if test="pk!=null and pk!=''">
+		and pk!=#{pk}
+		</if>
+	</select>
+	
+</mapper>
+

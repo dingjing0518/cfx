@@ -1,0 +1,239 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCompanyDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,name,isDelete,auditStatus,auditSpStatus,insertTime,updateTime,parentPk,
+		provinceName,province,cityName,city,areaName,area,regAddress,contactsTel,contacts,companyType,blUrl,organizationCode,bankName,bankAccount,ecUrl,isVisable,auditTime,auditSpTime,auditPk,auditSpPk,refuseReason,headPortrait,isPerfect,remarks
+	    ]]>
+	</sql>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(name)">
+				AND name = #{name}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(auditSpStatus)">
+				AND auditSpStatus = #{auditSpStatus}			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND auditSpStatus = #{auditSpStatus} or  auditStatus = #{auditStatus}	
+			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(parentPk)">
+				AND parentPk = #{parentPk}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(regAddress)">
+				AND regAddress = #{regAddress}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(companyType)">
+				AND companyType = #{companyType}			</if>
+			<if test="@Ognl@isNotEmpty(blUrl)">
+				AND blUrl = #{blUrl}			</if>
+			<if test="@Ognl@isNotEmpty(organizationCode)">
+				AND organizationCode = #{organizationCode}			</if>
+			<if test="@Ognl@isNotEmpty(bankName)">
+				AND bankName = #{bankName}			</if>
+			<if test="@Ognl@isNotEmpty(bankAccount)">
+				AND bankAccount = #{bankAccount}			</if>
+			<if test="@Ognl@isNotEmpty(ecUrl)">
+				AND ecUrl = #{ecUrl}			</if>
+			<if test="@Ognl@isNotEmpty(isVisable)">
+				AND isVisable = #{isVisable}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditSpTimeBegin)">
+				AND auditSpTime >= #{auditSpTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditSpTimeEnd)">
+				AND auditSpTime &lt;= #{auditSpTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}			</if>
+			<if test="@Ognl@isNotEmpty(auditSpPk)">
+				AND auditSpPk = #{auditSpPk}			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}			</if>
+			<if test="@Ognl@isNotEmpty(headPortrait)">
+				AND headPortrait = #{headPortrait}			</if>
+			<if test="@Ognl@isNotEmpty(isPerfect)">
+				AND isPerfect = #{isPerfect}			</if>
+			<if test="@Ognl@isNotEmpty(remarks)">
+				AND remarks = #{remarks}			</if>
+			<if test="@Ognl@isNotEmpty(parentChildPk)">
+				AND (pk = #{parentChildPk} or parentPk = #{parentChildPk})
+			</if>	
+		</where>
+	</sql>
+
+	<select id="getByCompanyPk" resultType="cn.cf.dto.B2bCompanyDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company where pk = #{pk}
+	</select>
+	
+	<select id="searchCompanyList" resultType="cn.cf.dto.B2bCompanyDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_company
+		<include refid="searchGridWhere" />
+	</select>
+	
+	<select id="searchCompanyByMember" resultType="cn.cf.dto.B2bCompanyDtoEx">
+		SELECT
+		pk,name,contactsTel,auditSpStatus,insertTime
+		FROM
+		cf_b2b_compay
+		WHERE
+		(parentPk = #{pk} OR pk = #{pk} )
+		and isDelete = 1 and isVisable = 1
+		<if test="companyType==1">
+			and auditStatus=2
+		</if>
+		<if test="companyType==2">
+			and auditSpStatus=2
+		</if>
+	</select>
+	
+		<select id="getByCustomerPk" resultType="cn.cf.dto.B2bCompanyDto"
+		parameterType="java.lang.String">
+		SELECT
+		c.pk,c.name 
+		FROM b2b_company c
+		LEFT JOIN b2b_customer_management cm ON
+ 		cm.purchaserPk = c.pk	where cm.purchaserPk = #{customerPk}
+	</select>
+	
+	<select id="getCustomerList" resultType="cn.cf.dto.B2bCompanyDtoEx"
+		parameterType="java.util.Map">
+		SELECT
+		cus.pk,
+		cus.purchaserPk,
+		c.NAME,
+		c.insertTime,
+		c.contactsTel,
+		c.contacts,
+		cusa.employeeNumber,
+		cusa.employeeName
+		FROM
+		b2b_company c
+		LEFT JOIN b2b_customer_management cus ON c.pk = cus.purchaserPk
+		LEFT JOIN b2b_customer_salesman cusa on cus.pk=cusa.customerPk
+		WHERE
+		  c.auditStatus=2
+		<!-- and cusa.filiale !="" and cusa.purchaserPk!="" -->
+		<if test="name!=null and name!=''">
+			and c.name like '%${name}%'
+		</if>
+		<if test="contacts !=null and contacts !=''">
+			and c.contacts like '%${contacts}%'
+		</if>
+		<if test="contactsTel !=null and contactsTel !=''">
+			and c.contactsTel like '%${contactsTel}%'
+		</if>
+		<if test="parentPk!=null and  parentPk==-1">
+		and cusa.memberPk = #{memberPk}
+		</if>
+		<if test="parentPk!=null and parentPk!=-1">
+		AND cusa.memberPk in (select parentPk from b2b_member_group where memberPk=#{memberPk})
+		</if>
+	 
+		<if test="storePk !=null">
+			and cus.storePk =#{storePk}
+		</if>
+		<if test="supplierPk !=null and supplierPk !=''">
+			and cus.supplierPk =#{supplierPk}
+		</if>
+		<if test="searchMemberPk !=null and searchMemberPk !=''">
+			and cusa.memberPk =#{searchMemberPk}
+		</if>
+		<!-- <if test="searchParentPk !=null and searchParentPk !=''">
+			and member.parentPk =#{searchParentPk}
+		</if> -->
+		GROUP BY cus.pk
+		<if test="limit != null">
+			limit ${start}, ${limit}
+		</if>
+	</select>
+	
+	<select id="getCustomerCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		count(DISTINCT cus.pk)
+		FROM
+		b2b_company c
+		LEFT JOIN b2b_customer_management cus ON c.pk = cus.purchaserPk
+		LEFT JOIN b2b_customer_salesman cusa on cus.pk=cusa.customerPk
+		WHERE
+	 c.auditStatus=2
+		<if test="name!=null and name!=''">
+
+			and c.name like '%${name}%'
+		</if>
+		<if test="contacts !=null and contacts !=''">
+
+			and c.contacts like '%${contacts}%'
+		</if>
+		<if test="contactsTel !=null and contactsTel !=''">
+
+			and c.contactsTel like '%${contactsTel}%'
+		</if>
+			<if test="parentPk!=null and parentPk==-1">
+		and cusa.memberPk = #{memberPk}
+		</if>
+		<if test="parentPk!=null and parentPk!=-1">
+		AND cusa.memberPk in (select parentPk from b2b_member_group where memberPk=#{memberPk})
+		</if>
+	 
+
+		<if test="storePk !=null">
+
+			and cus.storePk =#{storePk}
+		</if>
+		<if test="supplierPk !=null and supplierPk !=''">
+
+			and cus.supplierPk =#{supplierPk}
+		</if>
+		<if test="searchMemberPk !=null and searchMemberPk !=''">
+			and cusa.memberPk =#{searchMemberPk}
+		</if>
+	</select>
+	<update id="updateParentPk">
+		update b2b_company set parentPk = #{newParentPk}
+		where parentPk = #{oldParentpk}
+	</update>
+</mapper>
+

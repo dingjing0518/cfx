@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LogisticsErpMemberDaoEx">
+<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,logisticsPk,employeeName,employeeNumber
+	    ]]>
+	</sql>
+	<delete id="deleteByLogisticsPk">
+    <![CDATA[
+       DELETE FROM logistics_erp_member WHERE logisticsPk=#{logisticsPk}
+    ]]>
+	</delete>
+	<insert id="insert" useGeneratedKeys="true" keyProperty="pk">
+    <![CDATA[
+        INSERT INTO logistics_erp_member (
+         pk, memberPk, logisticsPk, employeeName, employeeNumber  ) VALUES (
+         #{pk}, #{memberPk}, #{logisticsPk}, #{employeeName}, #{employeeNumber}   )
+    ]]>
+	</insert>
+	
+	 <select id="searchLogisticsErpMemberList" resultType="cn.cf.dto.LogisticsErpMemberDto">
+	 SELECT
+		<include refid="columns" />
+		FROM logistics_erp_member where logisticsPk = #{logisticsPk}
+		 
+	 </select>
+</mapper>
+

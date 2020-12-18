@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.C2bMarrieddealDao">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		pk,memberPk,memberName,status,auditStatus,auditTime,auditPk,contactsTel,contacts,brandPk,brandName,productPk,productName,specPk,specName,specifications,gradePk,gradeName,seriesPk,seriesName,varietiesPk,varietiesName,seedvarietyPk,seedvarietyName,startTime,endTime,buyCounts,flag,refuseReason,province,provinceName,city,cityName,area,areaName,address,usePk,useName,remarks,price,isDelete,productType,insertTime,updateTime,purchaserPk,purchaserName,supplierPk,supplierName,isFinished,type,actualCount,isHidden
+	    ]]>
+	</sql>
+
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="pk">
+    <![CDATA[
+        INSERT INTO c2b_marrieddeal (
+         pk, memberPk, memberName, status, auditStatus, auditTime, auditPk, contactsTel, contacts, brandPk, brandName, productPk, productName, specPk, specName, specifications, gradePk, gradeName, seriesPk, seriesName, varietiesPk, varietiesName, seedvarietyPk, seedvarietyName, startTime, endTime, buyCounts, flag, refuseReason, province, provinceName, city, cityName, area, areaName, address, usePk, useName, remarks, price, isDelete, productType, insertTime, updateTime, purchaserPk, purchaserName, supplierPk, supplierName, isFinished, type, actualCount, isHidden
+        ) VALUES (
+         #{pk}, #{memberPk}, #{memberName}, #{status}, #{auditStatus}, #{auditTime}, #{auditPk}, #{contactsTel}, #{contacts}, #{brandPk}, #{brandName}, #{productPk}, #{productName}, #{specPk}, #{specName}, #{specifications}, #{gradePk}, #{gradeName}, #{seriesPk}, #{seriesName}, #{varietiesPk}, #{varietiesName}, #{seedvarietyPk}, #{seedvarietyName}, #{startTime}, #{endTime}, #{buyCounts}, #{flag}, #{refuseReason}, #{province}, #{provinceName}, #{city}, #{cityName}, #{area}, #{areaName}, #{address}, #{usePk}, #{useName}, #{remarks}, #{price}, #{isDelete}, #{productType}, #{insertTime}, #{updateTime}, #{purchaserPk}, #{purchaserName}, #{supplierPk}, #{supplierName}, #{isFinished}, #{type}, #{actualCount}, #{isHidden}        
+        )
+    ]]>
+	</insert>
+
+	<update id="update" parameterType="cn.cf.model.C2bMarrieddeal">
+    <![CDATA[
+        UPDATE c2b_marrieddeal SET
+	        memberPk = #{memberPk} , memberName = #{memberName} , status = #{status} , auditStatus = #{auditStatus} , auditTime = #{auditTime} , auditPk = #{auditPk} , contactsTel = #{contactsTel} , contacts = #{contacts} , brandPk = #{brandPk} , brandName = #{brandName} , productPk = #{productPk} , productName = #{productName} , specPk = #{specPk} , specName = #{specName} , specifications = #{specifications} , gradePk = #{gradePk} , gradeName = #{gradeName} , seriesPk = #{seriesPk} , seriesName = #{seriesName} , varietiesPk = #{varietiesPk} , varietiesName = #{varietiesName} , seedvarietyPk = #{seedvarietyPk} , seedvarietyName = #{seedvarietyName} , startTime = #{startTime} , endTime = #{endTime} , buyCounts = #{buyCounts} , flag = #{flag} , refuseReason = #{refuseReason} , province = #{province} , provinceName = #{provinceName} , city = #{city} , cityName = #{cityName} , area = #{area} , areaName = #{areaName} , address = #{address} , usePk = #{usePk} , useName = #{useName} , remarks = #{remarks} , price = #{price} , isDelete = #{isDelete} , productType = #{productType} , insertTime = #{insertTime} , updateTime = #{updateTime} , purchaserPk = #{purchaserPk} , purchaserName = #{purchaserName} , supplierPk = #{supplierPk} , supplierName = #{supplierName} , isFinished = #{isFinished} , type = #{type} , actualCount = #{actualCount} , isHidden = #{isHidden}  
+        WHERE 
+        	pk = #{pk}  	        
+    ]]>
+	</update>
+
+	<delete id="delete" parameterType="cn.cf.model.C2bMarrieddeal">
+    <![CDATA[
+        DELETE FROM c2b_marrieddeal WHERE
+        pk = #{id} 
+    ]]>
+	</delete>
+
+	<sql id="searchGridWhere">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="@Ognl@isNotEmpty(pk)">
+				AND pk = #{pk}			</if>
+			<if test="@Ognl@isNotEmpty(memberPk)">
+				AND memberPk = #{memberPk}			</if>
+			<if test="@Ognl@isNotEmpty(memberName)">
+				AND memberName = #{memberName}			</if>
+			<if test="@Ognl@isNotEmpty(status)">
+				AND status = #{status}			</if>
+			<if test="@Ognl@isNotEmpty(auditStatus)">
+				AND auditStatus = #{auditStatus}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeBegin)">
+				AND auditTime >= #{auditTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(auditTimeEnd)">
+				AND auditTime &lt;= #{auditTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(auditPk)">
+				AND auditPk = #{auditPk}			</if>
+			<if test="@Ognl@isNotEmpty(contactsTel)">
+				AND contactsTel = #{contactsTel}			</if>
+			<if test="@Ognl@isNotEmpty(contacts)">
+				AND contacts = #{contacts}			</if>
+			<if test="@Ognl@isNotEmpty(brandPk)">
+				AND brandPk = #{brandPk}			</if>
+			<if test="@Ognl@isNotEmpty(brandName)">
+				AND brandName = #{brandName}			</if>
+			<if test="@Ognl@isNotEmpty(productPk)">
+				AND productPk = #{productPk}			</if>
+			<if test="@Ognl@isNotEmpty(productName)">
+				AND productName = #{productName}			</if>
+			<if test="@Ognl@isNotEmpty(specPk)">
+				AND specPk = #{specPk}			</if>
+			<if test="@Ognl@isNotEmpty(specName)">
+				AND specName = #{specName}			</if>
+			<if test="@Ognl@isNotEmpty(specifications)">
+				AND specifications = #{specifications}			</if>
+			<if test="@Ognl@isNotEmpty(gradePk)">
+				AND gradePk = #{gradePk}			</if>
+			<if test="@Ognl@isNotEmpty(gradeName)">
+				AND gradeName = #{gradeName}			</if>
+			<if test="@Ognl@isNotEmpty(seriesPk)">
+				AND seriesPk = #{seriesPk}			</if>
+			<if test="@Ognl@isNotEmpty(seriesName)">
+				AND seriesName = #{seriesName}			</if>
+			<if test="@Ognl@isNotEmpty(varietiesPk)">
+				AND varietiesPk = #{varietiesPk}			</if>
+			<if test="@Ognl@isNotEmpty(varietiesName)">
+				AND varietiesName = #{varietiesName}			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyPk)">
+				AND seedvarietyPk = #{seedvarietyPk}			</if>
+			<if test="@Ognl@isNotEmpty(seedvarietyName)">
+				AND seedvarietyName = #{seedvarietyName}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeBegin)">
+				AND startTime >= #{startTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(startTimeEnd)">
+				AND startTime &lt;= #{startTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeBegin)">
+				AND endTime >= #{endTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(endTimeEnd)">
+				AND endTime &lt;= #{endTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(buyCounts)">
+				AND buyCounts = #{buyCounts}			</if>
+			<if test="@Ognl@isNotEmpty(flag)">
+				AND flag = #{flag}			</if>
+			<if test="@Ognl@isNotEmpty(refuseReason)">
+				AND refuseReason = #{refuseReason}			</if>
+			<if test="@Ognl@isNotEmpty(province)">
+				AND province = #{province}			</if>
+			<if test="@Ognl@isNotEmpty(provinceName)">
+				AND provinceName = #{provinceName}			</if>
+			<if test="@Ognl@isNotEmpty(city)">
+				AND city = #{city}			</if>
+			<if test="@Ognl@isNotEmpty(cityName)">
+				AND cityName = #{cityName}			</if>
+			<if test="@Ognl@isNotEmpty(area)">
+				AND area = #{area}			</if>
+			<if test="@Ognl@isNotEmpty(areaName)">
+				AND areaName = #{areaName}			</if>
+			<if test="@Ognl@isNotEmpty(address)">
+				AND address = #{address}			</if>
+			<if test="@Ognl@isNotEmpty(usePk)">
+				AND usePk = #{usePk}			</if>
+			<if test="@Ognl@isNotEmpty(useName)">
+				AND useName = #{useName}			</if>
+			<if test="@Ognl@isNotEmpty(remarks)">
+				AND remarks = #{remarks}			</if>
+			<if test="@Ognl@isNotEmpty(price)">
+				AND price = #{price}			</if>
+			<if test="@Ognl@isNotEmpty(isDelete)">
+				AND isDelete = #{isDelete}			</if>
+			<if test="@Ognl@isNotEmpty(productType)">
+				AND productType = #{productType}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeBegin)">
+				AND insertTime >= #{insertTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(insertTimeEnd)">
+				AND insertTime &lt;= #{insertTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeBegin)">
+				AND updateTime >= #{updateTimeBegin}			</if>
+			<if test="@Ognl@isNotEmpty(updateTimeEnd)">
+				AND updateTime &lt;= #{updateTimeEnd}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserPk)">
+				AND purchaserPk = #{purchaserPk}			</if>
+			<if test="@Ognl@isNotEmpty(purchaserName)">
+				AND purchaserName = #{purchaserName}			</if>
+			<if test="@Ognl@isNotEmpty(supplierPk)">
+				AND supplierPk = #{supplierPk}			</if>
+			<if test="@Ognl@isNotEmpty(supplierName)">
+				AND supplierName = #{supplierName}			</if>
+			<if test="@Ognl@isNotEmpty(isFinished)">
+				AND isFinished = #{isFinished}			</if>
+			<if test="@Ognl@isNotEmpty(type)">
+				AND type = #{type}			</if>
+			<if test="@Ognl@isNotEmpty(actualCount)">
+				AND actualCount = #{actualCount}			</if>
+			<if test="@Ognl@isNotEmpty(isHidden)">
+				AND isHidden = #{isHidden}			</if>
+		</where>
+	</sql>
+
+	<select id="searchGridCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM c2b_marrieddeal
+		<include refid="searchGridWhere" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 offset,pageSize,lastRows 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="searchGrid" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="searchList" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal
+		<include refid="searchGridWhere" />
+	</select>
+	<select id="getByPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where pk = #{pk}	</select>
+	<select id="getByMemberPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where memberPk = #{memberPk}	</select>
+	<select id="getByMemberName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where memberName = #{memberName}	</select>
+	<select id="getByAuditPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where auditPk = #{auditPk}	</select>
+	<select id="getByContactsTel" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where contactsTel = #{contactsTel}	</select>
+	<select id="getByContacts" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where contacts = #{contacts}	</select>
+	<select id="getByBrandPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where brandPk = #{brandPk}	</select>
+	<select id="getByBrandName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where brandName = #{brandName}	</select>
+	<select id="getByProductPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where productPk = #{productPk}	</select>
+	<select id="getByProductName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where productName = #{productName}	</select>
+	<select id="getBySpecPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where specPk = #{specPk}	</select>
+	<select id="getBySpecName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where specName = #{specName}	</select>
+	<select id="getBySpecifications" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where specifications = #{specifications}	</select>
+	<select id="getByGradePk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where gradePk = #{gradePk}	</select>
+	<select id="getByGradeName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where gradeName = #{gradeName}	</select>
+	<select id="getBySeriesPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where seriesPk = #{seriesPk}	</select>
+	<select id="getBySeriesName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where seriesName = #{seriesName}	</select>
+	<select id="getByVarietiesPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where varietiesPk = #{varietiesPk}	</select>
+	<select id="getByVarietiesName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where varietiesName = #{varietiesName}	</select>
+	<select id="getBySeedvarietyPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where seedvarietyPk = #{seedvarietyPk}	</select>
+	<select id="getBySeedvarietyName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where seedvarietyName = #{seedvarietyName}	</select>
+	<select id="getByRefuseReason" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where refuseReason = #{refuseReason}	</select>
+	<select id="getByProvince" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where province = #{province}	</select>
+	<select id="getByProvinceName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where provinceName = #{provinceName}	</select>
+	<select id="getByCity" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where city = #{city}	</select>
+	<select id="getByCityName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where cityName = #{cityName}	</select>
+	<select id="getByArea" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where area = #{area}	</select>
+	<select id="getByAreaName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where areaName = #{areaName}	</select>
+	<select id="getByAddress" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where address = #{address}	</select>
+	<select id="getByUsePk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where usePk = #{usePk}	</select>
+	<select id="getByUseName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where useName = #{useName}	</select>
+	<select id="getByRemarks" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where remarks = #{remarks}	</select>
+	<select id="getByPurchaserPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where purchaserPk = #{purchaserPk}	</select>
+	<select id="getByPurchaserName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where purchaserName = #{purchaserName}	</select>
+	<select id="getBySupplierPk" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where supplierPk = #{supplierPk}	</select>
+	<select id="getBySupplierName" resultType="cn.cf.dto.C2bMarrieddealDto"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM c2b_marrieddeal where supplierName = #{supplierName}	</select>
+</mapper>
+

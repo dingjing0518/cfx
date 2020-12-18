@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.MarketingCompanyExtDao">
+
+    <delete id="deleteAccount" parameterType="String">
+        DELETE FROM marketing_company WHERE
+        accountPk=#{accountPk}
+    </delete>
+    
+</mapper>
+

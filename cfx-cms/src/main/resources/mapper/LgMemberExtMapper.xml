@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.LgMemberExtDao">
+
+    <select id="getByMobile" resultType="cn.cf.dto.LgMemberDto"
+            parameterType="java.lang.String">
+       SELECT
+        `lg_member`.`pk`,
+        `lg_member`.`isDelete`,
+        `lg_member`.`auditStatus`,
+        `lg_member`.`insertTime`,
+        `lg_member`.`updateTime`,
+        `province`,
+        `provinceName`,
+        `city`,
+        `cityName`,
+        `area`,
+        `areaName`,
+        `contacts`,
+        `contactsTel`,
+        `businessLicense`,
+        `blUrl`,
+        `isVisable`,
+        `auditTime`,
+        `lg_member`.`headPortrait` ,
+        `lg_member`.`mobile`,
+        `lg_member`.`password`,
+        `lg_company`.pk as `companyPk`,
+        `lg_company`.name as `name`
+      FROM
+         `lg_member` LEFT JOIN `lg_company`  ON `lg_member`.`companyPk`=`lg_company`.`pk`
+      where mobile = #{mobile} and `lg_company`.isDelete=1
+    </select>
+
+
+	<!-- 根据memberPk查询 -->
+	<select id="getMemberByPk" resultType="cn.cf.dto.LgMemberDto" parameterType="java.lang.String">
+       SELECT `lg_member`.`pk`,`lg_member`.`isDelete`,`lg_member`.`auditStatus`,
+        `lg_member`.`insertTime`,`lg_member`.`updateTime`,
+        lg_company.`province`,lg_company.`provinceName`,
+        lg_company.`city`,lg_company.`cityName`,lg_company.`area`,
+        lg_company.`areaName`,lg_company.`contacts`,lg_company.`contactsTel`,
+        lg_company.`businessLicense`,lg_company.`blUrl`,
+        lg_company.`isVisable`,lg_company.`auditTime`,`lg_member`.`headPortrait`,
+        `lg_member`.`mobile`,`lg_member`.`password`,`lg_company`.pk as `companyPk`,
+        `lg_company`.name as `name`
+         FROM
+         `lg_member` LEFT JOIN `lg_company`  ON `lg_member`.`companyPk`=`lg_company`.`pk`
+      	where lg_member.pk = #{memberPk} and `lg_company`.isDelete=1
+    </select>
+
+<select id="getMemberByCompanyPk" resultType="cn.cf.dto.LgMemberDto" parameterType="java.lang.String">
+       SELECT `lg_member`.`pk`,`lg_member`.`isDelete`,`lg_member`.`auditStatus`,
+        `lg_member`.`insertTime`,`lg_member`.`updateTime`,
+        lg_company.`province`,lg_company.`provinceName`,
+        lg_company.`city`,lg_company.`cityName`,lg_company.`area`,
+        lg_company.`areaName`,lg_company.`contacts`,lg_company.`contactsTel`,
+        lg_company.`businessLicense`,lg_company.`blUrl`,
+        lg_company.`isVisable`,lg_company.`auditTime`,`lg_member`.`headPortrait`,
+        `lg_member`.`mobile`,`lg_member`.`password`,`lg_company`.pk as `companyPk`,
+        `lg_company`.name as `name`
+         FROM
+         `lg_member` LEFT JOIN `lg_company`  ON `lg_member`.`companyPk`=`lg_company`.`pk`
+      	where lg_member.companyPk = #{logisticsCompanyPk} and `lg_company`.isDelete=1
+    </select>
+    
+    <update id="updateByCompanyPk" parameterType ="java.util.Map">
+       UPDATE lg_member
+        <set>
+            <if test="isVisable != null and isVisable !=''">
+                isVisable = #{isVisable} ,
+            </if>
+            	updateTime = SYSDATE()
+        </set>
+        WHERE companyPk = #{companyPk}   
+    </update>
+
+</mapper>

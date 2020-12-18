@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bContractDaoEx">
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+		contractNo,contractStatus,contractSource,saleDepartment,startTime,endTime,days,covenant,supplementary,priceType,member,employeePk,salesman,salesmanNumber,supplierPk,purchaserPk,storePk,storeName,contractType,purchaserType,contractRate,contractCount,orderAmount,totalAmount,logisticsModel,logisticsModelPk,logisticsModelType,carrier,carrierPk,isDelete,insertTime,updateTime,paymentName,paymentType,paymentTime,economicsGoodsName,economicsGoodsType,source,plantName,plantPk,supplierInfo,purchaserInfo,addressInfo,ownAmount,block
+	    ]]>
+	</sql>
+
+	
+	<select id="getContractByNo" resultType="cn.cf.entity.B2bContractDtoEx"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="columns" />
+		FROM b2b_contract where contractNo = #{contractNo}	
+	</select>
+		
+	<update id="updateContractDto" parameterType="cn.cf.dto.B2bContractDto">
+		UPDATE b2b_contract 
+		<set>
+			<if test="contractStatus != null and contractStatus !=''">
+				contractStatus = #{contractStatus},
+			</if>
+			<if test="contractSource != null and contractSource !=''">
+				contractSource = #{contractSource},
+			</if>
+			<if test="saleDepartment != null and saleDepartment !=''">
+				saleDepartment = #{saleDepartment},
+			</if>
+			<if test="startTime != null and startTime !=''">
+				startTime = #{startTime},
+			</if>
+			<if test="endTime != null and endTime !=''">
+				endTime = #{endTime},
+			</if>
+			<if test="days != null and days !=''">
+				days = #{days},
+			</if>
+			<if test="covenant != null and covenant !=''">
+				covenant = #{covenant},
+			</if>
+			<if test="supplementary != null and supplementary !=''">
+				supplementary = #{supplementary},
+			</if>
+			<if test="priceType != null and priceType !=''">
+				priceType = #{priceType},
+			</if>
+			<if test="salesman != null and salesman !=''">
+				salesman = #{salesman},
+			</if>
+			<if test="salesmanNumber != null and salesmanNumber !=''">
+				salesmanNumber = #{salesmanNumber},
+			</if>
+			<if test="contractCount != null and contractCount !=''">
+				contractCount = #{contractCount},
+			</if>
+			<if test="logisticsModel != null and logisticsModel !=''">
+				logisticsModel = #{logisticsModel},
+			</if>
+			<if test="carrier != null and carrier !=''">
+				carrier = #{carrier},
+			</if>
+			<if test="paymentName != null and paymentName !=''">
+				paymentName = #{paymentName},
+			</if>
+			<if test="paymentType != null and paymentType !=''">
+				paymentType = #{paymentType},
+			</if>
+			<if test="paymentTime != null">
+				paymentTime = #{paymentTime},
+			</if>
+			<if test="supplierInfo != null and supplierInfo !=''">
+				supplierInfo = #{supplierInfo},
+			</if>
+			<if test="purchaserInfo != null and purchaserInfo !=''">
+				purchaserInfo = #{purchaserInfo},
+			</if>
+			<if test="addressInfo != null and addressInfo !=''">
+				addressInfo = #{addressInfo},
+			</if>
+			<if test="receivablesTime != null ">
+				receivablesTime = #{receivablesTime},
+			</if>
+		</set>
+		WHERE contractNo = #{contractNo}
+	</update>
+	
+</mapper>
+

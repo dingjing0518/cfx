@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.SysSmsRoleExtDao">
+ <delete id="deleteBysmsName">
+ DELETE FROM sys_sms_role where smsName=#{smsName} and type != 3
+ </delete>
+ 
+  <delete id="deleteBackBysmsNameAndType">
+ DELETE FROM sys_sms_role where smsName=#{smsName} and type = 3
+ </delete>
+ 
+ <select id="getSmsNameList" resultType="cn.cf.dto.SysSmsRoleDto">
+  select pk,smsName,rolePk,type from sys_sms_role where smsName = #{smsName} and type = 3
+ </select>
+ 
+ <insert id="insert">
+ INSERT INTO sys_sms_role (pk, smsName, rolePk, type)
+VALUES
+	(
+		#{pk},
+		#{smsName},
+	 	#{rolePk},
+		#{type}
+	)
+ </insert>
+</mapper>
+

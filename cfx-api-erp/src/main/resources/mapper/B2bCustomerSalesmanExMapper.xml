@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="cn.cf.dao.B2bCustomerSalesmanDaoEx">
+
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+	    <![CDATA[
+ pk,customerPk,memberPk,mobile,productPk,productName,filiale,filialeName,employeeNumber,employeeName,purchaserPk,purchaserName,storePk
+	    ]]>
+	</sql>
+	
+	
+	
+
+		<delete id="deleteByCustomerPk">
+  DELETE FROM b2b_customer_salesman WHERE
+        customerPk = #{customerPk} 
+
+</delete>
+<insert id="insertBatch" parameterType="java.util.List">
+       
+        
+        
+         INSERT INTO b2b_customer_salesman (pk,customerPk,memberPk,mobile,productPk,productName,employeeNumber,employeeName,purchaserPk,purchaserName,storePk,filiale,filialeName)
+  values
+  
+    <foreach collection="list" item="item" index="index" separator=",">
+            ( REPLACE(UUID(),'-',''),
+             #{item.customerPk},
+             #{item.memberPk},
+             #{item.mobile},
+             #{item.productPk},
+             #{item.productName},
+             #{item.employeeNumber},
+             #{item.employeeName},
+             #{item.purchaserPk},
+             #{item.purchaserName},
+             #{item.storePk},
+             #{item.filiale},
+             #{item.filialeName}
+             )
+        </foreach>
+        
+        
+  
+ 
+        
+        
+        
+    </insert>
+
+	
+	
+	
+</mapper>
+
